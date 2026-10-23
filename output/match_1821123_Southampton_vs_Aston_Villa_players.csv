@@ -1,0 +1,41 @@
+﻿match_id,team_side,team_id,team_name,player_id,player_name,shirt_no,position,field,is_first_eleven,is_man_of_the_match,subbed_in_player_id,subbed_out_player_id,subbed_in_expanded_minute,subbed_out_expanded_minute,age,height_cm,weight_kg,final_rating
+1821123,home,18,Southampton,316858,Aaron Ramsdale,30,GK,home,True,True,,,,,28,190,88,8.73
+1821123,home,18,Southampton,136742,Jan Bednarek,35,DC,home,True,False,,,,,30,189,84,5.58
+1821123,home,18,Southampton,92550,Jack Stephens,5,DC,home,True,False,,,,,32,185,75,6.84
+1821123,home,18,Southampton,384061,Taylor Harwood-Bellis,6,DC,home,True,False,,,,,24,188,82,5.86
+1821123,home,18,Southampton,313672,Kyle Walker-Peters,2,DMR,home,True,False,,,,,29,173,62,6.36
+1821123,home,18,Southampton,332402,Ryan Manning,3,DML,home,True,False,379783.0,,,83.0,30,173,66,6.54
+1821123,home,18,Southampton,404616,Lesley Ugochukwu,26,MC,home,True,False,,,,,22,190,72,6.39
+1821123,home,18,Southampton,447231,Mateus Fernandes,18,MC,home,True,False,538255.0,,,90.0,22,178,72,5.74
+1821123,home,18,Southampton,382363,Cameron Archer,19,FWR,home,True,False,397143.0,,,62.0,24,181,72,6.05
+1821123,home,18,Southampton,122182,Paul Onuachu,32,FW,home,True,False,438067.0,,,47.0,32,201,98,6.23
+1821123,home,18,Southampton,422135,Kamaldeen Sulemana,20,FWL,home,True,False,390036.0,,,62.0,24,175,70,6.14
+1821123,home,18,Southampton,390036,Will Smallbone,8,Sub,home,False,False,,422135.0,62.0,,26,183,71,5.91
+1821123,home,18,Southampton,379783,Yukinari Sugawara,16,Sub,home,False,False,,332402.0,83.0,,26,179,71,5.88
+1821123,home,18,Southampton,538255,Jay Robinson,46,Sub,home,False,False,,447231.0,90.0,,19,176,65,6.24
+1821123,home,18,Southampton,438067,Tyler Dibling,33,Sub,home,False,False,,122182.0,47.0,,20,178,72,6.02
+1821123,home,18,Southampton,397143,Ross Stewart,11,Sub,home,False,False,,382363.0,62.0,,30,188,85,5.8
+1821123,home,18,Southampton,342877,Joe Aribo,7,Sub,home,False,False,,,,,30,183,76,
+1821123,home,18,Southampton,148474,James Bree,14,Sub,home,False,False,,,,,28,178,74,
+1821123,home,18,Southampton,361334,Nathan Wood,15,Sub,home,False,False,,,,,24,188,75,
+1821123,home,18,Southampton,38577,Alex McCarthy,1,Sub,home,False,False,,,,,36,193,79,
+1821123,away,24,Aston Villa,102248,Emiliano Martínez,23,GK,away,True,False,,,,,34,195,98,7.38
+1821123,away,24,Aston Villa,322043,Matty Cash,2,DR,away,True,False,469329.0,,,86.0,29,185,79,7.21
+1821123,away,24,Aston Villa,123167,Tyrone Mings,5,DC,away,True,False,,,,,33,196,77,7.1
+1821123,away,24,Aston Villa,301440,Ezri Konsa,4,DC,away,True,False,,,,,29,183,76,7.53
+1821123,away,24,Aston Villa,384134,Ian Maatsen,22,DL,away,True,False,,,,,24,178,57,7.11
+1821123,away,24,Aston Villa,400815,Amadou Onana,24,DMC,away,True,False,331790.0,,,90.0,25,195,76,7.98
+1821123,away,24,Aston Villa,136345,Youri Tielemans,8,DMC,away,True,False,,,,,29,176,72,8.04
+1821123,away,24,Aston Villa,362824,Morgan Rogers,27,AMR,away,True,False,318449.0,,,86.0,24,187,80,7.22
+1821123,away,24,Aston Villa,137467,Marco Asensio,21,AMC,away,True,False,,,,,30,182,76,6.16
+1821123,away,24,Aston Villa,369813,Jacob Ramsey,41,AML,away,True,False,351354.0,,,67.0,25,180,75,6.85
+1821123,away,24,Aston Villa,300299,Marcus Rashford,9,FW,away,True,False,148503.0,,,67.0,28,188,80,6.83
+1821123,away,24,Aston Villa,331790,Boubacar Kamara,44,Sub,away,False,False,,400815.0,90.0,,26,184,68,6.15
+1821123,away,24,Aston Villa,351354,Donyell Malen,17,Sub,away,False,False,,369813.0,67.0,,27,178,68,7.27
+1821123,away,24,Aston Villa,469329,Andrés García,16,Sub,away,False,False,,322043.0,86.0,,23,185,77,6.23
+1821123,away,24,Aston Villa,148503,Ollie Watkins,11,Sub,away,False,False,,300299.0,67.0,,30,180,75,7.73
+1821123,away,24,Aston Villa,318449,John McGinn,7,Sub,away,False,False,,362824.0,86.0,,32,178,68,7.15
+1821123,away,24,Aston Villa,300426,Axel Disasi,3,Sub,away,False,False,,,,,28,190,83,
+1821123,away,24,Aston Villa,89925,Lucas Digne,12,Sub,away,False,False,,,,,33,178,74,
+1821123,away,24,Aston Villa,344259,Pau Torres,14,Sub,away,False,False,,,,,29,192,81,
+1821123,away,24,Aston Villa,41554,Robin Olsen,25,Sub,away,False,False,,,,,36,198,89,

@@ -12,7 +12,7 @@ Usage examples:
        python main.py --url "https://www.whoscored.com/Matches/1821123/Live/England-Premier-League"
 
     3. Re-generate CSVs offline from a previously saved raw JSON backup (no browser needed):
-       python main.py --from-json "output/match_1821123_raw.json"
+       python main.py --from-json "data/raw/match_1821123_raw.json"
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ def run_pipeline(
     Args:
         urls: List of WhoScored `/Live/` match URLs to scrape.
         from_json_files: Optional list of already downloaded raw JSON files to parse offline.
-        output_dir: Target folder for exported CSV and JSON files.
+        output_dir: Target folder for exported CSV files.
         headless: Whether to run Chrome in headless mode.
 
     Returns:

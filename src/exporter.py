@@ -33,13 +33,19 @@ class ExportedFiles:
 
 class MatchDataExporter:
     """
-    Exports raw `matchCentreData` JSON and parsed DataFrames (`events`, `players`, `metadata`)
-    into an output directory.
+    Exports the raw `matchCentreData` JSON to `raw_dir` and the parsed DataFrames
+    (`events`, `players`, `metadata`) to `output_dir`.
     """
 
-    def __init__(self, output_dir: Union[str, Path] = "output") -> None:
+    def __init__(
+        self,
+        output_dir: Union[str, Path] = "output",
+        raw_dir: Union[str, Path] = "data/raw",
+    ) -> None:
         self.output_dir = Path(output_dir)
+        self.raw_dir = Path(raw_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.raw_dir.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def _slugify(value: Any) -> str:
@@ -69,7 +75,7 @@ class MatchDataExporter:
         without re-scraping WhoScored.
         """
         file_prefix = prefix or self._build_file_prefix(match_data)
-        json_path = self.output_dir / f"{file_prefix}_raw.json"
+        json_path = self.raw_dir / f"{file_prefix}_raw.json"
         with json_path.open("w", encoding="utf-8") as f:
             json.dump(match_data, f, ensure_ascii=False, indent=2)
         logger.info("Saved raw match JSON backup to: %s", json_path)

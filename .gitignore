@@ -1,2 +1,9 @@
+﻿# Python
 __pycache__
 .venv
+
+# Ignored data
+data/raw/
+output/
+*.json
+*.csv

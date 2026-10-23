@@ -104,6 +104,16 @@ class MatchDataParser:
             events_df=events_df,
         )
 
+    @staticmethod
+    def _clean_score(value: Any) -> Any:
+        """
+        Removes the marker WhoScored prepends to a scoreline when the match was
+        decided on penalties: "*0 : 0" -> "0 : 0".
+        """
+        if value is None:
+            return None
+        return str(value).replace("*", "").strip()
+
     def parse_match_metadata(self, match_data: dict[str, Any]) -> pd.DataFrame:
         """
         Extracts match-level summary information (teams, score, date, venue, referee, etc.).
@@ -128,11 +138,12 @@ class MatchDataParser:
             "weather_code": match_data.get("weatherCode"),
             "referee_id": referee.get("officialId") if isinstance(referee, dict) else None,
             "referee_name": referee.get("name") if isinstance(referee, dict) else None,
-            "score": match_data.get("score"),
-            "ht_score": match_data.get("htScore"),
-            "ft_score": match_data.get("ftScore"),
-            "et_score": match_data.get("etScore"),
+            "score": self._clean_score(match_data.get("score")),
+            "ht_score": self._clean_score(match_data.get("htScore")),
+            "ft_score": self._clean_score(match_data.get("ftScore")),
+            "et_score": self._clean_score(match_data.get("etScore")),
             "pk_score": match_data.get("pkScore"),
+            "decided_on_penalties": str(match_data.get("score") or "").strip().startswith("*"),
             "home_team_id": home.get("teamId"),
             "home_team_name": home.get("name"),
             "home_country_name": home.get("countryName"),

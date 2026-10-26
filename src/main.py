@@ -2,38 +2,29 @@
 main.py
 =======
 Main CLI and pipeline orchestrator for scraping WhoScored Match Centre data
-and exporting structured datasets (`events`, `players`, `formations`, `metadata`)
-in Parquet (`data/processed/`) and CSV (`output/`) formats alongside raw JSON backups.
+and exporting comprehensive CSV datasets (`events`, `players`, `metadata`) + raw JSON backups.
 
 Usage examples:
-    1. Scrape (or load from local cache) the default match URL:
-       python -m src.main
+    1. Scrape the default match URL configured below:
+       python main.py
 
     2. Scrape one or more custom WhoScored Live match URLs:
-       python -m src.main --url "https://www.whoscored.com/Matches/1821123/Live/..."
+       python main.py --url "https://www.whoscored.com/Matches/1821123/Live/England-Premier-League"
 
-    3. Re-generate Parquet & CSV files offline from saved raw JSON backups:
-       python -m src.main --from-json "data/raw/match_1821123_Southampton_vs_Aston_Villa_raw.json"
+    3. Re-generate CSVs offline from a previously saved raw JSON backup (no browser needed):
+       python main.py --from-json "data/raw/match_1821123_raw.json"
 """
 
 from __future__ import annotations
 
 import argparse
 import logging
-import sys
 from pathlib import Path
 from typing import Any, Sequence
 
-# Ensure package imports work whether executed via `python -m src.main` or `python src/main.py`
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
 from src.exporter import ExportedFiles, MatchDataExporter
 from src.parser import MatchDataParser, ParsedMatchDataset
-from src.scraper import WhoScoredScraper, WhoScoredScraperError
-
-logger = logging.getLogger(__name__)
+from src.scraper import WhoScoredScraper
 
 DEFAULT_MATCH_URL = "https://www.whoscored.com/Matches/1821123/Live/England-Premier-League"
 
@@ -49,7 +40,7 @@ def configure_logging(verbose: bool = False) -> None:
 
 
 def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) -> None:
-    """Prints a human-readable overview of the parsed match and exported files."""
+    """Prints a human-readable overview of the scraped match and exported CSV files."""
     meta = dataset.metadata_df.iloc[0] if not dataset.metadata_df.empty else {}
     home_team = meta.get("home_team_name", "Home")
     away_team = meta.get("away_team_name", "Away")
@@ -61,7 +52,6 @@ def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) 
     print(f"  Match ID         : {dataset.match_id}")
     print(f"  Total Events     : {len(dataset.events_df):,}")
     print(f"  Total Players    : {len(dataset.players_df):,}")
-    print(f"  Formation Slots  : {len(dataset.formations_df):,}")
 
     if not dataset.events_df.empty and "event_type" in dataset.events_df.columns:
         print("\nTop 10 Event Types Captured:")
@@ -69,16 +59,11 @@ def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) 
         for ev_type, count in counts.items():
             print(f"  - {str(ev_type):<22}: {count:>5}")
 
-    print("\nExported Files:")
-    print(f"  [Raw JSON]       {exported.raw_json_path.resolve()}")
-    print(f"  [Events CSV]     {exported.events_csv_path.resolve()}")
-    print(f"  [Players CSV]    {exported.players_csv_path.resolve()}")
-    if exported.formations_csv_path:
-        print(f"  [Formations CSV] {exported.formations_csv_path.resolve()}")
-    print(f"  [Metadata CSV]   {exported.metadata_csv_path.resolve()}")
-    if exported.parquet_files:
-        parquet_dir = next(iter(exported.parquet_files.values())).parent.resolve()
-        print(f"  [Parquet Dir]    {parquet_dir} ({len(exported.parquet_files)} tables)")
+    print("\nExported Files for Data Exploration:")
+    print(f"  [Events CSV]   {exported.events_csv_path.resolve()}")
+    print(f"  [Players CSV]  {exported.players_csv_path.resolve()}")
+    print(f"  [Metadata CSV] {exported.metadata_csv_path.resolve()}")
+    print(f"  [Raw JSON]     {exported.raw_json_path.resolve()}")
     print("=" * 72 + "\n")
 
 
@@ -87,7 +72,7 @@ def process_match_payload(
     parser: MatchDataParser,
     exporter: MatchDataExporter,
 ) -> tuple[ParsedMatchDataset, ExportedFiles]:
-    """Parses a raw `matchCentreData` dictionary and exports all configured formats."""
+    """Parses a raw `matchCentreData` dictionary and exports all CSV and JSON files."""
     dataset = parser.parse_all(raw_data)
     exported = exporter.export_all(raw_data, dataset)
     print_dataset_summary(dataset, exported)
@@ -98,53 +83,47 @@ def run_pipeline(
     urls: Sequence[str] | None = None,
     from_json_files: Sequence[str | Path] | None = None,
     output_dir: str | Path = "output",
-    processed_dir: str | Path = "data/processed",
     headless: bool = False,
-    force_scrape: bool = False,
 ) -> list[tuple[ParsedMatchDataset, ExportedFiles]]:
     """
-    Runs the end-to-end scraping, parsing, and export pipeline.
-    Automatically reuses cached `data/raw/match_<id>_*.json` files unless `force_scrape=True`.
+    Runs the end-to-end scraping, parsing, and CSV export pipeline.
+
+    Args:
+        urls: List of WhoScored `/Live/` match URLs to scrape.
+        from_json_files: Optional list of already downloaded raw JSON files to parse offline.
+        output_dir: Target folder for exported CSV files.
+        headless: Whether to run Chrome in headless mode.
+
+    Returns:
+        List of `(ParsedMatchDataset, ExportedFiles)` tuples for each processed match.
     """
     parser = MatchDataParser()
-    exporter = MatchDataExporter(output_dir=output_dir, processed_dir=processed_dir)
+    exporter = MatchDataExporter(output_dir=output_dir)
     results: list[tuple[ParsedMatchDataset, ExportedFiles]] = []
 
+    # 1. Process any offline JSON files first (no browser required)
     if from_json_files:
         for json_file in from_json_files:
             raw_data = exporter.load_raw_json(json_file)
             results.append(process_match_payload(raw_data, parser, exporter))
 
-    urls_to_scrape: list[str] = []
-    for url in urls or []:
-        match_id = WhoScoredScraper.extract_match_id_from_url(url)
-        cached_json = None if force_scrape else exporter.find_cached_raw_json(match_id)
-        if cached_json is not None:
-            logger.info("Using cached raw JSON for matchId=%s: %s", match_id, cached_json)
-            raw_data = exporter.load_raw_json(cached_json)
-            results.append(process_match_payload(raw_data, parser, exporter))
-        else:
-            urls_to_scrape.append(url)
-
-    if urls_to_scrape:
+    # 2. Scrape live URLs in a single managed browser session
+    if urls:
         with WhoScoredScraper(headless=headless) as scraper:
-            for url in urls_to_scrape:
-                try:
-                    raw_data = scraper.scrape_match(url)
-                    results.append(process_match_payload(raw_data, parser, exporter))
-                except WhoScoredScraperError as exc:
-                    logger.error("Failed to scrape %s: %s", url, exc)
+            for url in urls:
+                raw_data = scraper.scrape_match(url)
+                results.append(process_match_payload(raw_data, parser, exporter))
 
     return results
 
 
 def parse_cli_args() -> argparse.Namespace:
     cli = argparse.ArgumentParser(
-        description="Scrape WhoScored match data and export Parquet + CSV tables for analytics."
+        description="Scrape WhoScored match data and export complete CSV files for data exploration."
     )
     cli.add_argument(
         "--url",
-        "-u",
+         "-u",
         nargs="+",
         help=f"One or more WhoScored Live match URLs (default: {DEFAULT_MATCH_URL}).",
     )
@@ -158,23 +137,12 @@ def parse_cli_args() -> argparse.Namespace:
         "--output-dir",
         "-o",
         default="output",
-        help="Directory where CSV files will be saved (default: 'output').",
-    )
-    cli.add_argument(
-        "--processed-dir",
-        "-p",
-        default="data/processed",
-        help="Directory where Parquet files will be saved (default: 'data/processed').",
-    )
-    cli.add_argument(
-        "--force-scrape",
-        action="store_true",
-        help="Re-scrape URLs via Selenium even if a raw JSON backup already exists in data/raw/.",
+        help="Directory where CSV and JSON files will be saved (default: 'output').",
     )
     cli.add_argument(
         "--headless",
         action="store_true",
-        help="Run Chrome in headless mode (visible mode is recommended to avoid Cloudflare).",
+        help="Run Chrome in headless mode (note: visible mode is less likely to trigger Cloudflare).",
     )
     cli.add_argument(
         "--verbose",
@@ -197,7 +165,6 @@ if __name__ == "__main__":
         urls=target_urls,
         from_json_files=args.from_json,
         output_dir=args.output_dir,
-        processed_dir=args.processed_dir,
         headless=args.headless,
-        force_scrape=args.force_scrape,
     )
+

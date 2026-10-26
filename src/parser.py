@@ -5,19 +5,20 @@ Transforms raw WhoScored `matchCentreData` JSON into clean, flat Pandas DataFram
 tailored for exploratory data analysis (EDA), tactical analytics, and machine learning.
 
 Outputs produced by `MatchDataParser`:
-1. `events_df`: Every chronological match event (passes, shots, tackles, fouls, aerials,
-   cards, substitutions, formation changes, etc.) for BOTH teams, enriched with player
+1. `events_df`: Every chronological match event for both teams, enriched with player
    details, inferred pass receivers, and flattened event qualifiers.
 2. `players_df`: Full squad/lineup metadata and match summary stats for both Home and
-   Away players (Starting XI flag, shirt number, position, age, height, weight, rating, etc.).
-3. `metadata_df`: Single-row DataFrame summarizing match-level info (teams, score,
+   Away players (Starting XI flag, shirt number, position, age, height, weight, rating).
+3. `formations_df`: Team tactical formations and active player pitch slots across match
+   minute intervals.
+4. `metadata_df`: Single-row DataFrame summarizing match-level info (teams, score,
    venue, referee, attendance, start time, weather).
 """
 
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Optional
 
 import numpy as np
@@ -32,6 +33,7 @@ class ParsedMatchDataset:
     metadata_df: pd.DataFrame
     players_df: pd.DataFrame
     events_df: pd.DataFrame
+    formations_df: pd.DataFrame = field(default_factory=pd.DataFrame)
 
 
 class MatchDataParser:
@@ -40,7 +42,6 @@ class MatchDataParser:
     into tabular Pandas DataFrames.
     """
 
-    # Common Opta/WhoScored qualifier displayNames that are useful as top-level columns in EDA
     KEY_VALUE_QUALIFIERS = {
         "Zone": "qualifier_zone",
         "Length": "pass_length",
@@ -49,7 +50,7 @@ class MatchDataParser:
         "PassEndY": "qualifier_pass_end_y",
         "RelatedEventId": "related_event_id",
         "OppositeRelatedEvent": "opposite_related_event_id",
-        " JerseyNumber": "qualifier_jersey_number",
+        "JerseyNumber": "qualifier_jersey_number",
         "FormationSlot": "formation_slot",
     }
 
@@ -82,45 +83,67 @@ class MatchDataParser:
 
     BODY_PART_QUALIFIERS = {"RightFoot", "LeftFoot", "Head", "OtherBodyPart"}
 
+    INT_EVENT_COLUMNS = (
+        "match_id",
+        "id",
+        "event_id",
+        "minute",
+        "second",
+        "expanded_minute",
+        "period_value",
+        "team_id",
+        "player_id",
+        "shirt_no",
+        "event_type_value",
+        "outcome_type_value",
+        "next_team_id",
+        "next_player_id",
+        "receiver_id",
+    )
+
+    FLOAT_EVENT_COLUMNS = ("x", "y", "end_x", "end_y", "pass_length", "pass_angle")
+
+    def __init__(self, include_raw_json_columns: bool = True) -> None:
+        self.include_raw_json_columns = include_raw_json_columns
+
     def parse_all(self, match_data: dict[str, Any]) -> ParsedMatchDataset:
-        """
-        Parses the complete `matchCentreData` payload into metadata, players, and events DataFrames.
-
-        Args:
-            match_data: Dictionary extracted by `WhoScoredScraper`.
-
-        Returns:
-            `ParsedMatchDataset` containing `metadata_df`, `players_df`, and `events_df`.
-        """
+        """Parses the complete `matchCentreData` payload into structured DataFrames."""
         match_id = match_data.get("matchId")
         metadata_df = self.parse_match_metadata(match_data)
         players_df = self.parse_players(match_data)
         events_df = self.parse_events(match_data, players_df=players_df)
+        formations_df = self.parse_formations(match_data, players_df=players_df)
 
         return ParsedMatchDataset(
             match_id=match_id,
             metadata_df=metadata_df,
             players_df=players_df,
             events_df=events_df,
+            formations_df=formations_df,
         )
 
     @staticmethod
-    def _clean_score(value: Any) -> Any:
-        """
-        Removes the marker WhoScored prepends to a scoreline when the match was
-        decided on penalties: "*0 : 0" -> "0 : 0".
-        """
-        if value is None:
+    def _clean_score(value: Any) -> Optional[str]:
+        """Removes the penalty-shootout marker '*' from WhoScored score strings."""
+        return str(value).replace("*", "").strip() if value is not None else None
+
+    @staticmethod
+    def _extract_final_rating(stats: Any) -> Optional[float]:
+        """Extracts the final recorded player rating from `player['stats']['ratings']`."""
+        ratings = stats.get("ratings") if isinstance(stats, dict) else None
+        if not isinstance(ratings, dict) or not ratings:
             return None
-        return str(value).replace("*", "").strip()
+        try:
+            last_key = max(ratings.keys(), key=lambda k: int(k))
+            return float(ratings[last_key])
+        except (ValueError, TypeError):
+            return None
 
     def parse_match_metadata(self, match_data: dict[str, Any]) -> pd.DataFrame:
-        """
-        Extracts match-level summary information (teams, score, date, venue, referee, etc.).
-        """
+        """Extracts match-level summary information (teams, score, date, venue, referee)."""
         home = match_data.get("home") or {}
         away = match_data.get("away") or {}
-        referee = match_data.get("referee") or {}
+        referee = match_data.get("referee") if isinstance(match_data.get("referee"), dict) else {}
 
         home_formations = home.get("formations") or []
         away_formations = away.get("formations") or []
@@ -136,8 +159,8 @@ class MatchDataParser:
             "venue_name": match_data.get("venueName"),
             "attendance": match_data.get("attendance"),
             "weather_code": match_data.get("weatherCode"),
-            "referee_id": referee.get("officialId") if isinstance(referee, dict) else None,
-            "referee_name": referee.get("name") if isinstance(referee, dict) else None,
+            "referee_id": referee.get("officialId"),
+            "referee_name": referee.get("name"),
             "score": self._clean_score(match_data.get("score")),
             "ht_score": self._clean_score(match_data.get("htScore")),
             "ft_score": self._clean_score(match_data.get("ftScore")),
@@ -148,6 +171,7 @@ class MatchDataParser:
             "home_team_name": home.get("name"),
             "home_country_name": home.get("countryName"),
             "home_manager_name": home.get("managerName"),
+            "home_average_age": home.get("averageAge"),
             "home_starting_formation": (
                 home_formations[0].get("formationName") if home_formations else None
             ),
@@ -155,6 +179,7 @@ class MatchDataParser:
             "away_team_name": away.get("name"),
             "away_country_name": away.get("countryName"),
             "away_manager_name": away.get("managerName"),
+            "away_average_age": away.get("averageAge"),
             "away_starting_formation": (
                 away_formations[0].get("formationName") if away_formations else None
             ),
@@ -164,41 +189,23 @@ class MatchDataParser:
         return pd.DataFrame([record])
 
     def parse_players(self, match_data: dict[str, Any]) -> pd.DataFrame:
-        """
-        Extracts player roster, lineup status, physical attributes, and match ratings
-        for both the `home` and `away` teams.
-        """
+        """Extracts player roster, lineup status, physical attributes, and match ratings."""
         match_id = match_data.get("matchId")
         rows: list[dict[str, Any]] = []
 
         for side in ("home", "away"):
-            team_info = match_data.get(side) or {}
-            team_id = team_info.get("teamId")
-            team_name = team_info.get("name")
-            players = team_info.get("players") or []
+            team = match_data.get(side) or {}
+            team_id = team.get("teamId")
+            team_name = team.get("name")
 
-            for player in players:
-                player_id = player.get("playerId")
-                stats = player.get("stats") or {}
-
-                # Extract final match rating if available in player['stats']['ratings']
-                ratings_dict = stats.get("ratings") if isinstance(stats, dict) else None
-                final_rating: Optional[float] = None
-                if isinstance(ratings_dict, dict) and ratings_dict:
-                    # The last key in ratings_dict represents the final recorded match rating
-                    try:
-                        last_key = max(ratings_dict.keys(), key=lambda k: int(k))
-                        final_rating = float(ratings_dict[last_key])
-                    except (ValueError, TypeError):
-                        final_rating = None
-
+            for player in team.get("players") or []:
                 rows.append(
                     {
                         "match_id": match_id,
                         "team_side": side,
                         "team_id": team_id,
                         "team_name": team_name,
-                        "player_id": player_id,
+                        "player_id": player.get("playerId"),
                         "player_name": player.get("name"),
                         "shirt_no": player.get("shirtNo"),
                         "position": player.get("position"),
@@ -212,30 +219,86 @@ class MatchDataParser:
                         "age": player.get("age"),
                         "height_cm": player.get("height"),
                         "weight_kg": player.get("weight"),
-                        "final_rating": final_rating,
+                        "final_rating": self._extract_final_rating(player.get("stats")),
                     }
                 )
 
-        if not rows:
-            return pd.DataFrame()
+        return pd.DataFrame(rows)
+
+    def parse_formations(
+        self,
+        match_data: dict[str, Any],
+        players_df: Optional[pd.DataFrame] = None,
+    ) -> pd.DataFrame:
+        """
+        Extracts team tactical formations and active pitch coordinates per player slot
+        across match minute intervals (`home.formations` and `away.formations`).
+        """
+        match_id = match_data.get("matchId")
+        if players_df is None:
+            players_df = self.parse_players(match_data)
+
+        player_names: dict[int, str] = {}
+        if not players_df.empty and "player_id" in players_df.columns:
+            valid = players_df.dropna(subset=["player_id"])
+            player_names = dict(
+                zip(valid["player_id"].astype(int), valid["player_name"].astype(str))
+            )
+
+        rows: list[dict[str, Any]] = []
+        for side in ("home", "away"):
+            team = match_data.get(side) or {}
+            team_id = team.get("teamId")
+            team_name = team.get("name")
+
+            for f_idx, formation in enumerate(team.get("formations") or []):
+                positions = formation.get("formationPositions") or []
+                player_ids = formation.get("playerIds") or []
+                jersey_numbers = formation.get("jerseyNumbers") or []
+                slots = formation.get("formationSlots") or []
+
+                for slot_idx, pos in enumerate(positions):
+                    pid = player_ids[slot_idx] if slot_idx < len(player_ids) else None
+                    rows.append(
+                        {
+                            "match_id": match_id,
+                            "team_side": side,
+                            "team_id": team_id,
+                            "team_name": team_name,
+                            "formation_index": f_idx,
+                            "formation_id": formation.get("formationId"),
+                            "formation_name": formation.get("formationName"),
+                            "period": formation.get("period"),
+                            "start_minute_expanded": formation.get("startMinuteExpanded"),
+                            "end_minute_expanded": formation.get("endMinuteExpanded"),
+                            "captain_player_id": formation.get("captainPlayerId"),
+                            "slot_number": (
+                                slots[slot_idx] if slot_idx < len(slots) else slot_idx + 1
+                            ),
+                            "player_id": pid,
+                            "player_name": player_names.get(int(pid)) if pid is not None else None,
+                            "shirt_no": (
+                                jersey_numbers[slot_idx]
+                                if slot_idx < len(jersey_numbers)
+                                else None
+                            ),
+                            "horizontal": pos.get("horizontal"),
+                            "vertical": pos.get("vertical"),
+                        }
+                    )
 
         return pd.DataFrame(rows)
 
-    @classmethod
-    def _extract_qualifiers_info(cls, qualifiers: Any) -> dict[str, Any]:
-        """
-        Flattens an event's `qualifiers` list into structured columns for easy filtering
-        in CSV/Pandas while preserving the complete qualifier dictionary as a JSON string.
-        """
+    def _extract_qualifiers_info(self, qualifiers: Any) -> dict[str, Any]:
+        """Flattens an event's `qualifiers` list into top-level columns."""
         result: dict[str, Any] = {
             "qualifier_names": "",
-            "qualifiers_json": "{}",
             "body_part": None,
+            **{col: None for col in self.KEY_VALUE_QUALIFIERS.values()},
+            **{col: False for col in self.BOOLEAN_FLAG_QUALIFIERS.values()},
         }
-        for col in cls.KEY_VALUE_QUALIFIERS.values():
-            result[col] = None
-        for col in cls.BOOLEAN_FLAG_QUALIFIERS.values():
-            result[col] = False
+        if self.include_raw_json_columns:
+            result["qualifiers_json"] = "{}"
 
         if not isinstance(qualifiers, list) or not qualifiers:
             return result
@@ -246,26 +309,26 @@ class MatchDataParser:
         for q in qualifiers:
             if not isinstance(q, dict):
                 continue
-            q_type = q.get("type") or {}
-            display_name = q_type.get("displayName") if isinstance(q_type, dict) else None
-            if not display_name:
+            q_type = q.get("type")
+            raw_name = q_type.get("displayName") if isinstance(q_type, dict) else None
+            if not raw_name:
                 continue
 
+            display_name = str(raw_name).strip()
             val = q.get("value", True)
             names.append(display_name)
             kv_map[display_name] = val
 
-            if display_name in cls.KEY_VALUE_QUALIFIERS:
-                result[cls.KEY_VALUE_QUALIFIERS[display_name]] = val
-
-            if display_name in cls.BOOLEAN_FLAG_QUALIFIERS:
-                result[cls.BOOLEAN_FLAG_QUALIFIERS[display_name]] = True
-
-            if display_name in cls.BODY_PART_QUALIFIERS:
+            if display_name in self.KEY_VALUE_QUALIFIERS:
+                result[self.KEY_VALUE_QUALIFIERS[display_name]] = val
+            if display_name in self.BOOLEAN_FLAG_QUALIFIERS:
+                result[self.BOOLEAN_FLAG_QUALIFIERS[display_name]] = True
+            if display_name in self.BODY_PART_QUALIFIERS:
                 result["body_part"] = display_name
 
         result["qualifier_names"] = "|".join(sorted(set(names)))
-        result["qualifiers_json"] = json.dumps(kv_map, ensure_ascii=False)
+        if self.include_raw_json_columns:
+            result["qualifiers_json"] = json.dumps(kv_map, ensure_ascii=False)
         return result
 
     def parse_events(
@@ -276,14 +339,7 @@ class MatchDataParser:
         """
         Parses ALL chronological match events from `matchCentreData["events"]` for both teams,
         enriching every row with team/player metadata, flattened qualifiers, and inferred pass
-        receiver columns (without dropping non-pass events).
-
-        Args:
-            match_data: Raw `matchCentreData` dictionary.
-            players_df: Optional pre-parsed players DataFrame to avoid recomputing lookups.
-
-        Returns:
-            Comprehensive Pandas DataFrame of all match events.
+        receiver columns.
         """
         events = match_data.get("events") or []
         if not events:
@@ -293,60 +349,43 @@ class MatchDataParser:
             players_df = self.parse_players(match_data)
 
         match_id = match_data.get("matchId")
-        player_name_dict: dict[str, str] = {
+        player_name_dict = {
             str(k): str(v)
             for k, v in (match_data.get("playerIdNameDictionary") or {}).items()
         }
 
-        # Build lookup maps for team & player attributes
-        home_info = match_data.get("home") or {}
-        away_info = match_data.get("away") or {}
-        team_map: dict[Any, dict[str, Any]] = {}
-        if home_info.get("teamId") is not None:
-            team_map[home_info["teamId"]] = {
-                "team_name": home_info.get("name"),
-                "team_side": "home",
-            }
-        if away_info.get("teamId") is not None:
-            team_map[away_info["teamId"]] = {
-                "team_name": away_info.get("name"),
-                "team_side": "away",
-            }
+        team_map: dict[Any, dict[str, str]] = {}
+        for side in ("home", "away"):
+            info = match_data.get(side) or {}
+            if info.get("teamId") is not None:
+                team_map[info["teamId"]] = {"team_name": info.get("name"), "team_side": side}
 
         player_meta_map: dict[int, dict[str, Any]] = {}
-        if not players_df.empty:
-            for _, prow in players_df.iterrows():
-                pid = prow.get("player_id")
-                if pd.notna(pid):
-                    player_meta_map[int(pid)] = {
-                        "player_name": prow.get("player_name"),
-                        "shirt_no": prow.get("shirt_no"),
-                        "position": prow.get("position"),
-                        "is_first_eleven": bool(prow.get("is_first_eleven", False)),
-                    }
+        if not players_df.empty and "player_id" in players_df.columns:
+            valid_players = players_df.dropna(subset=["player_id"]).copy()
+            valid_players["player_id"] = valid_players["player_id"].astype(int)
+            player_meta_map = (
+                valid_players.drop_duplicates(subset=["player_id"])
+                .set_index("player_id")[["player_name", "shirt_no", "position", "is_first_eleven"]]
+                .to_dict("index")
+            )
 
         parsed_rows: list[dict[str, Any]] = []
         for idx, ev in enumerate(events):
-            ev_type_obj = ev.get("type") if isinstance(ev.get("type"), dict) else {}
-            outcome_obj = (
-                ev.get("outcomeType") if isinstance(ev.get("outcomeType"), dict) else {}
-            )
-            period_obj = ev.get("period") if isinstance(ev.get("period"), dict) else {}
+            ev_type = ev.get("type") if isinstance(ev.get("type"), dict) else {}
+            outcome = ev.get("outcomeType") if isinstance(ev.get("outcomeType"), dict) else {}
+            period = ev.get("period") if isinstance(ev.get("period"), dict) else {}
+            card = ev.get("cardType") if isinstance(ev.get("cardType"), dict) else {}
 
             team_id = ev.get("teamId")
             team_meta = team_map.get(team_id, {})
 
-            raw_player_id = ev.get("playerId")
-            player_id: Optional[int] = (
-                int(raw_player_id) if raw_player_id is not None and pd.notna(raw_player_id) else None
-            )
+            raw_pid = ev.get("playerId")
+            player_id = int(raw_pid) if raw_pid is not None and pd.notna(raw_pid) else None
             p_meta = player_meta_map.get(player_id, {}) if player_id is not None else {}
-            player_name = (
-                p_meta.get("player_name")
-                or (player_name_dict.get(str(player_id)) if player_id is not None else None)
+            player_name = p_meta.get("player_name") or (
+                player_name_dict.get(str(player_id)) if player_id is not None else None
             )
-
-            qualifiers_info = self._extract_qualifiers_info(ev.get("qualifiers"))
 
             row: dict[str, Any] = {
                 "match_id": match_id,
@@ -356,8 +395,8 @@ class MatchDataParser:
                 "minute": ev.get("minute"),
                 "second": ev.get("second"),
                 "expanded_minute": ev.get("expandedMinute"),
-                "period": period_obj.get("displayName"),
-                "period_value": period_obj.get("value"),
+                "period": period.get("displayName"),
+                "period_value": period.get("value"),
                 "team_id": team_id,
                 "team_name": team_meta.get("team_name"),
                 "team_side": team_meta.get("team_side"),
@@ -366,10 +405,10 @@ class MatchDataParser:
                 "shirt_no": p_meta.get("shirt_no"),
                 "position": p_meta.get("position"),
                 "is_first_eleven": p_meta.get("is_first_eleven"),
-                "event_type": ev_type_obj.get("displayName"),
-                "event_type_value": ev_type_obj.get("value"),
-                "outcome_type": outcome_obj.get("displayName"),
-                "outcome_type_value": outcome_obj.get("value"),
+                "event_type": ev_type.get("displayName"),
+                "event_type_value": ev_type.get("value"),
+                "outcome_type": outcome.get("displayName"),
+                "outcome_type_value": outcome.get("value"),
                 "is_touch": bool(ev.get("isTouch", False)),
                 "is_shot": bool(ev.get("isShot", False)),
                 "is_goal": bool(ev.get("isGoal", False)),
@@ -381,107 +420,57 @@ class MatchDataParser:
                 "goal_mouth_z": ev.get("goalMouthZ"),
                 "blocked_x": ev.get("blockedX"),
                 "blocked_y": ev.get("blockedY"),
-                "card_type": (
-                    ev.get("cardType", {}).get("displayName")
-                    if isinstance(ev.get("cardType"), dict)
-                    else None
-                ),
-                "satisfied_events_types": json.dumps(ev.get("satisfiedEventsTypes") or []),
+                "card_type": card.get("displayName"),
             }
-            row.update(qualifiers_info)
+            if self.include_raw_json_columns:
+                row["satisfied_events_types"] = json.dumps(ev.get("satisfiedEventsTypes") or [])
+
+            row.update(self._extract_qualifiers_info(ev.get("qualifiers")))
             parsed_rows.append(row)
 
         df = pd.DataFrame(parsed_rows)
+        return self._enrich_with_pass_receivers(df)
 
-        # Infer pass receiver from the next chronological player action without dropping non-player events
-        df = self._enrich_with_pass_receivers(df)
-        return df
-
-    @staticmethod
-    def _enrich_with_pass_receivers(df: pd.DataFrame) -> pd.DataFrame:
+    @classmethod
+    def _enrich_with_pass_receivers(cls, df: pd.DataFrame) -> pd.DataFrame:
         """
         Adds pass receiver columns (`receiver_id`, `receiver_name`, `receiver_is_first_eleven`)
-        for successful pass events by looking at the next chronological player event in the same period,
-        while preserving ALL events in the DataFrame.
+        for successful pass events by looking at the next chronological player event in the same period.
         """
         if df.empty:
             return df
 
         df = df.copy()
+        on_ball = df.loc[df["player_id"].notna()]
+        next_cols = ["team_id", "player_id", "player_name", "is_first_eleven"]
+        shifted = on_ball.groupby("period", sort=False, dropna=False)[next_cols].shift(-1)
 
-        # Identify rows that have a valid player_id (on-ball/player actions)
-        player_events_mask = df["player_id"].notna()
-        player_events = df.loc[
-            player_events_mask,
-            ["team_id", "period", "player_id", "player_name", "is_first_eleven"],
-        ].copy()
+        df["next_team_id"] = shifted["team_id"]
+        df["next_player_id"] = shifted["player_id"]
+        df["next_player_name"] = shifted["player_name"]
+        df["next_player_is_first_eleven"] = shifted["is_first_eleven"]
 
-        # Shift(-1) across player events to find the next player action
-        player_events["next_team_id"] = player_events["team_id"].shift(-1)
-        player_events["next_period"] = player_events["period"].shift(-1)
-        player_events["next_player_id"] = player_events["player_id"].shift(-1)
-        player_events["next_player_name"] = player_events["player_name"].shift(-1)
-        player_events["next_player_is_first_eleven"] = player_events["is_first_eleven"].shift(-1)
-
-        # Merge next-player context back onto the full events table
-        for col in (
-            "next_team_id",
-            "next_period",
-            "next_player_id",
-            "next_player_name",
-            "next_player_is_first_eleven",
-        ):
-            df[col] = np.nan
-            df[col] = df[col].astype(object)
-            df.loc[player_events.index, col] = player_events[col]
-
-        # A pass has a valid teammate receiver when:
-        # 1. event_type == "Pass" and outcome_type == "Successful"
-        # 2. The next player event is by the same team in the same period
-        # 3. The receiver is a different player from the passer
-        valid_pass_receiver_mask = (
+        valid_pass_receiver = (
             (df["event_type"] == "Pass")
             & (df["outcome_type"] == "Successful")
             & (df["team_id"] == df["next_team_id"])
-            & (df["period"] == df["next_period"])
-            & (df["player_id"].notna())
-            & (df["next_player_id"].notna())
+            & df["player_id"].notna()
+            & df["next_player_id"].notna()
             & (df["player_id"] != df["next_player_id"])
         )
 
-        df["receiver_id"] = np.where(valid_pass_receiver_mask, df["next_player_id"], None)
-        df["receiver_name"] = np.where(valid_pass_receiver_mask, df["next_player_name"], None)
+        df["receiver_id"] = np.where(valid_pass_receiver, df["next_player_id"], None)
+        df["receiver_name"] = np.where(valid_pass_receiver, df["next_player_name"], None)
         df["receiver_is_first_eleven"] = np.where(
-            valid_pass_receiver_mask, df["next_player_is_first_eleven"], None
+            valid_pass_receiver, df["next_player_is_first_eleven"], None
         )
 
-        # Drop internal helper column `next_period`
-        df = df.drop(columns=["next_period"])
-
-        # Convert numeric ID columns to nullable Int64 so CSV exports integers instead of '12345.0'
-        for int_col in (
-            "match_id",
-            "id",
-            "event_id",
-            "minute",
-            "second",
-            "expanded_minute",
-            "period_value",
-            "team_id",
-            "player_id",
-            "shirt_no",
-            "event_type_value",
-            "outcome_type_value",
-            "next_team_id",
-            "next_player_id",
-            "receiver_id",
-        ):
+        for int_col in cls.INT_EVENT_COLUMNS:
             if int_col in df.columns:
                 df[int_col] = pd.to_numeric(df[int_col], errors="coerce").astype("Int64")
 
-        for float_col in ("x", "y", "end_x", "end_y", "pass_length", "pass_angle"):
+        for float_col in cls.FLOAT_EVENT_COLUMNS:
             if float_col in df.columns:
                 df[float_col] = pd.to_numeric(df[float_col], errors="coerce")
 
         return df
-

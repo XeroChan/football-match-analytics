@@ -12,7 +12,21 @@ Outputs produced by `MatchDataParser`:
 3. `formations_df`: Team tactical formations and active player pitch slots across match
    minute intervals.
 4. `metadata_df`: Single-row DataFrame summarizing match-level info (teams, score,
-   venue, referee, attendance, start time, weather).
+   venue, referee, attendance, start time, weather, period boundaries).
+5. `player_stats_df`: Long-format minute-by-minute player stats (`players[].stats`),
+   including the full rating time series.
+6. `team_stats_df`: Long-format minute-by-minute team stats (`home/away.stats`).
+7. `shot_zones_df`: Shot counts and goals per goal-mouth zone and minute
+   (`home/away.shotZones`).
+8. `minute_mapping_df`: Mapping of (period, minute) to expanded minute (`expandedMinutes`).
+9. `lookups_df`: WhoScored ID -> name dictionaries (`_matchCentreEventTypeJson`,
+   `_formationIdNameMappings`).
+10. `common_events_df`: Generic flattening of `commonEvents` (empty for most matches;
+    the schema is not fixed, so every item is normalized and also kept as raw JSON).
+
+Intentionally skipped: `home/away.incidentEvents` (exact duplicates of `events`),
+`stats.minutesWithStats` (index derivable from the stats tables) and the internal
+`$idx` / `$len` event fields.
 """
 
 from __future__ import annotations
@@ -34,6 +48,12 @@ class ParsedMatchDataset:
     players_df: pd.DataFrame
     events_df: pd.DataFrame
     formations_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    player_stats_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    team_stats_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    shot_zones_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    minute_mapping_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    lookups_df: pd.DataFrame = field(default_factory=pd.DataFrame)
+    common_events_df: pd.DataFrame = field(default_factory=pd.DataFrame)
 
 
 class MatchDataParser:
@@ -65,7 +85,8 @@ class MatchDataParser:
         "HeadPass": "is_head_pass",
         "ThrowIn": "is_throw_in",
         "CornerTaken": "is_corner",
-        "FreeKickTaken": "is_free_kick",
+        "FreekickTaken": "is_free_kick",  # actual WhoScored spelling
+        "FreeKickTaken": "is_free_kick",  # defensive alias
         "GoalKick": "is_goal_kick",
         "BigChance": "is_big_chance",
         "BigChanceCreated": "is_big_chance_created",
@@ -83,6 +104,9 @@ class MatchDataParser:
 
     BODY_PART_QUALIFIERS = {"RightFoot", "LeftFoot", "Head", "OtherBodyPart"}
 
+    # Periods for which fixed metadata columns are always emitted (1H, 2H, ET1, ET2, PSO).
+    METADATA_PERIODS = (1, 2, 3, 4, 5)
+
     INT_EVENT_COLUMNS = (
         "match_id",
         "id",
@@ -96,6 +120,10 @@ class MatchDataParser:
         "shirt_no",
         "event_type_value",
         "outcome_type_value",
+        "card_type_value",
+        "related_player_id",
+        "event_field",
+        "minute_info_extra_time",
         "next_team_id",
         "next_player_id",
         "receiver_id",
@@ -120,6 +148,12 @@ class MatchDataParser:
             players_df=players_df,
             events_df=events_df,
             formations_df=formations_df,
+            player_stats_df=self.parse_player_stats(match_data),
+            team_stats_df=self.parse_team_stats(match_data),
+            shot_zones_df=self.parse_shot_zones(match_data),
+            minute_mapping_df=self.parse_minute_mapping(match_data),
+            lookups_df=self.parse_lookups(match_data),
+            common_events_df=self.parse_common_events(match_data),
         )
 
     @staticmethod
@@ -138,6 +172,36 @@ class MatchDataParser:
             return float(ratings[last_key])
         except (ValueError, TypeError):
             return None
+
+    @staticmethod
+    def _display_name(value: Any) -> Optional[str]:
+        """Returns `displayName` from WhoScored `{displayName, value}` objects."""
+        return value.get("displayName") if isinstance(value, dict) else None
+
+    @staticmethod
+    def _to_int(value: Any) -> Optional[int]:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _to_float(value: Any) -> Optional[float]:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    @staticmethod
+    def _event_type_id_to_name(match_data: dict[str, Any]) -> dict[int, str]:
+        """Inverts `_matchCentreEventTypeJson` ({name: id}) into {id: name}."""
+        mapping: dict[int, str] = {}
+        for name, type_id in (match_data.get("_matchCentreEventTypeJson") or {}).items():
+            try:
+                mapping.setdefault(int(type_id), str(name))
+            except (TypeError, ValueError):
+                continue
+        return mapping
 
     def parse_match_metadata(self, match_data: dict[str, Any]) -> pd.DataFrame:
         """Extracts match-level summary information (teams, score, date, venue, referee)."""
@@ -184,8 +248,33 @@ class MatchDataParser:
                 away_formations[0].get("formationName") if away_formations else None
             ),
             "max_minute": match_data.get("maxMinute"),
+            "expanded_max_minute": match_data.get("expandedMaxMinute"),
+            "minute_expanded": match_data.get("minuteExpanded"),
+            "max_period": match_data.get("maxPeriod"),
+            "period_code": match_data.get("periodCode"),
+            "timeout_in_seconds": match_data.get("timeoutInSeconds"),
             "total_events_count": len(match_data.get("events") or []),
         }
+
+        # `home/away.scores` -> {fulltime, halftime, running}
+        for side, team in (("home", home), ("away", away)):
+            scores = team.get("scores") if isinstance(team.get("scores"), dict) else {}
+            for key in ("halftime", "fulltime", "running"):
+                record[f"{side}_score_{key}"] = scores.get(key)
+            for key in sorted(set(scores) - {"halftime", "fulltime", "running"}):
+                record[f"{side}_score_{key}"] = scores.get(key)
+
+        # `periodMinuteLimits` / `periodEndMinutes` -> fixed per-period columns
+        limits = match_data.get("periodMinuteLimits") or {}
+        end_minutes = match_data.get("periodEndMinutes") or {}
+        periods = sorted(
+            set(self.METADATA_PERIODS)
+            | {p for p in (self._to_int(k) for k in (*limits, *end_minutes)) if p is not None}
+        )
+        for p in periods:
+            record[f"period_{p}_minute_limit"] = limits.get(str(p), limits.get(p))
+            record[f"period_{p}_end_minute"] = end_minutes.get(str(p), end_minutes.get(p))
+
         return pd.DataFrame([record])
 
     def parse_players(self, match_data: dict[str, Any]) -> pd.DataFrame:
@@ -199,6 +288,8 @@ class MatchDataParser:
             team_name = team.get("name")
 
             for player in team.get("players") or []:
+                subbed_in_period = player.get("subbedInPeriod")
+                subbed_out_period = player.get("subbedOutPeriod")
                 rows.append(
                     {
                         "match_id": match_id,
@@ -216,6 +307,18 @@ class MatchDataParser:
                         "subbed_out_player_id": player.get("subbedOutPlayerId"),
                         "subbed_in_expanded_minute": player.get("subbedInExpandedMinute"),
                         "subbed_out_expanded_minute": player.get("subbedOutExpandedMinute"),
+                        "subbed_in_period": self._display_name(subbed_in_period),
+                        "subbed_in_period_value": (
+                            subbed_in_period.get("value")
+                            if isinstance(subbed_in_period, dict)
+                            else None
+                        ),
+                        "subbed_out_period": self._display_name(subbed_out_period),
+                        "subbed_out_period_value": (
+                            subbed_out_period.get("value")
+                            if isinstance(subbed_out_period, dict)
+                            else None
+                        ),
                         "age": player.get("age"),
                         "height_cm": player.get("height"),
                         "weight_kg": player.get("weight"),
@@ -223,7 +326,190 @@ class MatchDataParser:
                     }
                 )
 
-        return pd.DataFrame(rows)
+        df = pd.DataFrame(rows)
+        for col in ("subbed_in_period_value", "subbed_out_period_value"):
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
+        return df
+
+    def parse_player_stats(self, match_data: dict[str, Any]) -> pd.DataFrame:
+        """
+        Flattens `players[].stats` ({stat_name: {minute: value}}) into a long table with one
+        row per (player, stat, minute). Includes the full `ratings` time series.
+        """
+        match_id = match_data.get("matchId")
+        rows: list[dict[str, Any]] = []
+
+        for side in ("home", "away"):
+            team = match_data.get(side) or {}
+            for player in team.get("players") or []:
+                stats = player.get("stats")
+                if not isinstance(stats, dict):
+                    continue
+                for stat_name, per_minute in stats.items():
+                    if not isinstance(per_minute, dict):
+                        continue
+                    for minute, value in per_minute.items():
+                        rows.append(
+                            {
+                                "match_id": match_id,
+                                "team_side": side,
+                                "team_id": team.get("teamId"),
+                                "team_name": team.get("name"),
+                                "player_id": player.get("playerId"),
+                                "player_name": player.get("name"),
+                                "stat_name": stat_name,
+                                "minute": self._to_int(minute),
+                                "value": self._to_float(value),
+                            }
+                        )
+
+        return self._sort_long_table(
+            pd.DataFrame(rows), ["team_side", "player_id", "stat_name", "minute"]
+        )
+
+    def parse_team_stats(self, match_data: dict[str, Any]) -> pd.DataFrame:
+        """
+        Flattens `home/away.stats` ({stat_name: {minute: value}}) into a long table with one
+        row per (team, stat, minute).
+        """
+        match_id = match_data.get("matchId")
+        rows: list[dict[str, Any]] = []
+
+        for side in ("home", "away"):
+            team = match_data.get(side) or {}
+            stats = team.get("stats")
+            if not isinstance(stats, dict):
+                continue
+            for stat_name, per_minute in stats.items():
+                # `minutesWithStats` is a plain list of minutes (index only) -> skipped.
+                if not isinstance(per_minute, dict):
+                    continue
+                for minute, value in per_minute.items():
+                    rows.append(
+                        {
+                            "match_id": match_id,
+                            "team_side": side,
+                            "team_id": team.get("teamId"),
+                            "team_name": team.get("name"),
+                            "stat_name": stat_name,
+                            "minute": self._to_int(minute),
+                            "value": self._to_float(value),
+                        }
+                    )
+
+        return self._sort_long_table(pd.DataFrame(rows), ["team_side", "stat_name", "minute"])
+
+    def parse_shot_zones(self, match_data: dict[str, Any]) -> pd.DataFrame:
+        """
+        Flattens `home/away.shotZones` ({zone: {stats: {minute: {count, goalCount}}}}) into
+        one row per (team, zone, minute).
+        """
+        match_id = match_data.get("matchId")
+        rows: list[dict[str, Any]] = []
+
+        for side in ("home", "away"):
+            team = match_data.get(side) or {}
+            zones = team.get("shotZones")
+            if not isinstance(zones, dict):
+                continue
+            for zone_name, zone in zones.items():
+                per_minute = zone.get("stats") if isinstance(zone, dict) else None
+                if not isinstance(per_minute, dict):
+                    continue
+                for minute, values in per_minute.items():
+                    values = values if isinstance(values, dict) else {}
+                    rows.append(
+                        {
+                            "match_id": match_id,
+                            "team_side": side,
+                            "team_id": team.get("teamId"),
+                            "team_name": team.get("name"),
+                            "zone": zone_name,
+                            "minute": self._to_int(minute),
+                            "count": values.get("count"),
+                            "goal_count": values.get("goalCount"),
+                        }
+                    )
+
+        return self._sort_long_table(pd.DataFrame(rows), ["team_side", "zone", "minute"])
+
+    def parse_minute_mapping(self, match_data: dict[str, Any]) -> pd.DataFrame:
+        """Flattens `expandedMinutes` ({period: {minute: expanded_minute}})."""
+        match_id = match_data.get("matchId")
+        rows: list[dict[str, Any]] = []
+
+        for period, minutes in (match_data.get("expandedMinutes") or {}).items():
+            if not isinstance(minutes, dict):
+                continue
+            for minute, expanded in minutes.items():
+                rows.append(
+                    {
+                        "match_id": match_id,
+                        "period_value": self._to_int(period),
+                        "minute": self._to_int(minute),
+                        "expanded_minute": self._to_int(expanded),
+                    }
+                )
+
+        return self._sort_long_table(pd.DataFrame(rows), ["period_value", "minute"])
+
+    def parse_lookups(self, match_data: dict[str, Any]) -> pd.DataFrame:
+        """
+        Exports WhoScored's ID -> name dictionaries as one long lookup table:
+        `event_type` (`_matchCentreEventTypeJson`, used by `satisfied_events_types`) and
+        `formation` (`_formationIdNameMappings`).
+        """
+        rows: list[dict[str, Any]] = []
+
+        for name, type_id in (match_data.get("_matchCentreEventTypeJson") or {}).items():
+            rows.append({"lookup_type": "event_type", "lookup_id": self._to_int(type_id), "name": name})
+
+        for formation_id, name in (match_data.get("_formationIdNameMappings") or {}).items():
+            rows.append(
+                {"lookup_type": "formation", "lookup_id": self._to_int(formation_id), "name": name}
+            )
+
+        return self._sort_long_table(pd.DataFrame(rows), ["lookup_type", "lookup_id"])
+
+    def parse_common_events(self, match_data: dict[str, Any]) -> pd.DataFrame:
+        """
+        Flattens `commonEvents`. The list is empty for most matches and its item schema
+        is not fixed, so dict items are normalized with `pd.json_normalize` (nested keys
+        joined with `_`, lists kept as JSON strings) and every item is also preserved
+        verbatim in `raw_json` so no information is lost.
+        """
+        items = match_data.get("commonEvents") or []
+        if not isinstance(items, list) or not items:
+            return pd.DataFrame()
+
+        rows: list[dict[str, Any]] = []
+        for idx, item in enumerate(items):
+            row: dict[str, Any] = {"match_id": match_data.get("matchId"), "common_event_index": idx}
+            if isinstance(item, dict):
+                flat = pd.json_normalize(item, sep="_").iloc[0].to_dict() if item else {}
+                for key, value in flat.items():
+                    if isinstance(value, (list, dict)):
+                        value = json.dumps(value, ensure_ascii=False)
+                    row[key if key not in row else f"item_{key}"] = value
+            else:
+                row["value"] = item
+            row["raw_json"] = json.dumps(item, ensure_ascii=False)
+            rows.append(row)
+
+        df = pd.DataFrame(rows)
+        return df[[c for c in df.columns if c != "raw_json"] + ["raw_json"]]
+
+    @staticmethod
+    def _sort_long_table(df: pd.DataFrame, sort_cols: list[str]) -> pd.DataFrame:
+        """Sorts a long table deterministically and casts integer ID/minute columns."""
+        if df.empty:
+            return df
+        for col in ("match_id", "team_id", "player_id", "minute", "period_value",
+                    "expanded_minute", "lookup_id", "count", "goal_count"):
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
+        return df.sort_values(sort_cols, kind="stable").reset_index(drop=True)
 
     def parse_formations(
         self,
@@ -353,6 +639,7 @@ class MatchDataParser:
             str(k): str(v)
             for k, v in (match_data.get("playerIdNameDictionary") or {}).items()
         }
+        event_type_names = self._event_type_id_to_name(match_data)
 
         team_map: dict[Any, dict[str, str]] = {}
         for side in ("home", "away"):
@@ -370,12 +657,18 @@ class MatchDataParser:
                 .to_dict("index")
             )
 
+        def resolve_player_name(pid: Optional[int]) -> Optional[str]:
+            if pid is None:
+                return None
+            return player_meta_map.get(pid, {}).get("player_name") or player_name_dict.get(str(pid))
+
         parsed_rows: list[dict[str, Any]] = []
         for idx, ev in enumerate(events):
             ev_type = ev.get("type") if isinstance(ev.get("type"), dict) else {}
             outcome = ev.get("outcomeType") if isinstance(ev.get("outcomeType"), dict) else {}
             period = ev.get("period") if isinstance(ev.get("period"), dict) else {}
             card = ev.get("cardType") if isinstance(ev.get("cardType"), dict) else {}
+            minute_info = ev.get("minuteInfo") if isinstance(ev.get("minuteInfo"), dict) else {}
 
             team_id = ev.get("teamId")
             team_meta = team_map.get(team_id, {})
@@ -383,9 +676,18 @@ class MatchDataParser:
             raw_pid = ev.get("playerId")
             player_id = int(raw_pid) if raw_pid is not None and pd.notna(raw_pid) else None
             p_meta = player_meta_map.get(player_id, {}) if player_id is not None else {}
-            player_name = p_meta.get("player_name") or (
-                player_name_dict.get(str(player_id)) if player_id is not None else None
-            )
+            player_name = resolve_player_name(player_id)
+
+            related_player_id = self._to_int(ev.get("relatedPlayerId"))
+
+            satisfied_ids = ev.get("satisfiedEventsTypes") or []
+            satisfied_names = [
+                event_type_names.get(self._to_int(t), str(t)) for t in satisfied_ids
+            ]
+            satisfiers = ev.get("satisfiers") or []
+            satisfier_names = [
+                str(s.get("name")) for s in satisfiers if isinstance(s, dict) and s.get("name")
+            ]
 
             row: dict[str, Any] = {
                 "match_id": match_id,
@@ -421,11 +723,28 @@ class MatchDataParser:
                 "blocked_x": ev.get("blockedX"),
                 "blocked_y": ev.get("blockedY"),
                 "card_type": card.get("displayName"),
+                "card_type_value": card.get("value"),
+                "related_player_id": related_player_id,
+                "related_player_name": resolve_player_name(related_player_id),
+                "event_field": ev.get("field"),
+                "event_text": ev.get("text"),
+                "minute_info_minute": minute_info.get("minute"),
+                "minute_info_minute_string": minute_info.get("minuteString"),
+                "minute_info_extra_time": minute_info.get("extraTime"),
+                "minute_info_is_end_of_period": minute_info.get("isEndOfPeriod"),
+                "satisfiers": "|".join(satisfier_names),
+                "satisfied_event_type_names": "|".join(satisfied_names),
             }
             if self.include_raw_json_columns:
-                row["satisfied_events_types"] = json.dumps(ev.get("satisfiedEventsTypes") or [])
+                row["satisfied_events_types"] = json.dumps(satisfied_ids)
 
             row.update(self._extract_qualifiers_info(ev.get("qualifiers")))
+
+            # Top-level `relatedEventId` (incident events) fills the gap when the
+            # `RelatedEventId` qualifier is absent.
+            if row.get("related_event_id") is None and ev.get("relatedEventId") is not None:
+                row["related_event_id"] = ev.get("relatedEventId")
+
             parsed_rows.append(row)
 
         df = pd.DataFrame(parsed_rows)

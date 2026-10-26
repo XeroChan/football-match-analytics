@@ -4,6 +4,7 @@ __pycache__
 
 # Ignored data
 data/raw/
+data/processed/
 output/
 *.json
 *.csv

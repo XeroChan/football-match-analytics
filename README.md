@@ -18,7 +18,7 @@ football-match-analytics/
 │   ├── __init__.py           # Eksport głównych klas pakietu
 │   ├── main.py               # Punkt wejścia CLI i orkiestrator potoku danych
 │   ├── scraper.py            # Pobieranie danych matchCentreData przez Selenium
-│   ├── parser.py             # Transformacja JSON -> DataFrame (events, players, formations, metadata)
+│   ├── parser.py             # Transformacja JSON -> DataFrame (events, players, formations, metadata, stats...)
 │   └── exporter.py           # Zapis surowego JSON-a oraz tabel Parquet i CSV
 └── requirements.txt          # Lista bibliotek Pythona
 ```
@@ -61,14 +61,22 @@ python -m src.main --from-json "data/raw/match_1821123_Southampton_vs_Aston_Vill
 
 ## 🗄️ 3. Architektura danych (Schemat tabel)
 
-`MatchDataParser.parse_all()` zwraca obiekt `ParsedMatchDataset` zawierający 4 ustrukturyzowane tabele:
+`MatchDataParser.parse_all()` zwraca obiekt `ParsedMatchDataset` zawierający 10 ustrukturyzowanych tabel:
 
 | Tabela (`DataFrame`) | Źródło w pliku JSON | Kluczowe informacje |
 | --- | --- | --- |
-| **`metadata_df`** | Główne klucze pliku, `home`, `away`, `referee` | Wynik (`score`, `ht_score`, `ft_score`), frekwencja (`attendance`), stadion (`venue_name`), sędzia (`referee_name`), menedżerowie, wyjściowe formacje i średni wiek drużyn. |
-| **`players_df`** | `home.players` / `away.players` | Składy (`is_first_eleven`), pozycja (`position`), numer (`shirt_no`), dane fizyczne (`age`, `height_cm`, `weight_kg`), minuty zmian oraz ocena końcowa (`final_rating`). |
-| **`events_df`** | Główna tablica `events` + słownik graczy | Oś czasu (`minute`, `second`, `expanded_minute`), współrzędne (`x`, `y`, `end_x`, `end_y`), typ i wynik akcji, spłaszczone kwalifikatory (`is_key_pass`, `is_big_chance`, `pass_length`, `pass_angle`) oraz wywnioskowany odbiorca podania (`receiver_id`, `receiver_name`). |
+| **`metadata_df`** | Główne klucze pliku, `home`, `away`, `referee` | Wynik (`score`, `ht_score`, `ft_score`), frekwencja (`attendance`), stadion (`venue_name`), sędzia (`referee_name`), menedżerowie, wyjściowe formacje, średni wiek drużyn, wyniki drużyn (`home/away_score_*`) oraz granice połów (`period_N_minute_limit`, `period_N_end_minute`). |
+| **`players_df`** | `home.players` / `away.players` | Składy (`is_first_eleven`), pozycja (`position`), numer (`shirt_no`), dane fizyczne (`age`, `height_cm`, `weight_kg`), minuty i połowy zmian (`subbed_in_period`, `subbed_out_period`) oraz ocena końcowa (`final_rating`). |
+| **`events_df`** | Główna tablica `events` + słownik graczy | Oś czasu (`minute`, `second`, `expanded_minute`), współrzędne (`x`, `y`, `end_x`, `end_y`), typ i wynik akcji, spłaszczone kwalifikatory (`is_key_pass`, `is_big_chance`, `pass_length`, `pass_angle`) zdarzenia powiązane (`related_event_id`, `related_player_id`), opis incydentów (`event_text`, `satisfiers`), rozkodowane `satisfied_event_type_names` oraz wywnioskowany odbiorca podania (`receiver_id`, `receiver_name`). |
 | **`formations_df`** | `home.formations` / `away.formations` | Przedziały czasowe ustawień taktycznych (`formation_name`, `start_minute_expanded`, `end_minute_expanded`) wraz z przypisanymi zawodnikami i ich współrzędnymi (`horizontal`, `vertical`). |
+| **`player_stats_df`** | `home/away.players[].stats` | Statystyki zawodników minuta po minucie w formacie long (`stat_name`, `minute`, `value`), m.in. pełna seria `ratings`, `passesTotal`, `touches`, `totalSaves`. |
+| **`team_stats_df`** | `home.stats` / `away.stats` | 34 metryki drużynowe minuta po minucie w formacie long (posiadanie, strzały, odbiory, pojedynki powietrzne, oceny). |
+| **`shot_zones_df`** | `home/away.shotZones` | Liczba strzałów i goli (`count`, `goal_count`) w strefach bramki (`zone`) w danej minucie. |
+| **`minute_mapping_df`** | `expandedMinutes` | Mapowanie (`period_value`, `minute`) → `expanded_minute`. |
+| **`lookups_df`** | `_matchCentreEventTypeJson`, `_formationIdNameMappings` | Słowniki ID → nazwa (`lookup_type`: `event_type` / `formation`). |
+| **`common_events_df`** | `commonEvents` | Ogólne spłaszczenie elementów listy (`pd.json_normalize`) + surowy JSON w kolumnie `raw_json`. Tabela powstaje tylko, gdy lista nie jest pusta. |
+
+> Pomijane celowo: `incidentEvents` (duplikaty `events`), `stats.minutesWithStats` (sam indeks minut) oraz techniczne pola `$idx` / `$len`.
 
 ---
 

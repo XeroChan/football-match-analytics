@@ -30,13 +30,15 @@ class ExportedFiles:
     players_csv_path: Path
     metadata_csv_path: Path
     formations_csv_path: Optional[Path] = None
+    extra_csv_paths: dict[str, Path] = field(default_factory=dict)
     parquet_files: dict[str, Path] = field(default_factory=dict)
 
 
 class MatchDataExporter:
     """
     Exports the raw `matchCentreData` JSON to `raw_dir`, Parquet tables to `processed_dir`,
-    and CSV tables (`events`, `players`, `formations`, `metadata`) to `output_dir`.
+    and CSV tables (`events`, `players`, `formations`, `metadata`, `player_stats`,
+    `team_stats`, `shot_zones`, `minute_mapping`, `lookups`, `common_events`) to `output_dir`.
     """
 
     def __init__(
@@ -144,11 +146,26 @@ class MatchDataExporter:
             dataset.formations_df, prefix, "formations", parquet_files
         )
 
+        extra_tables = {
+            "player_stats": dataset.player_stats_df,
+            "team_stats": dataset.team_stats_df,
+            "shot_zones": dataset.shot_zones_df,
+            "minute_mapping": dataset.minute_mapping_df,
+            "lookups": dataset.lookups_df,
+            "common_events": dataset.common_events_df,
+        }
+        extra_csv_paths = {
+            name: self._write_table(df, prefix, name, parquet_files)
+            for name, df in extra_tables.items()
+            if not df.empty
+        }
+
         return ExportedFiles(
             raw_json_path=raw_json_path,
             events_csv_path=events_csv_path,
             players_csv_path=players_csv_path,
             metadata_csv_path=metadata_csv_path,
             formations_csv_path=formations_csv_path,
+            extra_csv_paths=extra_csv_paths,
             parquet_files=parquet_files,
         )

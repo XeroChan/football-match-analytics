@@ -2,7 +2,8 @@
 main.py
 =======
 Main CLI and pipeline orchestrator for scraping WhoScored Match Centre data
-and exporting structured datasets (`events`, `players`, `formations`, `metadata`)
+and exporting structured datasets (`events`, `players`, `formations`, `metadata`,
+`player_stats`, `team_stats`, `shot_zones`, `minute_mapping`, `lookups`, `common_events`)
 in Parquet (`data/processed/`) and CSV (`output/`) formats alongside raw JSON backups.
 
 Usage examples:
@@ -62,6 +63,8 @@ def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) 
     print(f"  Total Events     : {len(dataset.events_df):,}")
     print(f"  Total Players    : {len(dataset.players_df):,}")
     print(f"  Formation Slots  : {len(dataset.formations_df):,}")
+    print(f"  Player Stat Rows : {len(dataset.player_stats_df):,}")
+    print(f"  Team Stat Rows   : {len(dataset.team_stats_df):,}")
 
     if not dataset.events_df.empty and "event_type" in dataset.events_df.columns:
         print("\nTop 10 Event Types Captured:")
@@ -76,6 +79,9 @@ def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) 
     if exported.formations_csv_path:
         print(f"  [Formations CSV] {exported.formations_csv_path.resolve()}")
     print(f"  [Metadata CSV]   {exported.metadata_csv_path.resolve()}")
+    for table_name, csv_path in exported.extra_csv_paths.items():
+        label = f"[{table_name} CSV]"
+        print(f"  {label:<16} {csv_path.resolve()}")
     if exported.parquet_files:
         parquet_dir = next(iter(exported.parquet_files.values())).parent.resolve()
         print(f"  [Parquet Dir]    {parquet_dir} ({len(exported.parquet_files)} tables)")

@@ -2,7 +2,7 @@
 exporter.py
 ===========
 Handles persisting raw WhoScored JSON payloads and structured Pandas DataFrames
-to disk (CSV and JSON) with clean, deterministic filenames for data exploration.
+to disk (Parquet in `data/processed/` and CSV in `output/`) with deterministic filenames.
 """
 
 from __future__ import annotations
@@ -10,9 +10,9 @@ from __future__ import annotations
 import json
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 import pandas as pd
 
@@ -29,23 +29,35 @@ class ExportedFiles:
     events_csv_path: Path
     players_csv_path: Path
     metadata_csv_path: Path
+    formations_csv_path: Optional[Path] = None
+    parquet_files: dict[str, Path] = field(default_factory=dict)
 
 
 class MatchDataExporter:
     """
-    Exports the raw `matchCentreData` JSON to `raw_dir` and the parsed DataFrames
-    (`events`, `players`, `metadata`) to `output_dir`.
+    Exports the raw `matchCentreData` JSON to `raw_dir`, Parquet tables to `processed_dir`,
+    and CSV tables (`events`, `players`, `formations`, `metadata`) to `output_dir`.
     """
 
     def __init__(
         self,
         output_dir: Union[str, Path] = "output",
         raw_dir: Union[str, Path] = "data/raw",
+        processed_dir: Union[str, Path] = "data/processed",
+        export_parquet: bool = True,
+        export_csv: bool = True,
     ) -> None:
         self.output_dir = Path(output_dir)
         self.raw_dir = Path(raw_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.processed_dir = Path(processed_dir)
+        self.export_parquet = export_parquet
+        self.export_csv = export_csv
+
         self.raw_dir.mkdir(parents=True, exist_ok=True)
+        if self.export_csv:
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+        if self.export_parquet:
+            self.processed_dir.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def _slugify(value: Any) -> str:
@@ -56,10 +68,7 @@ class MatchDataExporter:
         return re.sub(r"[-\s]+", "_", text)
 
     def _build_file_prefix(self, match_data: dict[str, Any]) -> str:
-        """
-        Builds a human-readable file prefix such as `match_1821123_Bournemouth_vs_Sunderland`
-        or falls back to `match_<id>`.
-        """
+        """Builds a human-readable file prefix such as `match_1821123_Southampton_vs_Aston_Villa`."""
         match_id = match_data.get("matchId") or "unknown"
         home_name = self._slugify((match_data.get("home") or {}).get("name"))
         away_name = self._slugify((match_data.get("away") or {}).get("name"))
@@ -68,17 +77,23 @@ class MatchDataExporter:
             return f"match_{match_id}_{home_name}_vs_{away_name}"
         return f"match_{match_id}"
 
+    def find_cached_raw_json(self, match_id: Any) -> Optional[Path]:
+        """Finds an existing raw JSON file in `raw_dir` for the given `match_id`, if present."""
+        if not match_id:
+            return None
+        matches = sorted(self.raw_dir.glob(f"match_{match_id}*_raw.json"))
+        return matches[0] if matches else None
+
     def save_raw_json(self, match_data: dict[str, Any], prefix: str | None = None) -> Path:
-        """
-        Saves the complete raw `matchCentreData` dictionary to a UTF-8 JSON file.
-        Keeping this backup allows re-running or customizing `MatchDataParser` offline
-        without re-scraping WhoScored.
-        """
+        """Saves the complete raw `matchCentreData` dictionary to a UTF-8 JSON file."""
         file_prefix = prefix or self._build_file_prefix(match_data)
         json_path = self.raw_dir / f"{file_prefix}_raw.json"
-        with json_path.open("w", encoding="utf-8") as f:
-            json.dump(match_data, f, ensure_ascii=False, indent=2)
-        logger.info("Saved raw match JSON backup to: %s", json_path)
+        if not json_path.exists():
+            with json_path.open("w", encoding="utf-8") as f:
+                json.dump(match_data, f, ensure_ascii=False, indent=2)
+            logger.info("Saved raw match JSON backup to: %s", json_path)
+        else:
+            logger.debug("Raw match JSON backup already exists at: %s", json_path)
         return json_path
 
     @staticmethod
@@ -88,53 +103,52 @@ class MatchDataExporter:
         with path.open("r", encoding="utf-8") as f:
             return json.load(f)
 
+    def _write_table(self, df: pd.DataFrame, prefix: str, table_name: str, parquet_files: dict[str, Path]) -> Path:
+        """Writes a single DataFrame to CSV and/or Parquet."""
+        csv_path = self.output_dir / f"{prefix}_{table_name}.csv"
+        if self.export_csv and not df.empty:
+            df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+            logger.info(
+                "Saved %s CSV (%d rows, %d cols) to: %s",
+                table_name,
+                len(df),
+                len(df.columns),
+                csv_path,
+            )
+
+        if self.export_parquet and not df.empty:
+            parquet_path = self.processed_dir / f"{prefix}_{table_name}.parquet"
+            try:
+                df.to_parquet(parquet_path, index=False)
+                parquet_files[table_name] = parquet_path
+                logger.info("Saved %s Parquet to: %s", table_name, parquet_path)
+            except Exception as exc:
+                logger.warning("Skipping Parquet export for %s (%s)", table_name, exc)
+
+        return csv_path
+
     def export_all(
         self,
         match_data: dict[str, Any],
         dataset: ParsedMatchDataset,
     ) -> ExportedFiles:
-        """
-        Saves the raw JSON backup and exports `events`, `players`, and `metadata` CSV files.
-
-        Args:
-            match_data: Raw `matchCentreData` dictionary.
-            dataset: `ParsedMatchDataset` returned by `MatchDataParser.parse_all()`.
-
-        Returns:
-            `ExportedFiles` containing the paths to all created files.
-        """
+        """Saves the raw JSON backup and exports all structured tables to CSV and Parquet."""
         prefix = self._build_file_prefix(match_data)
-
         raw_json_path = self.save_raw_json(match_data, prefix=prefix)
 
-        events_csv_path = self.output_dir / f"{prefix}_events.csv"
-        players_csv_path = self.output_dir / f"{prefix}_players.csv"
-        metadata_csv_path = self.output_dir / f"{prefix}_metadata.csv"
-
-        # Use utf-8-sig so Excel and Pandas both open special player characters (accents, umlauts) cleanly
-        dataset.events_df.to_csv(events_csv_path, index=False, encoding="utf-8-sig")
-        logger.info(
-            "Saved all match events CSV (%d rows, %d columns) to: %s",
-            len(dataset.events_df),
-            len(dataset.events_df.columns),
-            events_csv_path,
+        parquet_files: dict[str, Path] = {}
+        events_csv_path = self._write_table(dataset.events_df, prefix, "events", parquet_files)
+        players_csv_path = self._write_table(dataset.players_df, prefix, "players", parquet_files)
+        metadata_csv_path = self._write_table(dataset.metadata_df, prefix, "metadata", parquet_files)
+        formations_csv_path = self._write_table(
+            dataset.formations_df, prefix, "formations", parquet_files
         )
-
-        dataset.players_df.to_csv(players_csv_path, index=False, encoding="utf-8-sig")
-        logger.info(
-            "Saved players/lineups CSV (%d rows, %d columns) to: %s",
-            len(dataset.players_df),
-            len(dataset.players_df.columns),
-            players_csv_path,
-        )
-
-        dataset.metadata_df.to_csv(metadata_csv_path, index=False, encoding="utf-8-sig")
-        logger.info("Saved match metadata CSV to: %s", metadata_csv_path)
 
         return ExportedFiles(
             raw_json_path=raw_json_path,
             events_csv_path=events_csv_path,
             players_csv_path=players_csv_path,
             metadata_csv_path=metadata_csv_path,
+            formations_csv_path=formations_csv_path,
+            parquet_files=parquet_files,
         )
-

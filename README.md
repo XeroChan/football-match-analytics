@@ -58,33 +58,19 @@ pip install -r requirements.txt
 
 ---
 
-## 🧹 4. Inżynieria cech i Data Wrangling
-
-Surowe dane wymagają specyficznego przygotowania w skryptach parsujących (`src/parser.py`):
-
-* **Rozpakowanie tablicy `qualifiers`:** Szczegóły akcji (np. `Length`, `Angle`, `Zone`, `KeyPass`, `BigChance`) są ukryte w liście słowników. Należy przekształcić je w płaski słownik `{type.displayName: value}` i wyciągnąć jako osobne kolumny.
-* **Transformacja szeregów czasowych (`stats`):** Statystyki graczy i drużyn (np. `ratings`, `touches`) zapisane są jako słowniki z kluczami reprezentującymi minuty meczu (np. `"74": 7.34`):
-* *Analiza pomeczowa:* Zsumuj wartości (dla podań/kontaktów) lub pobierz ostatnią wartość (dla oceny końcowej `ratings`).
-* *Analiza momentum:* Przekształć dane do formatu długiego (*long format*: `playerId`, `minute`, `metric`, `value`).
-
-
-* **Czas meczu (`minute` vs `expandedMinute`):** Do analiz chronologicznych zawsze używaj pola `expandedMinute`, ponieważ poprawnie uwzględnia ono doliczony czas gry (np. 65. minuta drugiej połowy ma `expandedMinute: 67`).
-
----
-
-## 🔍 5. Główne kierunki eksploracji (EDA)
+## 🔍 4. Główne kierunki eksploracji (EDA)
 
 1. **Analiza przestrzenna (Spatial Analysis):** Wykorzystanie współrzędnych `x`, `y` (skala 0–100) z tabeli `events`.
+
 * **Mapy podań (Pass Networks):** Wyznaczanie sieci wymiany podań (`Pass` o statusie `Successful`) i średnich pozycji zawodników.
 * **Mapy strzałów (Shot Maps):** Filtrowanie zdarzeń z flagą `isShot: true` z uwzględnieniem współrzędnych bramki (`goalMouthY`, `goalMouthZ`) oraz cech takich jak `BigChance` czy `Penalty`.
 
-
-2. **Wpływ zmian i taktyki:** Badanie momentów roszad w składzie (np. wejście rezerwowych w `expandedMinute: 67`) oraz wpływu zmiany formacji na zagęszczenie akcji w tercji ataku (`finalThird`).
-3. **Profilowanie zawodników:** Korelacje parametrów fizycznych (`height`, `weight`) ze skutecznością w powietrzu (`aerialsWon`) oraz identyfikacja podań progresywnych na podstawie kąta i długości.
+1. **Wpływ zmian i taktyki:** Badanie momentów roszad w składzie (np. wejście rezerwowych w `expandedMinute: 67`) oraz wpływu zmiany formacji na zagęszczenie akcji w tercji ataku (`finalThird`).
+2. **Profilowanie zawodników:** Korelacje parametrów fizycznych (`height`, `weight`) ze skutecznością w powietrzu (`aerialsWon`) oraz identyfikacja podań progresywnych na podstawie kąta i długości.
 
 ---
 
-## 💡 6. Codzienny Workflow pracy
+## 💡 5. Codzienny Workflow pracy
 
 1. Stwórz lub otwórz plik roboczy w katalogu `notebooks/`.
 2. W prawym górnym rogu notatnika w VS Code wybierz **Select Kernel** i wskaż środowisko `.venv`.

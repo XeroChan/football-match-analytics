@@ -45,6 +45,15 @@ class WhoScoredScraper:
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
     )
 
+    # Keys of `require.config.params['args']` that are persisted into the raw JSON,
+    # paired with their target key on the saved dictionary (`None` means root `matchCentreData`).
+    SAVED_PAGE_ARG_MAP: dict[str, Optional[str]] = {
+        "matchCentreData": None,
+        "matchCentreEventTypeJson": "_matchCentreEventTypeJson",
+        "formationIdNameMappings": "_formationIdNameMappings",
+    }
+    SAVED_PAGE_ARG_KEYS = tuple(SAVED_PAGE_ARG_MAP.keys())
+
     def __init__(
         self,
         headless: bool = False,
@@ -132,22 +141,13 @@ class WhoScoredScraper:
         return int(match.group(1)) if match else None
 
     @staticmethod
-    def extract_json_object_from_html(html_source: str, key: str = "matchCentreData") -> Optional[dict[str, Any]]:
+    def extract_json_object_from_html(
+        html_source: str,
+        key: str = "matchCentreData",
+    ) -> Optional[dict[str, Any]]:
         """
         Safely extracts a nested JSON object assigned to `key` from raw HTML/JS source
         by counting balanced curly braces `{}` (respecting string literals and escapes).
-
-        Why this is needed:
-            The legacy regex `r"matchCentreData:\\s*(\\{.*?\\}),\\s*\\n"` used a non-greedy
-            quantifier `.*?`, which stopped at the *first* inner `},\\n` inside the
-            nested JSON, causing `json.loads()` to fail with `JSONDecodeError`.
-
-        Args:
-            html_source: Full HTML source string of the match page.
-            key: The JavaScript key preceding the JSON object (default: "matchCentreData").
-
-        Returns:
-            Parsed dictionary if found and valid JSON, otherwise None.
         """
         pattern = re.compile(rf"{re.escape(key)}\s*:\s*\{{")
         match = pattern.search(html_source)
@@ -185,25 +185,126 @@ class WhoScoredScraper:
                         try:
                             return json.loads(json_str)
                         except json.JSONDecodeError as exc:
-                            logger.warning("Balanced brace extraction found block for '%s' but JSON parsing failed: %s", key, exc)
+                            logger.warning(
+                                "Balanced brace extraction found block for '%s' but JSON parsing failed: %s",
+                                key,
+                                exc,
+                            )
                             return None
 
         return None
 
+    @classmethod
+    def _attach_source_metadata(
+        cls,
+        match_data: dict[str, Any],
+        match_url: Optional[str] = None,
+    ) -> dict[str, Any]:
+        """Attaches URL-derived `matchId` (if missing) and `_sourceUrl` to `match_data`."""
+        if match_url:
+            url_match_id = cls.extract_match_id_from_url(match_url)
+            if url_match_id and "matchId" not in match_data:
+                match_data["matchId"] = url_match_id
+            match_data["_sourceUrl"] = match_url
+        return match_data
+
+    @classmethod
+    def extract_all_from_html(
+        cls,
+        html_source: str,
+        match_url: Optional[str] = None,
+    ) -> Optional[dict[str, Any]]:
+        """
+        Extracts `matchCentreData` plus all auxiliary lookup dicts defined in
+        `SAVED_PAGE_ARG_MAP` from raw HTML source using balanced-brace parsing.
+        """
+        match_data = cls.extract_json_object_from_html(html_source, key="matchCentreData")
+        if not match_data:
+            return None
+
+        for page_key, data_key in cls.SAVED_PAGE_ARG_MAP.items():
+            if data_key is None:
+                continue
+            extra = cls.extract_json_object_from_html(html_source, key=page_key)
+            if extra:
+                match_data[data_key] = extra
+            else:
+                logger.warning("HTML fallback: '%s' not found in page source.", page_key)
+        return cls._attach_source_metadata(match_data, match_url)
+
+    @classmethod
+    def find_unsaved_page_args(cls, page_args: Any) -> list[dict[str, Any]]:
+        """Returns entries from `page_args` whose `key` is not in `SAVED_PAGE_ARG_KEYS`."""
+        if not isinstance(page_args, list):
+            return []
+        return [
+            a
+            for a in page_args
+            if isinstance(a, dict) and a.get("key") not in cls.SAVED_PAGE_ARG_KEYS
+        ]
+
+    @classmethod
+    def _report_unsaved_page_args(cls, page_args: Any) -> None:
+        """
+        Logs every key of `require.config.params['args']` that is NOT persisted into the raw
+        JSON, with its JS type, size and a short JSON preview, so nothing is dropped silently.
+        """
+        if not isinstance(page_args, list):
+            logger.warning("Could not enumerate page args keys (got %r).", type(page_args).__name__)
+            return
+
+        all_keys = [str(a.get("key")) for a in page_args if isinstance(a, dict)]
+        unsaved = cls.find_unsaved_page_args(page_args)
+        logger.info("Page args keys found (%d): %s", len(all_keys), ", ".join(all_keys))
+
+        if not unsaved:
+            logger.info("All page args keys are saved to the raw JSON.")
+            return
+
+        logger.warning("%d page args key(s) are NOT saved to the raw JSON:", len(unsaved))
+        for arg in unsaved:
+            logger.warning(
+                "  - %s | type=%s | size=%s | preview=%s",
+                arg.get("key"),
+                arg.get("type"),
+                arg.get("size"),
+                arg.get("preview"),
+            )
+
     def _poll_js_match_data(self) -> Optional[dict[str, Any]]:
         """
         Polls the browser window for `matchCentreData` until it is available or times out.
-        Also captures `matchCentreEventTypeJson` if present on the page.
+        Also captures all auxiliary dictionaries listed in `SAVED_PAGE_ARG_MAP` if present
+        on the page, and reports every other `args` key that is not being saved.
         """
         assert self._driver is not None
         js_query = """
         try {
-            if (window.require && window.require.config && window.require.config.params &&
-                window.require.config.params['args'] && window.require.config.params['args'].matchCentreData) {
+            var savedKeys = arguments[0] || [];
+            var args = window.require && window.require.config && window.require.config.params &&
+                window.require.config.params['args'];
+            if (args && args.matchCentreData) {
+                var pageArgs = Object.keys(args).map(function (key) {
+                    var v = args[key];
+                    var type = v === null ? 'null' : (Array.isArray(v) ? 'array' : typeof v);
+                    var size = null, preview = null;
+                    try {
+                        if (type === 'array') size = v.length;
+                        else if (type === 'object') size = Object.keys(v).length;
+                        else if (type === 'string') size = v.length;
+                        var s = type === 'function' ? String(v) : JSON.stringify(v);
+                        preview = s === undefined ? null : (s.length > 300 ? s.slice(0, 300) + '...' : s);
+                    } catch (e) { preview = '<unserializable: ' + e + '>'; }
+                    return {key: key, type: type, size: size, preview: preview};
+                });
+                var savedArgs = {};
+                for (var i = 0; i < savedKeys.length; i++) {
+                    var k = savedKeys[i];
+                    savedArgs[k] = args[k] !== undefined ? args[k] : null;
+                }
                 return {
-                    matchCentreData: window.require.config.params['args'].matchCentreData,
-                    matchCentreEventTypeJson: window.require.config.params['args'].matchCentreEventTypeJson || null,
-                    formationIdNameMappings: window.require.config.params['args'].formationIdNameMappings || null
+                    savedArgs: savedArgs,
+                    pageArgs: pageArgs
                 };
             }
         } catch (e) {}
@@ -211,16 +312,19 @@ class WhoScoredScraper:
         """
 
         deadline = time.time() + self.timeout_seconds
+        saved_keys = list(self.SAVED_PAGE_ARG_KEYS)
         while time.time() < deadline:
             try:
-                result = self._driver.execute_script(js_query)
-                if isinstance(result, dict) and isinstance(result.get("matchCentreData"), dict):
-                    match_data: dict[str, Any] = result["matchCentreData"]
-                    # Attach auxiliary dictionaries if available
-                    if result.get("matchCentreEventTypeJson"):
-                        match_data["_matchCentreEventTypeJson"] = result["matchCentreEventTypeJson"]
-                    if result.get("formationIdNameMappings"):
-                        match_data["_formationIdNameMappings"] = result["formationIdNameMappings"]
+                result = self._driver.execute_script(js_query, saved_keys)
+                saved_args = result.get("savedArgs") if isinstance(result, dict) else None
+                if isinstance(saved_args, dict) and isinstance(
+                    saved_args.get("matchCentreData"), dict
+                ):
+                    match_data: dict[str, Any] = saved_args["matchCentreData"]
+                    self._report_unsaved_page_args(result.get("pageArgs"))
+                    for page_key, data_key in self.SAVED_PAGE_ARG_MAP.items():
+                        if data_key and saved_args.get(page_key):
+                            match_data[data_key] = saved_args[page_key]
                     return match_data
             except (JavascriptException, WebDriverException):
                 pass
@@ -256,9 +360,16 @@ class WhoScoredScraper:
 
             # Method 2 (Fallback): Parse HTML source with balanced-brace JSON extraction
             if not match_data:
-                logger.info("JS global not populated within timeout; trying HTML balanced-brace fallback...")
+                logger.info(
+                    "JS global not populated within timeout; trying HTML balanced-brace fallback..."
+                )
                 html_source = self._driver.page_source
-                match_data = self.extract_json_object_from_html(html_source, key="matchCentreData")
+                match_data = self.extract_all_from_html(html_source)
+                if match_data:
+                    logger.warning(
+                        "HTML fallback used: page args keys cannot be enumerated, so unsaved "
+                        "keys are NOT reported for this match."
+                    )
 
             if not match_data:
                 raise WhoScoredScraperError(
@@ -267,11 +378,7 @@ class WhoScoredScraper:
                     "and was not blocked by a Cloudflare CAPTCHA challenge."
                 )
 
-            # Attach metadata helper fields if not already in the dictionary
-            url_match_id = self.extract_match_id_from_url(match_url)
-            if url_match_id and "matchId" not in match_data:
-                match_data["matchId"] = url_match_id
-            match_data["_sourceUrl"] = match_url
+            self._attach_source_metadata(match_data, match_url)
 
             events_count = len(match_data.get("events", []))
             logger.info(
@@ -293,4 +400,3 @@ def scrape_whoscored_match_json(match_url: str, headless: bool = False) -> dict[
     """
     with WhoScoredScraper(headless=headless) as scraper:
         return scraper.scrape_match(match_url)
-

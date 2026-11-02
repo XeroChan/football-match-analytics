@@ -10,28 +10,16 @@ from __future__ import annotations
 import json
 import logging
 import re
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional, Union
 
 import pandas as pd
 
-from src.parser import ParsedMatchDataset
+from src.models import ExportedFiles, ParsedMatchDataset
+
+__all__ = ["ExportedFiles", "MatchDataExporter"]
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class ExportedFiles:
-    """Paths of all files generated for a single match export."""
-
-    raw_json_path: Path
-    events_csv_path: Path
-    players_csv_path: Path
-    metadata_csv_path: Path
-    formations_csv_path: Optional[Path] = None
-    extra_csv_paths: dict[str, Path] = field(default_factory=dict)
-    parquet_files: dict[str, Path] = field(default_factory=dict)
 
 
 class MatchDataExporter:
@@ -86,11 +74,16 @@ class MatchDataExporter:
         matches = sorted(self.raw_dir.glob(f"match_{match_id}*_raw.json"))
         return matches[0] if matches else None
 
-    def save_raw_json(self, match_data: dict[str, Any], prefix: str | None = None) -> Path:
+    def save_raw_json(
+        self,
+        match_data: dict[str, Any],
+        prefix: str | None = None,
+        overwrite: bool = False,
+    ) -> Path:
         """Saves the complete raw `matchCentreData` dictionary to a UTF-8 JSON file."""
         file_prefix = prefix or self._build_file_prefix(match_data)
         json_path = self.raw_dir / f"{file_prefix}_raw.json"
-        if not json_path.exists():
+        if overwrite or not json_path.exists():
             with json_path.open("w", encoding="utf-8") as f:
                 json.dump(match_data, f, ensure_ascii=False, indent=2)
             logger.info("Saved raw match JSON backup to: %s", json_path)
@@ -105,11 +98,22 @@ class MatchDataExporter:
         with path.open("r", encoding="utf-8") as f:
             return json.load(f)
 
-    def _write_table(self, df: pd.DataFrame, prefix: str, table_name: str, parquet_files: dict[str, Path]) -> Path:
-        """Writes a single DataFrame to CSV and/or Parquet."""
-        csv_path = self.output_dir / f"{prefix}_{table_name}.csv"
-        if self.export_csv and not df.empty:
+    def _write_table(
+        self,
+        df: pd.DataFrame,
+        prefix: str,
+        table_name: str,
+        csv_files: dict[str, Path],
+        parquet_files: dict[str, Path],
+    ) -> None:
+        """Writes a non-empty DataFrame to CSV and/or Parquet."""
+        if df.empty:
+            return
+
+        if self.export_csv:
+            csv_path = self.output_dir / f"{prefix}_{table_name}.csv"
             df.to_csv(csv_path, index=False, encoding="utf-8-sig")
+            csv_files[table_name] = csv_path
             logger.info(
                 "Saved %s CSV (%d rows, %d cols) to: %s",
                 table_name,
@@ -118,7 +122,7 @@ class MatchDataExporter:
                 csv_path,
             )
 
-        if self.export_parquet and not df.empty:
+        if self.export_parquet:
             parquet_path = self.processed_dir / f"{prefix}_{table_name}.parquet"
             try:
                 df.to_parquet(parquet_path, index=False)
@@ -127,45 +131,32 @@ class MatchDataExporter:
             except Exception as exc:
                 logger.warning("Skipping Parquet export for %s (%s)", table_name, exc)
 
-        return csv_path
-
     def export_all(
         self,
         match_data: dict[str, Any],
         dataset: ParsedMatchDataset,
+        raw_json_path: Optional[Union[str, Path]] = None,
+        overwrite_raw_json: bool = False,
     ) -> ExportedFiles:
-        """Saves the raw JSON backup and exports all structured tables to CSV and Parquet."""
+        """
+        Saves the raw JSON backup (unless an existing `raw_json_path` is provided)
+        and exports all non-empty structured tables to CSV and Parquet.
+        """
         prefix = self._build_file_prefix(match_data)
-        raw_json_path = self.save_raw_json(match_data, prefix=prefix)
+        if raw_json_path is not None:
+            saved_raw_path = Path(raw_json_path)
+        else:
+            saved_raw_path = self.save_raw_json(
+                match_data, prefix=prefix, overwrite=overwrite_raw_json
+            )
 
+        csv_files: dict[str, Path] = {}
         parquet_files: dict[str, Path] = {}
-        events_csv_path = self._write_table(dataset.events_df, prefix, "events", parquet_files)
-        players_csv_path = self._write_table(dataset.players_df, prefix, "players", parquet_files)
-        metadata_csv_path = self._write_table(dataset.metadata_df, prefix, "metadata", parquet_files)
-        formations_csv_path = self._write_table(
-            dataset.formations_df, prefix, "formations", parquet_files
-        )
-
-        extra_tables = {
-            "player_stats": dataset.player_stats_df,
-            "team_stats": dataset.team_stats_df,
-            "shot_zones": dataset.shot_zones_df,
-            "minute_mapping": dataset.minute_mapping_df,
-            "lookups": dataset.lookups_df,
-            "common_events": dataset.common_events_df,
-        }
-        extra_csv_paths = {
-            name: self._write_table(df, prefix, name, parquet_files)
-            for name, df in extra_tables.items()
-            if not df.empty
-        }
+        for table_name, df in dataset.tables().items():
+            self._write_table(df, prefix, table_name, csv_files, parquet_files)
 
         return ExportedFiles(
-            raw_json_path=raw_json_path,
-            events_csv_path=events_csv_path,
-            players_csv_path=players_csv_path,
-            metadata_csv_path=metadata_csv_path,
-            formations_csv_path=formations_csv_path,
-            extra_csv_paths=extra_csv_paths,
+            raw_json_path=saved_raw_path,
+            csv_files=csv_files,
             parquet_files=parquet_files,
         )

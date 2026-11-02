@@ -21,17 +21,12 @@ from __future__ import annotations
 
 import argparse
 import logging
-import sys
 from pathlib import Path
 from typing import Any, Sequence
 
-# Ensure package imports work whether executed via `python -m src.main` or `python src/main.py`
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
 from src.exporter import ExportedFiles, MatchDataExporter
-from src.parser import MatchDataParser, ParsedMatchDataset
+from src.models import ParsedMatchDataset
+from src.parser import MatchDataParser
 from src.scraper import WhoScoredScraper, WhoScoredScraperError
 
 logger = logging.getLogger(__name__)
@@ -60,11 +55,9 @@ def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) 
     print(f"Match Summary: {home_team} vs {away_team} (Score: {score})")
     print("=" * 72)
     print(f"  Match ID         : {dataset.match_id}")
-    print(f"  Total Events     : {len(dataset.events_df):,}")
-    print(f"  Total Players    : {len(dataset.players_df):,}")
-    print(f"  Formation Slots  : {len(dataset.formations_df):,}")
-    print(f"  Player Stat Rows : {len(dataset.player_stats_df):,}")
-    print(f"  Team Stat Rows   : {len(dataset.team_stats_df):,}")
+    for table_name, df in dataset.tables().items():
+        if not df.empty:
+            print(f"  {table_name:<16} : {len(df):,} rows ({len(df.columns)} cols)")
 
     if not dataset.events_df.empty and "event_type" in dataset.events_df.columns:
         print("\nTop 10 Event Types Captured:")
@@ -74,12 +67,7 @@ def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) 
 
     print("\nExported Files:")
     print(f"  [Raw JSON]       {exported.raw_json_path.resolve()}")
-    print(f"  [Events CSV]     {exported.events_csv_path.resolve()}")
-    print(f"  [Players CSV]    {exported.players_csv_path.resolve()}")
-    if exported.formations_csv_path:
-        print(f"  [Formations CSV] {exported.formations_csv_path.resolve()}")
-    print(f"  [Metadata CSV]   {exported.metadata_csv_path.resolve()}")
-    for table_name, csv_path in exported.extra_csv_paths.items():
+    for table_name, csv_path in exported.csv_files.items():
         label = f"[{table_name} CSV]"
         print(f"  {label:<16} {csv_path.resolve()}")
     if exported.parquet_files:
@@ -92,10 +80,17 @@ def process_match_payload(
     raw_data: dict[str, Any],
     parser: MatchDataParser,
     exporter: MatchDataExporter,
+    raw_json_path: Path | None = None,
+    overwrite_raw_json: bool = False,
 ) -> tuple[ParsedMatchDataset, ExportedFiles]:
     """Parses a raw `matchCentreData` dictionary and exports all configured formats."""
     dataset = parser.parse_all(raw_data)
-    exported = exporter.export_all(raw_data, dataset)
+    exported = exporter.export_all(
+        raw_data,
+        dataset,
+        raw_json_path=raw_json_path,
+        overwrite_raw_json=overwrite_raw_json,
+    )
     print_dataset_summary(dataset, exported)
     return dataset, exported
 
@@ -118,8 +113,11 @@ def run_pipeline(
 
     if from_json_files:
         for json_file in from_json_files:
-            raw_data = exporter.load_raw_json(json_file)
-            results.append(process_match_payload(raw_data, parser, exporter))
+            json_path = Path(json_file)
+            raw_data = exporter.load_raw_json(json_path)
+            results.append(
+                process_match_payload(raw_data, parser, exporter, raw_json_path=json_path)
+            )
 
     urls_to_scrape: list[str] = []
     for url in urls or []:
@@ -128,7 +126,9 @@ def run_pipeline(
         if cached_json is not None:
             logger.info("Using cached raw JSON for matchId=%s: %s", match_id, cached_json)
             raw_data = exporter.load_raw_json(cached_json)
-            results.append(process_match_payload(raw_data, parser, exporter))
+            results.append(
+                process_match_payload(raw_data, parser, exporter, raw_json_path=cached_json)
+            )
         else:
             urls_to_scrape.append(url)
 
@@ -137,7 +137,14 @@ def run_pipeline(
             for url in urls_to_scrape:
                 try:
                     raw_data = scraper.scrape_match(url)
-                    results.append(process_match_payload(raw_data, parser, exporter))
+                    results.append(
+                        process_match_payload(
+                            raw_data,
+                            parser,
+                            exporter,
+                            overwrite_raw_json=force_scrape,
+                        )
+                    )
                 except WhoScoredScraperError as exc:
                     logger.error("Failed to scrape %s: %s", url, exc)
 

@@ -13,13 +13,29 @@ football-match-analytics/
 │   └── processed/            # Przetworzone tabele w formacie .parquet (szybka analiza wielu meczów)
 ├── output/                   # Przetworzone tabele w formacie .csv (podgląd w Excelu / Data Wranglerze)
 ├── notebooks/
-│   └── 01_eda_events.ipynb   # Notatnik Jupyter korzystający z modułu src.parser
+│   ├── 01_eda_events.ipynb   # Notatnik Jupyter korzystający z modułu src.parser
+│   ├── 02_eda_events.ipynb   # Kontrola jakości i eksploracja zdarzeń
+│   └── 03_eda_events.ipynb   # Korelacje pod predykcję goli, karnych i ocen
 ├── src/
 │   ├── __init__.py           # Eksport głównych klas pakietu
 │   ├── main.py               # Punkt wejścia CLI i orkiestrator potoku danych
+│   ├── models.py             # Kontenery danych (ParsedMatchDataset, ExportedFiles)
 │   ├── scraper.py            # Pobieranie danych matchCentreData przez Selenium
-│   ├── parser.py             # Transformacja JSON -> DataFrame (events, players, formations, metadata, stats...)
+│   ├── parser.py             # Fasada MatchDataParser
+│   ├── parsers/              # Moduły parsowania poszczególnych domen
+│   │   ├── __init__.py
+│   │   ├── events.py         # Zdarzenia meczowe, incydenty i odbiorcy podań
+│   │   ├── qualifiers.py     # Mapowania i spłaszczanie kwalifikatorów zdarzeń
+│   │   ├── lineups.py        # Składy zawodników (players) i ustawienia taktyczne (formations)
+│   │   ├── metadata.py       # Metadane meczu, mapowanie minut, słowniki ID i commonEvents
+│   │   ├── stats.py          # Statystyki zawodników, drużyn i stref strzałów minuta po minucie
+│   │   └── helpers.py        # Wspólne funkcje konwersji typów, słowników graczy i sortowania
 │   └── exporter.py           # Zapis surowego JSON-a oraz tabel Parquet i CSV
+├── tests/
+│   ├── test_parser_coverage.py  # Testy pokrycia wszystkich ścieżek kluczy JSON i kwalifikatorów
+│   ├── test_parsers.py          # Testy jednostkowe parserów domenowych
+│   └── test_scraper_exporter.py # Testy ekstraktora HTML/JS oraz zapisu CSV/Parquet
+├── pyproject.toml            # Konfiguracja pytest
 └── requirements.txt          # Lista bibliotek Pythona
 ```
 
@@ -76,7 +92,7 @@ python -m src.main --from-json "data/raw/match_1821123_Southampton_vs_Aston_Vill
 | **`lookups_df`** | `_matchCentreEventTypeJson`, `_formationIdNameMappings` | Słowniki ID → nazwa (`lookup_type`: `event_type` / `formation`). |
 | **`common_events_df`** | `commonEvents` | Ogólne spłaszczenie elementów listy (`pd.json_normalize`) + surowy JSON w kolumnie `raw_json`. Tabela powstaje tylko, gdy lista nie jest pusta. |
 
-> Pomijane celowo: `incidentEvents` (duplikaty `events`), `stats.minutesWithStats` (sam indeks minut) oraz techniczne pola `$idx` / `$len`.
+> Pomijane celowo: `incidentEvents` (scalone po `id` z `events`), `stats.minutesWithStats` (sam indeks minut) oraz techniczne pola `$idx` / `$len`.
 
 ---
 

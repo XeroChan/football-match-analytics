@@ -1,0 +1,1463 @@
+﻿match_id,team_side,team_id,team_name,stat_name,minute,value
+1821123,away,24,Aston Villa,aerialSuccess,21,0.0
+1821123,away,24,Aston Villa,aerialSuccess,39,0.0
+1821123,away,24,Aston Villa,aerialSuccess,47,0.0
+1821123,away,24,Aston Villa,aerialSuccess,50,0.0
+1821123,away,24,Aston Villa,aerialSuccess,76,0.0
+1821123,away,24,Aston Villa,aerialSuccess,83,0.0
+1821123,away,24,Aston Villa,aerialSuccess,96,0.0
+1821123,away,24,Aston Villa,aerialsTotal,17,1.0
+1821123,away,24,Aston Villa,aerialsTotal,20,1.0
+1821123,away,24,Aston Villa,aerialsTotal,21,2.0
+1821123,away,24,Aston Villa,aerialsTotal,25,1.0
+1821123,away,24,Aston Villa,aerialsTotal,35,1.0
+1821123,away,24,Aston Villa,aerialsTotal,39,1.0
+1821123,away,24,Aston Villa,aerialsTotal,47,1.0
+1821123,away,24,Aston Villa,aerialsTotal,50,1.0
+1821123,away,24,Aston Villa,aerialsTotal,76,1.0
+1821123,away,24,Aston Villa,aerialsTotal,78,1.0
+1821123,away,24,Aston Villa,aerialsTotal,83,1.0
+1821123,away,24,Aston Villa,aerialsTotal,89,1.0
+1821123,away,24,Aston Villa,aerialsTotal,96,1.0
+1821123,away,24,Aston Villa,aerialsWon,17,1.0
+1821123,away,24,Aston Villa,aerialsWon,20,1.0
+1821123,away,24,Aston Villa,aerialsWon,25,1.0
+1821123,away,24,Aston Villa,aerialsWon,35,1.0
+1821123,away,24,Aston Villa,aerialsWon,78,1.0
+1821123,away,24,Aston Villa,aerialsWon,89,1.0
+1821123,away,24,Aston Villa,clearances,8,1.0
+1821123,away,24,Aston Villa,clearances,25,1.0
+1821123,away,24,Aston Villa,clearances,35,1.0
+1821123,away,24,Aston Villa,clearances,51,1.0
+1821123,away,24,Aston Villa,clearances,58,1.0
+1821123,away,24,Aston Villa,clearances,59,2.0
+1821123,away,24,Aston Villa,clearances,64,2.0
+1821123,away,24,Aston Villa,clearances,68,1.0
+1821123,away,24,Aston Villa,clearances,76,1.0
+1821123,away,24,Aston Villa,clearances,78,1.0
+1821123,away,24,Aston Villa,clearances,83,1.0
+1821123,away,24,Aston Villa,clearances,84,2.0
+1821123,away,24,Aston Villa,clearances,88,1.0
+1821123,away,24,Aston Villa,clearances,89,2.0
+1821123,away,24,Aston Villa,clearances,97,1.0
+1821123,away,24,Aston Villa,cornersAccurate,12,1.0
+1821123,away,24,Aston Villa,cornersAccurate,34,1.0
+1821123,away,24,Aston Villa,cornersAccurate,54,1.0
+1821123,away,24,Aston Villa,cornersAccurate,56,1.0
+1821123,away,24,Aston Villa,cornersAccurate,60,1.0
+1821123,away,24,Aston Villa,cornersTotal,0,1.0
+1821123,away,24,Aston Villa,cornersTotal,12,1.0
+1821123,away,24,Aston Villa,cornersTotal,19,1.0
+1821123,away,24,Aston Villa,cornersTotal,34,1.0
+1821123,away,24,Aston Villa,cornersTotal,45,1.0
+1821123,away,24,Aston Villa,cornersTotal,46,1.0
+1821123,away,24,Aston Villa,cornersTotal,48,1.0
+1821123,away,24,Aston Villa,cornersTotal,53,1.0
+1821123,away,24,Aston Villa,cornersTotal,55,1.0
+1821123,away,24,Aston Villa,cornersTotal,59,1.0
+1821123,away,24,Aston Villa,cornersTotal,60,1.0
+1821123,away,24,Aston Villa,cornersTotal,70,1.0
+1821123,away,24,Aston Villa,cornersTotal,76,1.0
+1821123,away,24,Aston Villa,cornersTotal,86,1.0
+1821123,away,24,Aston Villa,defensiveAerials,25,1.0
+1821123,away,24,Aston Villa,defensiveAerials,35,1.0
+1821123,away,24,Aston Villa,defensiveAerials,39,1.0
+1821123,away,24,Aston Villa,defensiveAerials,47,1.0
+1821123,away,24,Aston Villa,defensiveAerials,50,1.0
+1821123,away,24,Aston Villa,defensiveAerials,78,1.0
+1821123,away,24,Aston Villa,defensiveAerials,83,1.0
+1821123,away,24,Aston Villa,defensiveAerials,89,1.0
+1821123,away,24,Aston Villa,defensiveAerials,96,1.0
+1821123,away,24,Aston Villa,dispossessed,39,1.0
+1821123,away,24,Aston Villa,dispossessed,40,1.0
+1821123,away,24,Aston Villa,dispossessed,41,1.0
+1821123,away,24,Aston Villa,dispossessed,48,1.0
+1821123,away,24,Aston Villa,dispossessed,51,2.0
+1821123,away,24,Aston Villa,dispossessed,52,1.0
+1821123,away,24,Aston Villa,dispossessed,63,2.0
+1821123,away,24,Aston Villa,dispossessed,77,1.0
+1821123,away,24,Aston Villa,dispossessed,93,1.0
+1821123,away,24,Aston Villa,dribbleSuccess,4,0.0
+1821123,away,24,Aston Villa,dribbleSuccess,7,100.0
+1821123,away,24,Aston Villa,dribbleSuccess,27,0.0
+1821123,away,24,Aston Villa,dribbleSuccess,30,0.0
+1821123,away,24,Aston Villa,dribbleSuccess,33,0.0
+1821123,away,24,Aston Villa,dribbleSuccess,37,100.0
+1821123,away,24,Aston Villa,dribbleSuccess,39,0.0
+1821123,away,24,Aston Villa,dribbleSuccess,48,50.0
+1821123,away,24,Aston Villa,dribbleSuccess,54,100.0
+1821123,away,24,Aston Villa,dribbleSuccess,55,0.0
+1821123,away,24,Aston Villa,dribbleSuccess,59,0.0
+1821123,away,24,Aston Villa,dribbleSuccess,69,0.0
+1821123,away,24,Aston Villa,dribbledPast,87,1.0
+1821123,away,24,Aston Villa,dribbledPast,97,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,4,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,7,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,27,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,30,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,33,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,37,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,39,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,48,2.0
+1821123,away,24,Aston Villa,dribblesAttempted,54,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,55,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,59,1.0
+1821123,away,24,Aston Villa,dribblesAttempted,69,1.0
+1821123,away,24,Aston Villa,dribblesLost,4,1.0
+1821123,away,24,Aston Villa,dribblesLost,27,1.0
+1821123,away,24,Aston Villa,dribblesLost,30,1.0
+1821123,away,24,Aston Villa,dribblesLost,33,1.0
+1821123,away,24,Aston Villa,dribblesLost,39,1.0
+1821123,away,24,Aston Villa,dribblesLost,48,1.0
+1821123,away,24,Aston Villa,dribblesLost,55,1.0
+1821123,away,24,Aston Villa,dribblesLost,59,1.0
+1821123,away,24,Aston Villa,dribblesLost,69,1.0
+1821123,away,24,Aston Villa,dribblesWon,7,1.0
+1821123,away,24,Aston Villa,dribblesWon,37,1.0
+1821123,away,24,Aston Villa,dribblesWon,48,1.0
+1821123,away,24,Aston Villa,dribblesWon,54,1.0
+1821123,away,24,Aston Villa,foulsCommited,63,1.0
+1821123,away,24,Aston Villa,foulsCommited,77,1.0
+1821123,away,24,Aston Villa,foulsCommited,82,1.0
+1821123,away,24,Aston Villa,foulsCommited,87,1.0
+1821123,away,24,Aston Villa,interceptions,4,1.0
+1821123,away,24,Aston Villa,interceptions,13,2.0
+1821123,away,24,Aston Villa,interceptions,21,1.0
+1821123,away,24,Aston Villa,interceptions,35,1.0
+1821123,away,24,Aston Villa,interceptions,40,1.0
+1821123,away,24,Aston Villa,interceptions,42,1.0
+1821123,away,24,Aston Villa,interceptions,47,1.0
+1821123,away,24,Aston Villa,interceptions,77,1.0
+1821123,away,24,Aston Villa,interceptions,89,1.0
+1821123,away,24,Aston Villa,offensiveAerials,17,1.0
+1821123,away,24,Aston Villa,offensiveAerials,20,1.0
+1821123,away,24,Aston Villa,offensiveAerials,21,2.0
+1821123,away,24,Aston Villa,offensiveAerials,76,1.0
+1821123,away,24,Aston Villa,passSuccess,0,100.0
+1821123,away,24,Aston Villa,passSuccess,2,0.0
+1821123,away,24,Aston Villa,passSuccess,3,90.0
+1821123,away,24,Aston Villa,passSuccess,4,100.0
+1821123,away,24,Aston Villa,passSuccess,5,100.0
+1821123,away,24,Aston Villa,passSuccess,6,95.0
+1821123,away,24,Aston Villa,passSuccess,7,87.5
+1821123,away,24,Aston Villa,passSuccess,8,100.0
+1821123,away,24,Aston Villa,passSuccess,9,80.0
+1821123,away,24,Aston Villa,passSuccess,10,92.86
+1821123,away,24,Aston Villa,passSuccess,11,100.0
+1821123,away,24,Aston Villa,passSuccess,12,75.0
+1821123,away,24,Aston Villa,passSuccess,13,100.0
+1821123,away,24,Aston Villa,passSuccess,14,71.43
+1821123,away,24,Aston Villa,passSuccess,15,100.0
+1821123,away,24,Aston Villa,passSuccess,16,100.0
+1821123,away,24,Aston Villa,passSuccess,18,75.0
+1821123,away,24,Aston Villa,passSuccess,19,100.0
+1821123,away,24,Aston Villa,passSuccess,20,100.0
+1821123,away,24,Aston Villa,passSuccess,21,75.0
+1821123,away,24,Aston Villa,passSuccess,22,95.0
+1821123,away,24,Aston Villa,passSuccess,23,88.89
+1821123,away,24,Aston Villa,passSuccess,24,100.0
+1821123,away,24,Aston Villa,passSuccess,25,80.0
+1821123,away,24,Aston Villa,passSuccess,26,100.0
+1821123,away,24,Aston Villa,passSuccess,27,100.0
+1821123,away,24,Aston Villa,passSuccess,28,100.0
+1821123,away,24,Aston Villa,passSuccess,29,100.0
+1821123,away,24,Aston Villa,passSuccess,30,100.0
+1821123,away,24,Aston Villa,passSuccess,32,94.12
+1821123,away,24,Aston Villa,passSuccess,33,85.71
+1821123,away,24,Aston Villa,passSuccess,34,100.0
+1821123,away,24,Aston Villa,passSuccess,35,66.67
+1821123,away,24,Aston Villa,passSuccess,36,100.0
+1821123,away,24,Aston Villa,passSuccess,37,66.67
+1821123,away,24,Aston Villa,passSuccess,38,100.0
+1821123,away,24,Aston Villa,passSuccess,39,87.5
+1821123,away,24,Aston Villa,passSuccess,40,66.67
+1821123,away,24,Aston Villa,passSuccess,41,100.0
+1821123,away,24,Aston Villa,passSuccess,42,0.0
+1821123,away,24,Aston Villa,passSuccess,43,83.33
+1821123,away,24,Aston Villa,passSuccess,45,90.0
+1821123,away,24,Aston Villa,passSuccess,46,66.67
+1821123,away,24,Aston Villa,passSuccess,47,75.0
+1821123,away,24,Aston Villa,passSuccess,48,100.0
+1821123,away,24,Aston Villa,passSuccess,49,100.0
+1821123,away,24,Aston Villa,passSuccess,50,50.0
+1821123,away,24,Aston Villa,passSuccess,51,100.0
+1821123,away,24,Aston Villa,passSuccess,52,92.86
+1821123,away,24,Aston Villa,passSuccess,53,100.0
+1821123,away,24,Aston Villa,passSuccess,54,75.0
+1821123,away,24,Aston Villa,passSuccess,55,100.0
+1821123,away,24,Aston Villa,passSuccess,56,75.0
+1821123,away,24,Aston Villa,passSuccess,57,100.0
+1821123,away,24,Aston Villa,passSuccess,59,100.0
+1821123,away,24,Aston Villa,passSuccess,62,100.0
+1821123,away,24,Aston Villa,passSuccess,63,100.0
+1821123,away,24,Aston Villa,passSuccess,64,100.0
+1821123,away,24,Aston Villa,passSuccess,65,100.0
+1821123,away,24,Aston Villa,passSuccess,68,100.0
+1821123,away,24,Aston Villa,passSuccess,69,100.0
+1821123,away,24,Aston Villa,passSuccess,71,0.0
+1821123,away,24,Aston Villa,passSuccess,72,100.0
+1821123,away,24,Aston Villa,passSuccess,73,100.0
+1821123,away,24,Aston Villa,passSuccess,74,100.0
+1821123,away,24,Aston Villa,passSuccess,76,50.0
+1821123,away,24,Aston Villa,passSuccess,77,100.0
+1821123,away,24,Aston Villa,passSuccess,79,88.89
+1821123,away,24,Aston Villa,passSuccess,80,100.0
+1821123,away,24,Aston Villa,passSuccess,83,100.0
+1821123,away,24,Aston Villa,passSuccess,84,100.0
+1821123,away,24,Aston Villa,passSuccess,85,100.0
+1821123,away,24,Aston Villa,passSuccess,91,100.0
+1821123,away,24,Aston Villa,passSuccess,92,96.3
+1821123,away,24,Aston Villa,passSuccess,93,100.0
+1821123,away,24,Aston Villa,passSuccess,97,50.0
+1821123,away,24,Aston Villa,passSuccess,98,50.0
+1821123,away,24,Aston Villa,passSuccess,99,80.0
+1821123,away,24,Aston Villa,passesAccurate,0,9.0
+1821123,away,24,Aston Villa,passesAccurate,3,9.0
+1821123,away,24,Aston Villa,passesAccurate,4,1.0
+1821123,away,24,Aston Villa,passesAccurate,5,7.0
+1821123,away,24,Aston Villa,passesAccurate,6,19.0
+1821123,away,24,Aston Villa,passesAccurate,7,7.0
+1821123,away,24,Aston Villa,passesAccurate,8,2.0
+1821123,away,24,Aston Villa,passesAccurate,9,8.0
+1821123,away,24,Aston Villa,passesAccurate,10,13.0
+1821123,away,24,Aston Villa,passesAccurate,11,3.0
+1821123,away,24,Aston Villa,passesAccurate,12,3.0
+1821123,away,24,Aston Villa,passesAccurate,13,7.0
+1821123,away,24,Aston Villa,passesAccurate,14,5.0
+1821123,away,24,Aston Villa,passesAccurate,15,1.0
+1821123,away,24,Aston Villa,passesAccurate,16,5.0
+1821123,away,24,Aston Villa,passesAccurate,18,3.0
+1821123,away,24,Aston Villa,passesAccurate,19,15.0
+1821123,away,24,Aston Villa,passesAccurate,20,3.0
+1821123,away,24,Aston Villa,passesAccurate,21,3.0
+1821123,away,24,Aston Villa,passesAccurate,22,19.0
+1821123,away,24,Aston Villa,passesAccurate,23,8.0
+1821123,away,24,Aston Villa,passesAccurate,24,3.0
+1821123,away,24,Aston Villa,passesAccurate,25,4.0
+1821123,away,24,Aston Villa,passesAccurate,26,13.0
+1821123,away,24,Aston Villa,passesAccurate,27,1.0
+1821123,away,24,Aston Villa,passesAccurate,28,9.0
+1821123,away,24,Aston Villa,passesAccurate,29,1.0
+1821123,away,24,Aston Villa,passesAccurate,30,7.0
+1821123,away,24,Aston Villa,passesAccurate,32,16.0
+1821123,away,24,Aston Villa,passesAccurate,33,12.0
+1821123,away,24,Aston Villa,passesAccurate,34,10.0
+1821123,away,24,Aston Villa,passesAccurate,35,2.0
+1821123,away,24,Aston Villa,passesAccurate,36,5.0
+1821123,away,24,Aston Villa,passesAccurate,37,2.0
+1821123,away,24,Aston Villa,passesAccurate,38,15.0
+1821123,away,24,Aston Villa,passesAccurate,39,7.0
+1821123,away,24,Aston Villa,passesAccurate,40,2.0
+1821123,away,24,Aston Villa,passesAccurate,41,2.0
+1821123,away,24,Aston Villa,passesAccurate,43,5.0
+1821123,away,24,Aston Villa,passesAccurate,45,9.0
+1821123,away,24,Aston Villa,passesAccurate,46,2.0
+1821123,away,24,Aston Villa,passesAccurate,47,6.0
+1821123,away,24,Aston Villa,passesAccurate,48,14.0
+1821123,away,24,Aston Villa,passesAccurate,49,2.0
+1821123,away,24,Aston Villa,passesAccurate,50,1.0
+1821123,away,24,Aston Villa,passesAccurate,51,7.0
+1821123,away,24,Aston Villa,passesAccurate,52,13.0
+1821123,away,24,Aston Villa,passesAccurate,53,5.0
+1821123,away,24,Aston Villa,passesAccurate,54,6.0
+1821123,away,24,Aston Villa,passesAccurate,55,13.0
+1821123,away,24,Aston Villa,passesAccurate,56,3.0
+1821123,away,24,Aston Villa,passesAccurate,57,1.0
+1821123,away,24,Aston Villa,passesAccurate,59,3.0
+1821123,away,24,Aston Villa,passesAccurate,62,3.0
+1821123,away,24,Aston Villa,passesAccurate,63,3.0
+1821123,away,24,Aston Villa,passesAccurate,64,2.0
+1821123,away,24,Aston Villa,passesAccurate,65,16.0
+1821123,away,24,Aston Villa,passesAccurate,68,4.0
+1821123,away,24,Aston Villa,passesAccurate,69,1.0
+1821123,away,24,Aston Villa,passesAccurate,72,3.0
+1821123,away,24,Aston Villa,passesAccurate,73,4.0
+1821123,away,24,Aston Villa,passesAccurate,74,5.0
+1821123,away,24,Aston Villa,passesAccurate,76,1.0
+1821123,away,24,Aston Villa,passesAccurate,77,11.0
+1821123,away,24,Aston Villa,passesAccurate,79,8.0
+1821123,away,24,Aston Villa,passesAccurate,80,8.0
+1821123,away,24,Aston Villa,passesAccurate,83,1.0
+1821123,away,24,Aston Villa,passesAccurate,84,2.0
+1821123,away,24,Aston Villa,passesAccurate,85,13.0
+1821123,away,24,Aston Villa,passesAccurate,91,20.0
+1821123,away,24,Aston Villa,passesAccurate,92,26.0
+1821123,away,24,Aston Villa,passesAccurate,93,9.0
+1821123,away,24,Aston Villa,passesAccurate,97,1.0
+1821123,away,24,Aston Villa,passesAccurate,98,1.0
+1821123,away,24,Aston Villa,passesAccurate,99,4.0
+1821123,away,24,Aston Villa,passesKey,0,1.0
+1821123,away,24,Aston Villa,passesKey,8,1.0
+1821123,away,24,Aston Villa,passesKey,17,1.0
+1821123,away,24,Aston Villa,passesKey,19,1.0
+1821123,away,24,Aston Villa,passesKey,20,2.0
+1821123,away,24,Aston Villa,passesKey,32,1.0
+1821123,away,24,Aston Villa,passesKey,35,1.0
+1821123,away,24,Aston Villa,passesKey,36,1.0
+1821123,away,24,Aston Villa,passesKey,39,1.0
+1821123,away,24,Aston Villa,passesKey,46,1.0
+1821123,away,24,Aston Villa,passesKey,48,1.0
+1821123,away,24,Aston Villa,passesKey,52,1.0
+1821123,away,24,Aston Villa,passesKey,60,1.0
+1821123,away,24,Aston Villa,passesKey,74,1.0
+1821123,away,24,Aston Villa,passesKey,80,1.0
+1821123,away,24,Aston Villa,passesKey,85,1.0
+1821123,away,24,Aston Villa,passesTotal,0,9.0
+1821123,away,24,Aston Villa,passesTotal,2,1.0
+1821123,away,24,Aston Villa,passesTotal,3,10.0
+1821123,away,24,Aston Villa,passesTotal,4,1.0
+1821123,away,24,Aston Villa,passesTotal,5,7.0
+1821123,away,24,Aston Villa,passesTotal,6,20.0
+1821123,away,24,Aston Villa,passesTotal,7,8.0
+1821123,away,24,Aston Villa,passesTotal,8,2.0
+1821123,away,24,Aston Villa,passesTotal,9,10.0
+1821123,away,24,Aston Villa,passesTotal,10,14.0
+1821123,away,24,Aston Villa,passesTotal,11,3.0
+1821123,away,24,Aston Villa,passesTotal,12,4.0
+1821123,away,24,Aston Villa,passesTotal,13,7.0
+1821123,away,24,Aston Villa,passesTotal,14,7.0
+1821123,away,24,Aston Villa,passesTotal,15,1.0
+1821123,away,24,Aston Villa,passesTotal,16,5.0
+1821123,away,24,Aston Villa,passesTotal,18,4.0
+1821123,away,24,Aston Villa,passesTotal,19,15.0
+1821123,away,24,Aston Villa,passesTotal,20,3.0
+1821123,away,24,Aston Villa,passesTotal,21,4.0
+1821123,away,24,Aston Villa,passesTotal,22,20.0
+1821123,away,24,Aston Villa,passesTotal,23,9.0
+1821123,away,24,Aston Villa,passesTotal,24,3.0
+1821123,away,24,Aston Villa,passesTotal,25,5.0
+1821123,away,24,Aston Villa,passesTotal,26,13.0
+1821123,away,24,Aston Villa,passesTotal,27,1.0
+1821123,away,24,Aston Villa,passesTotal,28,9.0
+1821123,away,24,Aston Villa,passesTotal,29,1.0
+1821123,away,24,Aston Villa,passesTotal,30,7.0
+1821123,away,24,Aston Villa,passesTotal,32,17.0
+1821123,away,24,Aston Villa,passesTotal,33,14.0
+1821123,away,24,Aston Villa,passesTotal,34,10.0
+1821123,away,24,Aston Villa,passesTotal,35,3.0
+1821123,away,24,Aston Villa,passesTotal,36,5.0
+1821123,away,24,Aston Villa,passesTotal,37,3.0
+1821123,away,24,Aston Villa,passesTotal,38,15.0
+1821123,away,24,Aston Villa,passesTotal,39,8.0
+1821123,away,24,Aston Villa,passesTotal,40,3.0
+1821123,away,24,Aston Villa,passesTotal,41,2.0
+1821123,away,24,Aston Villa,passesTotal,42,1.0
+1821123,away,24,Aston Villa,passesTotal,43,6.0
+1821123,away,24,Aston Villa,passesTotal,45,10.0
+1821123,away,24,Aston Villa,passesTotal,46,3.0
+1821123,away,24,Aston Villa,passesTotal,47,8.0
+1821123,away,24,Aston Villa,passesTotal,48,14.0
+1821123,away,24,Aston Villa,passesTotal,49,2.0
+1821123,away,24,Aston Villa,passesTotal,50,2.0
+1821123,away,24,Aston Villa,passesTotal,51,7.0
+1821123,away,24,Aston Villa,passesTotal,52,14.0
+1821123,away,24,Aston Villa,passesTotal,53,5.0
+1821123,away,24,Aston Villa,passesTotal,54,8.0
+1821123,away,24,Aston Villa,passesTotal,55,13.0
+1821123,away,24,Aston Villa,passesTotal,56,4.0
+1821123,away,24,Aston Villa,passesTotal,57,1.0
+1821123,away,24,Aston Villa,passesTotal,59,3.0
+1821123,away,24,Aston Villa,passesTotal,62,3.0
+1821123,away,24,Aston Villa,passesTotal,63,3.0
+1821123,away,24,Aston Villa,passesTotal,64,2.0
+1821123,away,24,Aston Villa,passesTotal,65,16.0
+1821123,away,24,Aston Villa,passesTotal,68,4.0
+1821123,away,24,Aston Villa,passesTotal,69,1.0
+1821123,away,24,Aston Villa,passesTotal,71,1.0
+1821123,away,24,Aston Villa,passesTotal,72,3.0
+1821123,away,24,Aston Villa,passesTotal,73,4.0
+1821123,away,24,Aston Villa,passesTotal,74,5.0
+1821123,away,24,Aston Villa,passesTotal,76,2.0
+1821123,away,24,Aston Villa,passesTotal,77,11.0
+1821123,away,24,Aston Villa,passesTotal,79,9.0
+1821123,away,24,Aston Villa,passesTotal,80,8.0
+1821123,away,24,Aston Villa,passesTotal,83,1.0
+1821123,away,24,Aston Villa,passesTotal,84,2.0
+1821123,away,24,Aston Villa,passesTotal,85,13.0
+1821123,away,24,Aston Villa,passesTotal,91,20.0
+1821123,away,24,Aston Villa,passesTotal,92,27.0
+1821123,away,24,Aston Villa,passesTotal,93,9.0
+1821123,away,24,Aston Villa,passesTotal,97,2.0
+1821123,away,24,Aston Villa,passesTotal,98,2.0
+1821123,away,24,Aston Villa,passesTotal,99,5.0
+1821123,away,24,Aston Villa,possession,0,9.0
+1821123,away,24,Aston Villa,possession,1,1.0
+1821123,away,24,Aston Villa,possession,2,1.0
+1821123,away,24,Aston Villa,possession,3,10.0
+1821123,away,24,Aston Villa,possession,4,1.0
+1821123,away,24,Aston Villa,possession,5,8.0
+1821123,away,24,Aston Villa,possession,6,20.0
+1821123,away,24,Aston Villa,possession,7,9.0
+1821123,away,24,Aston Villa,possession,8,3.0
+1821123,away,24,Aston Villa,possession,9,10.0
+1821123,away,24,Aston Villa,possession,10,14.0
+1821123,away,24,Aston Villa,possession,11,3.0
+1821123,away,24,Aston Villa,possession,12,5.0
+1821123,away,24,Aston Villa,possession,13,7.0
+1821123,away,24,Aston Villa,possession,14,7.0
+1821123,away,24,Aston Villa,possession,15,1.0
+1821123,away,24,Aston Villa,possession,16,5.0
+1821123,away,24,Aston Villa,possession,17,1.0
+1821123,away,24,Aston Villa,possession,18,4.0
+1821123,away,24,Aston Villa,possession,19,15.0
+1821123,away,24,Aston Villa,possession,20,6.0
+1821123,away,24,Aston Villa,possession,21,4.0
+1821123,away,24,Aston Villa,possession,22,20.0
+1821123,away,24,Aston Villa,possession,23,9.0
+1821123,away,24,Aston Villa,possession,24,4.0
+1821123,away,24,Aston Villa,possession,25,5.0
+1821123,away,24,Aston Villa,possession,26,13.0
+1821123,away,24,Aston Villa,possession,27,2.0
+1821123,away,24,Aston Villa,possession,28,9.0
+1821123,away,24,Aston Villa,possession,29,3.0
+1821123,away,24,Aston Villa,possession,30,7.0
+1821123,away,24,Aston Villa,possession,31,1.0
+1821123,away,24,Aston Villa,possession,32,17.0
+1821123,away,24,Aston Villa,possession,33,14.0
+1821123,away,24,Aston Villa,possession,34,11.0
+1821123,away,24,Aston Villa,possession,35,3.0
+1821123,away,24,Aston Villa,possession,36,5.0
+1821123,away,24,Aston Villa,possession,37,3.0
+1821123,away,24,Aston Villa,possession,38,15.0
+1821123,away,24,Aston Villa,possession,39,8.0
+1821123,away,24,Aston Villa,possession,40,3.0
+1821123,away,24,Aston Villa,possession,41,2.0
+1821123,away,24,Aston Villa,possession,42,1.0
+1821123,away,24,Aston Villa,possession,43,6.0
+1821123,away,24,Aston Villa,possession,45,11.0
+1821123,away,24,Aston Villa,possession,46,4.0
+1821123,away,24,Aston Villa,possession,47,8.0
+1821123,away,24,Aston Villa,possession,48,14.0
+1821123,away,24,Aston Villa,possession,49,3.0
+1821123,away,24,Aston Villa,possession,50,2.0
+1821123,away,24,Aston Villa,possession,51,7.0
+1821123,away,24,Aston Villa,possession,52,14.0
+1821123,away,24,Aston Villa,possession,53,6.0
+1821123,away,24,Aston Villa,possession,54,9.0
+1821123,away,24,Aston Villa,possession,55,14.0
+1821123,away,24,Aston Villa,possession,56,4.0
+1821123,away,24,Aston Villa,possession,57,1.0
+1821123,away,24,Aston Villa,possession,59,3.0
+1821123,away,24,Aston Villa,possession,60,2.0
+1821123,away,24,Aston Villa,possession,62,3.0
+1821123,away,24,Aston Villa,possession,63,3.0
+1821123,away,24,Aston Villa,possession,64,2.0
+1821123,away,24,Aston Villa,possession,65,16.0
+1821123,away,24,Aston Villa,possession,68,5.0
+1821123,away,24,Aston Villa,possession,69,1.0
+1821123,away,24,Aston Villa,possession,71,2.0
+1821123,away,24,Aston Villa,possession,72,3.0
+1821123,away,24,Aston Villa,possession,73,7.0
+1821123,away,24,Aston Villa,possession,74,5.0
+1821123,away,24,Aston Villa,possession,76,3.0
+1821123,away,24,Aston Villa,possession,77,11.0
+1821123,away,24,Aston Villa,possession,79,9.0
+1821123,away,24,Aston Villa,possession,80,8.0
+1821123,away,24,Aston Villa,possession,83,1.0
+1821123,away,24,Aston Villa,possession,84,2.0
+1821123,away,24,Aston Villa,possession,85,13.0
+1821123,away,24,Aston Villa,possession,87,1.0
+1821123,away,24,Aston Villa,possession,91,20.0
+1821123,away,24,Aston Villa,possession,92,27.0
+1821123,away,24,Aston Villa,possession,93,11.0
+1821123,away,24,Aston Villa,possession,97,2.0
+1821123,away,24,Aston Villa,possession,98,2.0
+1821123,away,24,Aston Villa,possession,99,5.0
+1821123,away,24,Aston Villa,ratings,0,6.01909090909091
+1821123,away,24,Aston Villa,ratings,1,6.01636363636364
+1821123,away,24,Aston Villa,ratings,2,6.01909090909091
+1821123,away,24,Aston Villa,ratings,3,6.02
+1821123,away,24,Aston Villa,ratings,4,6.02818181818182
+1821123,away,24,Aston Villa,ratings,5,6.03090909090909
+1821123,away,24,Aston Villa,ratings,6,6.03454545454545
+1821123,away,24,Aston Villa,ratings,7,6.05
+1821123,away,24,Aston Villa,ratings,8,6.09272727272727
+1821123,away,24,Aston Villa,ratings,9,6.10636363636364
+1821123,away,24,Aston Villa,ratings,10,6.10727272727273
+1821123,away,24,Aston Villa,ratings,11,6.11363636363636
+1821123,away,24,Aston Villa,ratings,12,6.11545454545455
+1821123,away,24,Aston Villa,ratings,13,6.13454545454545
+1821123,away,24,Aston Villa,ratings,14,6.14545454545454
+1821123,away,24,Aston Villa,ratings,15,6.17909090909091
+1821123,away,24,Aston Villa,ratings,16,6.18454545454545
+1821123,away,24,Aston Villa,ratings,17,6.20363636363636
+1821123,away,24,Aston Villa,ratings,18,6.20454545454545
+1821123,away,24,Aston Villa,ratings,19,6.21636363636364
+1821123,away,24,Aston Villa,ratings,20,6.26
+1821123,away,24,Aston Villa,ratings,21,6.26636363636364
+1821123,away,24,Aston Villa,ratings,22,6.28272727272727
+1821123,away,24,Aston Villa,ratings,23,6.28090909090909
+1821123,away,24,Aston Villa,ratings,24,6.29
+1821123,away,24,Aston Villa,ratings,25,6.30454545454545
+1821123,away,24,Aston Villa,ratings,26,6.31818181818182
+1821123,away,24,Aston Villa,ratings,27,6.31545454545455
+1821123,away,24,Aston Villa,ratings,28,6.32181818181818
+1821123,away,24,Aston Villa,ratings,29,6.32181818181818
+1821123,away,24,Aston Villa,ratings,30,6.32545454545455
+1821123,away,24,Aston Villa,ratings,31,6.32454545454545
+1821123,away,24,Aston Villa,ratings,32,6.33545454545455
+1821123,away,24,Aston Villa,ratings,33,6.35
+1821123,away,24,Aston Villa,ratings,34,6.35363636363637
+1821123,away,24,Aston Villa,ratings,35,6.38818181818182
+1821123,away,24,Aston Villa,ratings,36,6.39636363636364
+1821123,away,24,Aston Villa,ratings,37,6.41454545454546
+1821123,away,24,Aston Villa,ratings,38,6.41818181818182
+1821123,away,24,Aston Villa,ratings,39,6.45545454545455
+1821123,away,24,Aston Villa,ratings,40,6.46090909090909
+1821123,away,24,Aston Villa,ratings,41,6.46
+1821123,away,24,Aston Villa,ratings,42,6.46818181818182
+1821123,away,24,Aston Villa,ratings,43,6.47727272727273
+1821123,away,24,Aston Villa,ratings,44,6.47818181818182
+1821123,away,24,Aston Villa,ratings,45,6.48636363636364
+1821123,away,24,Aston Villa,ratings,46,6.49272727272727
+1821123,away,24,Aston Villa,ratings,47,6.49909090909091
+1821123,away,24,Aston Villa,ratings,48,6.54454545454545
+1821123,away,24,Aston Villa,ratings,49,6.54545454545455
+1821123,away,24,Aston Villa,ratings,50,6.54181818181818
+1821123,away,24,Aston Villa,ratings,51,6.56454545454545
+1821123,away,24,Aston Villa,ratings,52,6.57181818181818
+1821123,away,24,Aston Villa,ratings,53,6.57181818181818
+1821123,away,24,Aston Villa,ratings,54,6.58636363636364
+1821123,away,24,Aston Villa,ratings,55,6.58727272727273
+1821123,away,24,Aston Villa,ratings,56,6.59636363636364
+1821123,away,24,Aston Villa,ratings,57,6.59636363636364
+1821123,away,24,Aston Villa,ratings,58,6.59818181818182
+1821123,away,24,Aston Villa,ratings,59,6.60636363636364
+1821123,away,24,Aston Villa,ratings,60,6.61818181818182
+1821123,away,24,Aston Villa,ratings,62,6.61818181818182
+1821123,away,24,Aston Villa,ratings,63,6.62636363636364
+1821123,away,24,Aston Villa,ratings,64,6.63545454545455
+1821123,away,24,Aston Villa,ratings,65,6.64363636363636
+1821123,away,24,Aston Villa,ratings,66,6.64181818181818
+1821123,away,24,Aston Villa,ratings,67,6.56
+1821123,away,24,Aston Villa,ratings,68,6.56384615384615
+1821123,away,24,Aston Villa,ratings,69,6.59769230769231
+1821123,away,24,Aston Villa,ratings,70,6.56230769230769
+1821123,away,24,Aston Villa,ratings,71,6.56076923076923
+1821123,away,24,Aston Villa,ratings,72,6.56307692307692
+1821123,away,24,Aston Villa,ratings,73,6.56230769230769
+1821123,away,24,Aston Villa,ratings,74,6.76923076923077
+1821123,away,24,Aston Villa,ratings,76,6.77846153846154
+1821123,away,24,Aston Villa,ratings,77,6.78307692307692
+1821123,away,24,Aston Villa,ratings,78,6.79307692307692
+1821123,away,24,Aston Villa,ratings,79,6.79538461538462
+1821123,away,24,Aston Villa,ratings,80,6.98230769230769
+1821123,away,24,Aston Villa,ratings,82,6.98153846153846
+1821123,away,24,Aston Villa,ratings,83,6.98461538461538
+1821123,away,24,Aston Villa,ratings,84,7.01153846153846
+1821123,away,24,Aston Villa,ratings,85,7.03307692307692
+1821123,away,24,Aston Villa,ratings,86,6.916
+1821123,away,24,Aston Villa,ratings,87,6.91266666666667
+1821123,away,24,Aston Villa,ratings,88,6.90933333333333
+1821123,away,24,Aston Villa,ratings,89,6.94933333333333
+1821123,away,24,Aston Villa,ratings,90,6.9025
+1821123,away,24,Aston Villa,ratings,91,6.904375
+1821123,away,24,Aston Villa,ratings,92,6.909375
+1821123,away,24,Aston Villa,ratings,93,6.93125
+1821123,away,24,Aston Villa,ratings,95,7.01375
+1821123,away,24,Aston Villa,ratings,96,7.0125
+1821123,away,24,Aston Villa,ratings,97,7.01875
+1821123,away,24,Aston Villa,ratings,98,7.024375
+1821123,away,24,Aston Villa,ratings,99,7.12125
+1821123,away,24,Aston Villa,shotsBlocked,0,1.0
+1821123,away,24,Aston Villa,shotsBlocked,19,1.0
+1821123,away,24,Aston Villa,shotsBlocked,32,1.0
+1821123,away,24,Aston Villa,shotsBlocked,46,1.0
+1821123,away,24,Aston Villa,shotsBlocked,48,1.0
+1821123,away,24,Aston Villa,shotsBlocked,50,1.0
+1821123,away,24,Aston Villa,shotsOffTarget,1,1.0
+1821123,away,24,Aston Villa,shotsOffTarget,17,1.0
+1821123,away,24,Aston Villa,shotsOffTarget,20,1.0
+1821123,away,24,Aston Villa,shotsOffTarget,35,1.0
+1821123,away,24,Aston Villa,shotsOffTarget,36,1.0
+1821123,away,24,Aston Villa,shotsOffTarget,50,1.0
+1821123,away,24,Aston Villa,shotsOffTarget,52,1.0
+1821123,away,24,Aston Villa,shotsOffTarget,60,1.0
+1821123,away,24,Aston Villa,shotsOffTarget,66,1.0
+1821123,away,24,Aston Villa,shotsOnTarget,8,1.0
+1821123,away,24,Aston Villa,shotsOnTarget,20,1.0
+1821123,away,24,Aston Villa,shotsOnTarget,39,1.0
+1821123,away,24,Aston Villa,shotsOnTarget,48,1.0
+1821123,away,24,Aston Villa,shotsOnTarget,70,1.0
+1821123,away,24,Aston Villa,shotsOnTarget,74,1.0
+1821123,away,24,Aston Villa,shotsOnTarget,80,1.0
+1821123,away,24,Aston Villa,shotsOnTarget,85,1.0
+1821123,away,24,Aston Villa,shotsOnTarget,95,2.0
+1821123,away,24,Aston Villa,shotsTotal,0,1.0
+1821123,away,24,Aston Villa,shotsTotal,1,1.0
+1821123,away,24,Aston Villa,shotsTotal,8,1.0
+1821123,away,24,Aston Villa,shotsTotal,17,1.0
+1821123,away,24,Aston Villa,shotsTotal,19,1.0
+1821123,away,24,Aston Villa,shotsTotal,20,2.0
+1821123,away,24,Aston Villa,shotsTotal,32,1.0
+1821123,away,24,Aston Villa,shotsTotal,35,1.0
+1821123,away,24,Aston Villa,shotsTotal,36,1.0
+1821123,away,24,Aston Villa,shotsTotal,39,1.0
+1821123,away,24,Aston Villa,shotsTotal,46,1.0
+1821123,away,24,Aston Villa,shotsTotal,48,2.0
+1821123,away,24,Aston Villa,shotsTotal,50,2.0
+1821123,away,24,Aston Villa,shotsTotal,52,1.0
+1821123,away,24,Aston Villa,shotsTotal,60,1.0
+1821123,away,24,Aston Villa,shotsTotal,66,1.0
+1821123,away,24,Aston Villa,shotsTotal,70,1.0
+1821123,away,24,Aston Villa,shotsTotal,74,1.0
+1821123,away,24,Aston Villa,shotsTotal,80,1.0
+1821123,away,24,Aston Villa,shotsTotal,85,1.0
+1821123,away,24,Aston Villa,shotsTotal,95,2.0
+1821123,away,24,Aston Villa,tackleSuccess,8,100.0
+1821123,away,24,Aston Villa,tackleSuccess,9,100.0
+1821123,away,24,Aston Villa,tackleSuccess,14,100.0
+1821123,away,24,Aston Villa,tackleSuccess,22,100.0
+1821123,away,24,Aston Villa,tackleSuccess,24,100.0
+1821123,away,24,Aston Villa,tackleSuccess,26,100.0
+1821123,away,24,Aston Villa,tackleSuccess,33,100.0
+1821123,away,24,Aston Villa,tackleSuccess,35,100.0
+1821123,away,24,Aston Villa,tackleSuccess,39,100.0
+1821123,away,24,Aston Villa,tackleSuccess,43,100.0
+1821123,away,24,Aston Villa,tackleSuccess,45,100.0
+1821123,away,24,Aston Villa,tackleSuccess,48,100.0
+1821123,away,24,Aston Villa,tackleSuccess,51,100.0
+1821123,away,24,Aston Villa,tackleSuccess,56,100.0
+1821123,away,24,Aston Villa,tackleSuccess,63,100.0
+1821123,away,24,Aston Villa,tackleSuccess,67,100.0
+1821123,away,24,Aston Villa,tackleSuccess,69,100.0
+1821123,away,24,Aston Villa,tackleSuccess,74,100.0
+1821123,away,24,Aston Villa,tackleSuccess,76,100.0
+1821123,away,24,Aston Villa,tackleSuccess,84,100.0
+1821123,away,24,Aston Villa,tackleSuccess,87,0.0
+1821123,away,24,Aston Villa,tackleSuccess,97,50.0
+1821123,away,24,Aston Villa,tackleSuccessful,8,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,9,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,14,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,22,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,24,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,26,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,33,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,35,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,39,2.0
+1821123,away,24,Aston Villa,tackleSuccessful,43,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,45,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,48,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,51,2.0
+1821123,away,24,Aston Villa,tackleSuccessful,56,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,63,2.0
+1821123,away,24,Aston Villa,tackleSuccessful,67,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,69,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,74,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,76,1.0
+1821123,away,24,Aston Villa,tackleSuccessful,84,2.0
+1821123,away,24,Aston Villa,tackleSuccessful,97,1.0
+1821123,away,24,Aston Villa,tackleUnsuccesful,87,1.0
+1821123,away,24,Aston Villa,tackleUnsuccesful,97,1.0
+1821123,away,24,Aston Villa,tacklesTotal,8,1.0
+1821123,away,24,Aston Villa,tacklesTotal,9,1.0
+1821123,away,24,Aston Villa,tacklesTotal,14,1.0
+1821123,away,24,Aston Villa,tacklesTotal,22,1.0
+1821123,away,24,Aston Villa,tacklesTotal,24,1.0
+1821123,away,24,Aston Villa,tacklesTotal,26,1.0
+1821123,away,24,Aston Villa,tacklesTotal,33,1.0
+1821123,away,24,Aston Villa,tacklesTotal,35,1.0
+1821123,away,24,Aston Villa,tacklesTotal,39,2.0
+1821123,away,24,Aston Villa,tacklesTotal,43,1.0
+1821123,away,24,Aston Villa,tacklesTotal,45,1.0
+1821123,away,24,Aston Villa,tacklesTotal,48,1.0
+1821123,away,24,Aston Villa,tacklesTotal,51,2.0
+1821123,away,24,Aston Villa,tacklesTotal,56,1.0
+1821123,away,24,Aston Villa,tacklesTotal,63,2.0
+1821123,away,24,Aston Villa,tacklesTotal,67,1.0
+1821123,away,24,Aston Villa,tacklesTotal,69,1.0
+1821123,away,24,Aston Villa,tacklesTotal,74,1.0
+1821123,away,24,Aston Villa,tacklesTotal,76,1.0
+1821123,away,24,Aston Villa,tacklesTotal,84,2.0
+1821123,away,24,Aston Villa,tacklesTotal,87,1.0
+1821123,away,24,Aston Villa,tacklesTotal,97,2.0
+1821123,away,24,Aston Villa,throwInAccuracy,0,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,12,100.0
+1821123,away,24,Aston Villa,throwInAccuracy,19,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,34,100.0
+1821123,away,24,Aston Villa,throwInAccuracy,45,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,46,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,48,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,53,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,55,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,59,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,60,100.0
+1821123,away,24,Aston Villa,throwInAccuracy,70,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,76,0.0
+1821123,away,24,Aston Villa,throwInAccuracy,86,0.0
+1821123,away,24,Aston Villa,throwInsAccurate,7,1.0
+1821123,away,24,Aston Villa,throwInsAccurate,18,1.0
+1821123,away,24,Aston Villa,throwInsAccurate,24,1.0
+1821123,away,24,Aston Villa,throwInsAccurate,47,1.0
+1821123,away,24,Aston Villa,throwInsAccurate,49,1.0
+1821123,away,24,Aston Villa,throwInsAccurate,55,1.0
+1821123,away,24,Aston Villa,throwInsAccurate,72,1.0
+1821123,away,24,Aston Villa,throwInsAccurate,98,1.0
+1821123,away,24,Aston Villa,throwInsTotal,1,1.0
+1821123,away,24,Aston Villa,throwInsTotal,7,1.0
+1821123,away,24,Aston Villa,throwInsTotal,18,1.0
+1821123,away,24,Aston Villa,throwInsTotal,24,1.0
+1821123,away,24,Aston Villa,throwInsTotal,47,1.0
+1821123,away,24,Aston Villa,throwInsTotal,49,1.0
+1821123,away,24,Aston Villa,throwInsTotal,50,1.0
+1821123,away,24,Aston Villa,throwInsTotal,55,1.0
+1821123,away,24,Aston Villa,throwInsTotal,72,1.0
+1821123,away,24,Aston Villa,throwInsTotal,98,1.0
+1821123,away,24,Aston Villa,touches,0,10.0
+1821123,away,24,Aston Villa,touches,1,3.0
+1821123,away,24,Aston Villa,touches,2,2.0
+1821123,away,24,Aston Villa,touches,3,10.0
+1821123,away,24,Aston Villa,touches,4,4.0
+1821123,away,24,Aston Villa,touches,5,8.0
+1821123,away,24,Aston Villa,touches,6,21.0
+1821123,away,24,Aston Villa,touches,7,11.0
+1821123,away,24,Aston Villa,touches,8,8.0
+1821123,away,24,Aston Villa,touches,9,11.0
+1821123,away,24,Aston Villa,touches,10,14.0
+1821123,away,24,Aston Villa,touches,11,4.0
+1821123,away,24,Aston Villa,touches,12,5.0
+1821123,away,24,Aston Villa,touches,13,9.0
+1821123,away,24,Aston Villa,touches,14,8.0
+1821123,away,24,Aston Villa,touches,15,2.0
+1821123,away,24,Aston Villa,touches,16,6.0
+1821123,away,24,Aston Villa,touches,17,2.0
+1821123,away,24,Aston Villa,touches,18,5.0
+1821123,away,24,Aston Villa,touches,19,17.0
+1821123,away,24,Aston Villa,touches,20,9.0
+1821123,away,24,Aston Villa,touches,21,5.0
+1821123,away,24,Aston Villa,touches,22,22.0
+1821123,away,24,Aston Villa,touches,23,10.0
+1821123,away,24,Aston Villa,touches,24,7.0
+1821123,away,24,Aston Villa,touches,25,8.0
+1821123,away,24,Aston Villa,touches,26,15.0
+1821123,away,24,Aston Villa,touches,27,3.0
+1821123,away,24,Aston Villa,touches,28,10.0
+1821123,away,24,Aston Villa,touches,29,3.0
+1821123,away,24,Aston Villa,touches,30,9.0
+1821123,away,24,Aston Villa,touches,31,1.0
+1821123,away,24,Aston Villa,touches,32,18.0
+1821123,away,24,Aston Villa,touches,33,16.0
+1821123,away,24,Aston Villa,touches,34,11.0
+1821123,away,24,Aston Villa,touches,35,7.0
+1821123,away,24,Aston Villa,touches,36,6.0
+1821123,away,24,Aston Villa,touches,37,5.0
+1821123,away,24,Aston Villa,touches,38,15.0
+1821123,away,24,Aston Villa,touches,39,13.0
+1821123,away,24,Aston Villa,touches,40,5.0
+1821123,away,24,Aston Villa,touches,41,4.0
+1821123,away,24,Aston Villa,touches,42,3.0
+1821123,away,24,Aston Villa,touches,43,7.0
+1821123,away,24,Aston Villa,touches,45,12.0
+1821123,away,24,Aston Villa,touches,46,6.0
+1821123,away,24,Aston Villa,touches,47,10.0
+1821123,away,24,Aston Villa,touches,48,21.0
+1821123,away,24,Aston Villa,touches,49,4.0
+1821123,away,24,Aston Villa,touches,50,5.0
+1821123,away,24,Aston Villa,touches,51,14.0
+1821123,away,24,Aston Villa,touches,52,16.0
+1821123,away,24,Aston Villa,touches,53,6.0
+1821123,away,24,Aston Villa,touches,54,10.0
+1821123,away,24,Aston Villa,touches,55,16.0
+1821123,away,24,Aston Villa,touches,56,7.0
+1821123,away,24,Aston Villa,touches,57,1.0
+1821123,away,24,Aston Villa,touches,58,2.0
+1821123,away,24,Aston Villa,touches,59,6.0
+1821123,away,24,Aston Villa,touches,60,3.0
+1821123,away,24,Aston Villa,touches,62,3.0
+1821123,away,24,Aston Villa,touches,63,8.0
+1821123,away,24,Aston Villa,touches,64,5.0
+1821123,away,24,Aston Villa,touches,65,17.0
+1821123,away,24,Aston Villa,touches,66,1.0
+1821123,away,24,Aston Villa,touches,67,1.0
+1821123,away,24,Aston Villa,touches,68,6.0
+1821123,away,24,Aston Villa,touches,69,5.0
+1821123,away,24,Aston Villa,touches,70,1.0
+1821123,away,24,Aston Villa,touches,71,2.0
+1821123,away,24,Aston Villa,touches,72,5.0
+1821123,away,24,Aston Villa,touches,73,7.0
+1821123,away,24,Aston Villa,touches,74,7.0
+1821123,away,24,Aston Villa,touches,76,6.0
+1821123,away,24,Aston Villa,touches,77,13.0
+1821123,away,24,Aston Villa,touches,78,2.0
+1821123,away,24,Aston Villa,touches,79,10.0
+1821123,away,24,Aston Villa,touches,80,9.0
+1821123,away,24,Aston Villa,touches,83,3.0
+1821123,away,24,Aston Villa,touches,84,7.0
+1821123,away,24,Aston Villa,touches,85,14.0
+1821123,away,24,Aston Villa,touches,87,1.0
+1821123,away,24,Aston Villa,touches,88,1.0
+1821123,away,24,Aston Villa,touches,89,5.0
+1821123,away,24,Aston Villa,touches,91,20.0
+1821123,away,24,Aston Villa,touches,92,28.0
+1821123,away,24,Aston Villa,touches,93,14.0
+1821123,away,24,Aston Villa,touches,95,2.0
+1821123,away,24,Aston Villa,touches,97,4.0
+1821123,away,24,Aston Villa,touches,98,4.0
+1821123,away,24,Aston Villa,touches,99,5.0
+1821123,home,18,Southampton,aerialSuccess,17,0.0
+1821123,home,18,Southampton,aerialSuccess,20,0.0
+1821123,home,18,Southampton,aerialSuccess,25,0.0
+1821123,home,18,Southampton,aerialSuccess,35,0.0
+1821123,home,18,Southampton,aerialSuccess,78,0.0
+1821123,home,18,Southampton,aerialSuccess,89,0.0
+1821123,home,18,Southampton,aerialsTotal,17,1.0
+1821123,home,18,Southampton,aerialsTotal,20,1.0
+1821123,home,18,Southampton,aerialsTotal,21,2.0
+1821123,home,18,Southampton,aerialsTotal,25,1.0
+1821123,home,18,Southampton,aerialsTotal,35,1.0
+1821123,home,18,Southampton,aerialsTotal,39,1.0
+1821123,home,18,Southampton,aerialsTotal,47,1.0
+1821123,home,18,Southampton,aerialsTotal,50,1.0
+1821123,home,18,Southampton,aerialsTotal,76,1.0
+1821123,home,18,Southampton,aerialsTotal,78,1.0
+1821123,home,18,Southampton,aerialsTotal,83,1.0
+1821123,home,18,Southampton,aerialsTotal,89,1.0
+1821123,home,18,Southampton,aerialsTotal,96,1.0
+1821123,home,18,Southampton,aerialsWon,21,2.0
+1821123,home,18,Southampton,aerialsWon,39,1.0
+1821123,home,18,Southampton,aerialsWon,47,1.0
+1821123,home,18,Southampton,aerialsWon,50,1.0
+1821123,home,18,Southampton,aerialsWon,76,1.0
+1821123,home,18,Southampton,aerialsWon,83,1.0
+1821123,home,18,Southampton,aerialsWon,96,1.0
+1821123,home,18,Southampton,clearances,1,2.0
+1821123,home,18,Southampton,clearances,7,2.0
+1821123,home,18,Southampton,clearances,10,1.0
+1821123,home,18,Southampton,clearances,12,1.0
+1821123,home,18,Southampton,clearances,20,2.0
+1821123,home,18,Southampton,clearances,21,2.0
+1821123,home,18,Southampton,clearances,26,1.0
+1821123,home,18,Southampton,clearances,29,2.0
+1821123,home,18,Southampton,clearances,30,1.0
+1821123,home,18,Southampton,clearances,31,2.0
+1821123,home,18,Southampton,clearances,32,1.0
+1821123,home,18,Southampton,clearances,37,1.0
+1821123,home,18,Southampton,clearances,45,1.0
+1821123,home,18,Southampton,clearances,46,1.0
+1821123,home,18,Southampton,clearances,49,1.0
+1821123,home,18,Southampton,clearances,50,1.0
+1821123,home,18,Southampton,clearances,52,1.0
+1821123,home,18,Southampton,clearances,56,1.0
+1821123,home,18,Southampton,clearances,60,1.0
+1821123,home,18,Southampton,clearances,70,1.0
+1821123,home,18,Southampton,clearances,71,2.0
+1821123,home,18,Southampton,clearances,73,3.0
+1821123,home,18,Southampton,clearances,76,1.0
+1821123,home,18,Southampton,clearances,77,1.0
+1821123,home,18,Southampton,clearances,93,3.0
+1821123,home,18,Southampton,clearances,98,1.0
+1821123,home,18,Southampton,cornersTotal,25,1.0
+1821123,home,18,Southampton,cornersTotal,89,1.0
+1821123,home,18,Southampton,defensiveAerials,17,1.0
+1821123,home,18,Southampton,defensiveAerials,20,1.0
+1821123,home,18,Southampton,defensiveAerials,21,2.0
+1821123,home,18,Southampton,defensiveAerials,76,1.0
+1821123,home,18,Southampton,dispossessed,22,1.0
+1821123,home,18,Southampton,dispossessed,26,1.0
+1821123,home,18,Southampton,dispossessed,33,1.0
+1821123,home,18,Southampton,dispossessed,35,1.0
+1821123,home,18,Southampton,dispossessed,39,1.0
+1821123,home,18,Southampton,dispossessed,48,1.0
+1821123,home,18,Southampton,dispossessed,51,1.0
+1821123,home,18,Southampton,dispossessed,63,1.0
+1821123,home,18,Southampton,dispossessed,67,1.0
+1821123,home,18,Southampton,dispossessed,74,1.0
+1821123,home,18,Southampton,dispossessed,76,1.0
+1821123,home,18,Southampton,dispossessed,84,1.0
+1821123,home,18,Southampton,dribbleSuccess,8,0.0
+1821123,home,18,Southampton,dribbleSuccess,9,0.0
+1821123,home,18,Southampton,dribbleSuccess,14,0.0
+1821123,home,18,Southampton,dribbleSuccess,24,0.0
+1821123,home,18,Southampton,dribbleSuccess,39,0.0
+1821123,home,18,Southampton,dribbleSuccess,43,0.0
+1821123,home,18,Southampton,dribbleSuccess,45,0.0
+1821123,home,18,Southampton,dribbleSuccess,51,0.0
+1821123,home,18,Southampton,dribbleSuccess,56,0.0
+1821123,home,18,Southampton,dribbleSuccess,63,0.0
+1821123,home,18,Southampton,dribbleSuccess,69,0.0
+1821123,home,18,Southampton,dribbleSuccess,84,0.0
+1821123,home,18,Southampton,dribbleSuccess,87,100.0
+1821123,home,18,Southampton,dribbleSuccess,97,50.0
+1821123,home,18,Southampton,dribbledPast,7,1.0
+1821123,home,18,Southampton,dribbledPast,37,1.0
+1821123,home,18,Southampton,dribbledPast,48,1.0
+1821123,home,18,Southampton,dribbledPast,54,1.0
+1821123,home,18,Southampton,dribblesAttempted,8,1.0
+1821123,home,18,Southampton,dribblesAttempted,9,1.0
+1821123,home,18,Southampton,dribblesAttempted,14,1.0
+1821123,home,18,Southampton,dribblesAttempted,24,1.0
+1821123,home,18,Southampton,dribblesAttempted,39,1.0
+1821123,home,18,Southampton,dribblesAttempted,43,1.0
+1821123,home,18,Southampton,dribblesAttempted,45,1.0
+1821123,home,18,Southampton,dribblesAttempted,51,1.0
+1821123,home,18,Southampton,dribblesAttempted,56,1.0
+1821123,home,18,Southampton,dribblesAttempted,63,1.0
+1821123,home,18,Southampton,dribblesAttempted,69,1.0
+1821123,home,18,Southampton,dribblesAttempted,84,1.0
+1821123,home,18,Southampton,dribblesAttempted,87,1.0
+1821123,home,18,Southampton,dribblesAttempted,97,2.0
+1821123,home,18,Southampton,dribblesLost,8,1.0
+1821123,home,18,Southampton,dribblesLost,9,1.0
+1821123,home,18,Southampton,dribblesLost,14,1.0
+1821123,home,18,Southampton,dribblesLost,24,1.0
+1821123,home,18,Southampton,dribblesLost,39,1.0
+1821123,home,18,Southampton,dribblesLost,43,1.0
+1821123,home,18,Southampton,dribblesLost,45,1.0
+1821123,home,18,Southampton,dribblesLost,51,1.0
+1821123,home,18,Southampton,dribblesLost,56,1.0
+1821123,home,18,Southampton,dribblesLost,63,1.0
+1821123,home,18,Southampton,dribblesLost,69,1.0
+1821123,home,18,Southampton,dribblesLost,84,1.0
+1821123,home,18,Southampton,dribblesLost,97,1.0
+1821123,home,18,Southampton,dribblesWon,87,1.0
+1821123,home,18,Southampton,dribblesWon,97,1.0
+1821123,home,18,Southampton,errors,39,1.0
+1821123,home,18,Southampton,foulsCommited,2,1.0
+1821123,home,18,Southampton,foulsCommited,11,1.0
+1821123,home,18,Southampton,foulsCommited,16,1.0
+1821123,home,18,Southampton,foulsCommited,25,1.0
+1821123,home,18,Southampton,foulsCommited,28,1.0
+1821123,home,18,Southampton,foulsCommited,30,1.0
+1821123,home,18,Southampton,foulsCommited,37,1.0
+1821123,home,18,Southampton,foulsCommited,65,1.0
+1821123,home,18,Southampton,foulsCommited,69,1.0
+1821123,home,18,Southampton,foulsCommited,72,1.0
+1821123,home,18,Southampton,foulsCommited,93,1.0
+1821123,home,18,Southampton,interceptions,9,1.0
+1821123,home,18,Southampton,interceptions,14,1.0
+1821123,home,18,Southampton,interceptions,23,1.0
+1821123,home,18,Southampton,interceptions,37,1.0
+1821123,home,18,Southampton,interceptions,40,1.0
+1821123,home,18,Southampton,interceptions,46,1.0
+1821123,home,18,Southampton,interceptions,47,2.0
+1821123,home,18,Southampton,interceptions,50,1.0
+1821123,home,18,Southampton,interceptions,55,1.0
+1821123,home,18,Southampton,interceptions,72,1.0
+1821123,home,18,Southampton,offensiveAerials,25,1.0
+1821123,home,18,Southampton,offensiveAerials,35,1.0
+1821123,home,18,Southampton,offensiveAerials,39,1.0
+1821123,home,18,Southampton,offensiveAerials,47,1.0
+1821123,home,18,Southampton,offensiveAerials,50,1.0
+1821123,home,18,Southampton,offensiveAerials,78,1.0
+1821123,home,18,Southampton,offensiveAerials,83,1.0
+1821123,home,18,Southampton,offensiveAerials,89,1.0
+1821123,home,18,Southampton,offensiveAerials,96,1.0
+1821123,home,18,Southampton,passSuccess,2,0.0
+1821123,home,18,Southampton,passSuccess,4,93.33
+1821123,home,18,Southampton,passSuccess,5,100.0
+1821123,home,18,Southampton,passSuccess,6,100.0
+1821123,home,18,Southampton,passSuccess,8,100.0
+1821123,home,18,Southampton,passSuccess,11,50.0
+1821123,home,18,Southampton,passSuccess,12,100.0
+1821123,home,18,Southampton,passSuccess,13,77.78
+1821123,home,18,Southampton,passSuccess,14,100.0
+1821123,home,18,Southampton,passSuccess,15,100.0
+1821123,home,18,Southampton,passSuccess,18,90.0
+1821123,home,18,Southampton,passSuccess,19,100.0
+1821123,home,18,Southampton,passSuccess,21,83.33
+1821123,home,18,Southampton,passSuccess,23,0.0
+1821123,home,18,Southampton,passSuccess,24,100.0
+1821123,home,18,Southampton,passSuccess,25,100.0
+1821123,home,18,Southampton,passSuccess,27,100.0
+1821123,home,18,Southampton,passSuccess,28,85.71
+1821123,home,18,Southampton,passSuccess,30,0.0
+1821123,home,18,Southampton,passSuccess,33,0.0
+1821123,home,18,Southampton,passSuccess,34,0.0
+1821123,home,18,Southampton,passSuccess,35,62.5
+1821123,home,18,Southampton,passSuccess,36,50.0
+1821123,home,18,Southampton,passSuccess,37,75.0
+1821123,home,18,Southampton,passSuccess,39,75.0
+1821123,home,18,Southampton,passSuccess,40,92.31
+1821123,home,18,Southampton,passSuccess,41,91.67
+1821123,home,18,Southampton,passSuccess,42,50.0
+1821123,home,18,Southampton,passSuccess,43,100.0
+1821123,home,18,Southampton,passSuccess,44,92.31
+1821123,home,18,Southampton,passSuccess,45,100.0
+1821123,home,18,Southampton,passSuccess,47,60.0
+1821123,home,18,Southampton,passSuccess,50,100.0
+1821123,home,18,Southampton,passSuccess,51,85.71
+1821123,home,18,Southampton,passSuccess,53,0.0
+1821123,home,18,Southampton,passSuccess,54,0.0
+1821123,home,18,Southampton,passSuccess,55,0.0
+1821123,home,18,Southampton,passSuccess,56,0.0
+1821123,home,18,Southampton,passSuccess,57,87.5
+1821123,home,18,Southampton,passSuccess,58,100.0
+1821123,home,18,Southampton,passSuccess,59,100.0
+1821123,home,18,Southampton,passSuccess,61,100.0
+1821123,home,18,Southampton,passSuccess,64,100.0
+1821123,home,18,Southampton,passSuccess,67,100.0
+1821123,home,18,Southampton,passSuccess,68,90.91
+1821123,home,18,Southampton,passSuccess,69,90.0
+1821123,home,18,Southampton,passSuccess,73,100.0
+1821123,home,18,Southampton,passSuccess,75,50.0
+1821123,home,18,Southampton,passSuccess,77,0.0
+1821123,home,18,Southampton,passSuccess,78,77.78
+1821123,home,18,Southampton,passSuccess,79,75.0
+1821123,home,18,Southampton,passSuccess,81,100.0
+1821123,home,18,Southampton,passSuccess,82,100.0
+1821123,home,18,Southampton,passSuccess,83,87.5
+1821123,home,18,Southampton,passSuccess,84,100.0
+1821123,home,18,Southampton,passSuccess,85,100.0
+1821123,home,18,Southampton,passSuccess,86,50.0
+1821123,home,18,Southampton,passSuccess,87,100.0
+1821123,home,18,Southampton,passSuccess,88,80.0
+1821123,home,18,Southampton,passSuccess,89,50.0
+1821123,home,18,Southampton,passSuccess,92,66.67
+1821123,home,18,Southampton,passSuccess,96,100.0
+1821123,home,18,Southampton,passSuccess,97,93.33
+1821123,home,18,Southampton,passSuccess,98,100.0
+1821123,home,18,Southampton,passSuccess,99,100.0
+1821123,home,18,Southampton,passesAccurate,4,14.0
+1821123,home,18,Southampton,passesAccurate,5,7.0
+1821123,home,18,Southampton,passesAccurate,6,2.0
+1821123,home,18,Southampton,passesAccurate,8,5.0
+1821123,home,18,Southampton,passesAccurate,11,1.0
+1821123,home,18,Southampton,passesAccurate,12,4.0
+1821123,home,18,Southampton,passesAccurate,13,7.0
+1821123,home,18,Southampton,passesAccurate,14,1.0
+1821123,home,18,Southampton,passesAccurate,15,2.0
+1821123,home,18,Southampton,passesAccurate,18,9.0
+1821123,home,18,Southampton,passesAccurate,19,2.0
+1821123,home,18,Southampton,passesAccurate,21,10.0
+1821123,home,18,Southampton,passesAccurate,24,3.0
+1821123,home,18,Southampton,passesAccurate,25,1.0
+1821123,home,18,Southampton,passesAccurate,27,12.0
+1821123,home,18,Southampton,passesAccurate,28,6.0
+1821123,home,18,Southampton,passesAccurate,35,5.0
+1821123,home,18,Southampton,passesAccurate,36,1.0
+1821123,home,18,Southampton,passesAccurate,37,3.0
+1821123,home,18,Southampton,passesAccurate,39,3.0
+1821123,home,18,Southampton,passesAccurate,40,12.0
+1821123,home,18,Southampton,passesAccurate,41,11.0
+1821123,home,18,Southampton,passesAccurate,42,3.0
+1821123,home,18,Southampton,passesAccurate,43,5.0
+1821123,home,18,Southampton,passesAccurate,44,12.0
+1821123,home,18,Southampton,passesAccurate,45,3.0
+1821123,home,18,Southampton,passesAccurate,47,3.0
+1821123,home,18,Southampton,passesAccurate,50,1.0
+1821123,home,18,Southampton,passesAccurate,51,6.0
+1821123,home,18,Southampton,passesAccurate,57,7.0
+1821123,home,18,Southampton,passesAccurate,58,8.0
+1821123,home,18,Southampton,passesAccurate,59,3.0
+1821123,home,18,Southampton,passesAccurate,61,10.0
+1821123,home,18,Southampton,passesAccurate,64,4.0
+1821123,home,18,Southampton,passesAccurate,67,6.0
+1821123,home,18,Southampton,passesAccurate,68,10.0
+1821123,home,18,Southampton,passesAccurate,69,9.0
+1821123,home,18,Southampton,passesAccurate,73,2.0
+1821123,home,18,Southampton,passesAccurate,75,1.0
+1821123,home,18,Southampton,passesAccurate,78,7.0
+1821123,home,18,Southampton,passesAccurate,79,3.0
+1821123,home,18,Southampton,passesAccurate,81,7.0
+1821123,home,18,Southampton,passesAccurate,82,10.0
+1821123,home,18,Southampton,passesAccurate,83,7.0
+1821123,home,18,Southampton,passesAccurate,84,13.0
+1821123,home,18,Southampton,passesAccurate,85,4.0
+1821123,home,18,Southampton,passesAccurate,86,1.0
+1821123,home,18,Southampton,passesAccurate,87,7.0
+1821123,home,18,Southampton,passesAccurate,88,4.0
+1821123,home,18,Southampton,passesAccurate,89,1.0
+1821123,home,18,Southampton,passesAccurate,92,2.0
+1821123,home,18,Southampton,passesAccurate,96,8.0
+1821123,home,18,Southampton,passesAccurate,97,14.0
+1821123,home,18,Southampton,passesAccurate,98,4.0
+1821123,home,18,Southampton,passesAccurate,99,1.0
+1821123,home,18,Southampton,passesKey,15,1.0
+1821123,home,18,Southampton,passesKey,40,1.0
+1821123,home,18,Southampton,passesKey,61,1.0
+1821123,home,18,Southampton,passesKey,64,1.0
+1821123,home,18,Southampton,passesKey,99,1.0
+1821123,home,18,Southampton,passesTotal,2,2.0
+1821123,home,18,Southampton,passesTotal,4,15.0
+1821123,home,18,Southampton,passesTotal,5,7.0
+1821123,home,18,Southampton,passesTotal,6,2.0
+1821123,home,18,Southampton,passesTotal,8,5.0
+1821123,home,18,Southampton,passesTotal,11,2.0
+1821123,home,18,Southampton,passesTotal,12,4.0
+1821123,home,18,Southampton,passesTotal,13,9.0
+1821123,home,18,Southampton,passesTotal,14,1.0
+1821123,home,18,Southampton,passesTotal,15,2.0
+1821123,home,18,Southampton,passesTotal,18,10.0
+1821123,home,18,Southampton,passesTotal,19,2.0
+1821123,home,18,Southampton,passesTotal,21,12.0
+1821123,home,18,Southampton,passesTotal,23,1.0
+1821123,home,18,Southampton,passesTotal,24,3.0
+1821123,home,18,Southampton,passesTotal,25,1.0
+1821123,home,18,Southampton,passesTotal,27,12.0
+1821123,home,18,Southampton,passesTotal,28,7.0
+1821123,home,18,Southampton,passesTotal,30,1.0
+1821123,home,18,Southampton,passesTotal,33,1.0
+1821123,home,18,Southampton,passesTotal,34,1.0
+1821123,home,18,Southampton,passesTotal,35,8.0
+1821123,home,18,Southampton,passesTotal,36,2.0
+1821123,home,18,Southampton,passesTotal,37,4.0
+1821123,home,18,Southampton,passesTotal,39,4.0
+1821123,home,18,Southampton,passesTotal,40,13.0
+1821123,home,18,Southampton,passesTotal,41,12.0
+1821123,home,18,Southampton,passesTotal,42,6.0
+1821123,home,18,Southampton,passesTotal,43,5.0
+1821123,home,18,Southampton,passesTotal,44,13.0
+1821123,home,18,Southampton,passesTotal,45,3.0
+1821123,home,18,Southampton,passesTotal,47,5.0
+1821123,home,18,Southampton,passesTotal,50,1.0
+1821123,home,18,Southampton,passesTotal,51,7.0
+1821123,home,18,Southampton,passesTotal,53,1.0
+1821123,home,18,Southampton,passesTotal,54,1.0
+1821123,home,18,Southampton,passesTotal,55,1.0
+1821123,home,18,Southampton,passesTotal,56,1.0
+1821123,home,18,Southampton,passesTotal,57,8.0
+1821123,home,18,Southampton,passesTotal,58,8.0
+1821123,home,18,Southampton,passesTotal,59,3.0
+1821123,home,18,Southampton,passesTotal,61,10.0
+1821123,home,18,Southampton,passesTotal,64,4.0
+1821123,home,18,Southampton,passesTotal,67,6.0
+1821123,home,18,Southampton,passesTotal,68,11.0
+1821123,home,18,Southampton,passesTotal,69,10.0
+1821123,home,18,Southampton,passesTotal,73,2.0
+1821123,home,18,Southampton,passesTotal,75,2.0
+1821123,home,18,Southampton,passesTotal,77,1.0
+1821123,home,18,Southampton,passesTotal,78,9.0
+1821123,home,18,Southampton,passesTotal,79,4.0
+1821123,home,18,Southampton,passesTotal,81,7.0
+1821123,home,18,Southampton,passesTotal,82,10.0
+1821123,home,18,Southampton,passesTotal,83,8.0
+1821123,home,18,Southampton,passesTotal,84,13.0
+1821123,home,18,Southampton,passesTotal,85,4.0
+1821123,home,18,Southampton,passesTotal,86,2.0
+1821123,home,18,Southampton,passesTotal,87,7.0
+1821123,home,18,Southampton,passesTotal,88,5.0
+1821123,home,18,Southampton,passesTotal,89,2.0
+1821123,home,18,Southampton,passesTotal,92,3.0
+1821123,home,18,Southampton,passesTotal,96,8.0
+1821123,home,18,Southampton,passesTotal,97,15.0
+1821123,home,18,Southampton,passesTotal,98,4.0
+1821123,home,18,Southampton,passesTotal,99,1.0
+1821123,home,18,Southampton,possession,2,2.0
+1821123,home,18,Southampton,possession,4,15.0
+1821123,home,18,Southampton,possession,5,7.0
+1821123,home,18,Southampton,possession,6,2.0
+1821123,home,18,Southampton,possession,8,7.0
+1821123,home,18,Southampton,possession,11,2.0
+1821123,home,18,Southampton,possession,12,4.0
+1821123,home,18,Southampton,possession,13,9.0
+1821123,home,18,Southampton,possession,14,1.0
+1821123,home,18,Southampton,possession,15,2.0
+1821123,home,18,Southampton,possession,18,10.0
+1821123,home,18,Southampton,possession,19,2.0
+1821123,home,18,Southampton,possession,20,1.0
+1821123,home,18,Southampton,possession,21,12.0
+1821123,home,18,Southampton,possession,23,1.0
+1821123,home,18,Southampton,possession,24,3.0
+1821123,home,18,Southampton,possession,25,3.0
+1821123,home,18,Southampton,possession,27,13.0
+1821123,home,18,Southampton,possession,28,7.0
+1821123,home,18,Southampton,possession,30,1.0
+1821123,home,18,Southampton,possession,33,2.0
+1821123,home,18,Southampton,possession,34,1.0
+1821123,home,18,Southampton,possession,35,8.0
+1821123,home,18,Southampton,possession,36,2.0
+1821123,home,18,Southampton,possession,37,4.0
+1821123,home,18,Southampton,possession,39,4.0
+1821123,home,18,Southampton,possession,40,14.0
+1821123,home,18,Southampton,possession,41,12.0
+1821123,home,18,Southampton,possession,42,6.0
+1821123,home,18,Southampton,possession,43,7.0
+1821123,home,18,Southampton,possession,44,13.0
+1821123,home,18,Southampton,possession,45,3.0
+1821123,home,18,Southampton,possession,47,5.0
+1821123,home,18,Southampton,possession,50,1.0
+1821123,home,18,Southampton,possession,51,7.0
+1821123,home,18,Southampton,possession,53,1.0
+1821123,home,18,Southampton,possession,54,1.0
+1821123,home,18,Southampton,possession,55,1.0
+1821123,home,18,Southampton,possession,56,1.0
+1821123,home,18,Southampton,possession,57,8.0
+1821123,home,18,Southampton,possession,58,8.0
+1821123,home,18,Southampton,possession,59,5.0
+1821123,home,18,Southampton,possession,61,10.0
+1821123,home,18,Southampton,possession,64,7.0
+1821123,home,18,Southampton,possession,67,6.0
+1821123,home,18,Southampton,possession,68,11.0
+1821123,home,18,Southampton,possession,69,10.0
+1821123,home,18,Southampton,possession,73,2.0
+1821123,home,18,Southampton,possession,75,2.0
+1821123,home,18,Southampton,possession,77,1.0
+1821123,home,18,Southampton,possession,78,9.0
+1821123,home,18,Southampton,possession,79,5.0
+1821123,home,18,Southampton,possession,81,7.0
+1821123,home,18,Southampton,possession,82,10.0
+1821123,home,18,Southampton,possession,83,8.0
+1821123,home,18,Southampton,possession,84,14.0
+1821123,home,18,Southampton,possession,85,5.0
+1821123,home,18,Southampton,possession,86,2.0
+1821123,home,18,Southampton,possession,87,8.0
+1821123,home,18,Southampton,possession,88,5.0
+1821123,home,18,Southampton,possession,89,5.0
+1821123,home,18,Southampton,possession,92,3.0
+1821123,home,18,Southampton,possession,96,8.0
+1821123,home,18,Southampton,possession,97,15.0
+1821123,home,18,Southampton,possession,98,5.0
+1821123,home,18,Southampton,possession,99,1.0
+1821123,home,18,Southampton,ratings,0,6.00727272727273
+1821123,home,18,Southampton,ratings,1,6.01636363636364
+1821123,home,18,Southampton,ratings,2,6.01272727272727
+1821123,home,18,Southampton,ratings,4,6.02363636363636
+1821123,home,18,Southampton,ratings,5,6.02181818181818
+1821123,home,18,Southampton,ratings,6,6.02
+1821123,home,18,Southampton,ratings,7,6.02545454545455
+1821123,home,18,Southampton,ratings,8,6.04363636363636
+1821123,home,18,Southampton,ratings,9,6.04909090909091
+1821123,home,18,Southampton,ratings,10,6.05454545454545
+1821123,home,18,Southampton,ratings,11,6.05181818181818
+1821123,home,18,Southampton,ratings,12,6.05727272727273
+1821123,home,18,Southampton,ratings,13,6.05818181818182
+1821123,home,18,Southampton,ratings,14,6.06454545454546
+1821123,home,18,Southampton,ratings,15,6.08636363636364
+1821123,home,18,Southampton,ratings,16,6.08454545454545
+1821123,home,18,Southampton,ratings,17,6.08272727272727
+1821123,home,18,Southampton,ratings,18,6.08272727272727
+1821123,home,18,Southampton,ratings,19,6.08818181818182
+1821123,home,18,Southampton,ratings,20,6.11545454545455
+1821123,home,18,Southampton,ratings,21,6.13909090909091
+1821123,home,18,Southampton,ratings,22,6.13363636363636
+1821123,home,18,Southampton,ratings,23,6.14363636363636
+1821123,home,18,Southampton,ratings,24,6.14454545454545
+1821123,home,18,Southampton,ratings,25,6.14090909090909
+1821123,home,18,Southampton,ratings,26,6.14272727272727
+1821123,home,18,Southampton,ratings,27,6.15090909090909
+1821123,home,18,Southampton,ratings,28,6.15090909090909
+1821123,home,18,Southampton,ratings,29,6.16
+1821123,home,18,Southampton,ratings,30,6.16363636363636
+1821123,home,18,Southampton,ratings,31,6.17272727272727
+1821123,home,18,Southampton,ratings,32,6.18454545454546
+1821123,home,18,Southampton,ratings,33,6.19363636363636
+1821123,home,18,Southampton,ratings,34,6.19727272727273
+1821123,home,18,Southampton,ratings,35,6.19272727272727
+1821123,home,18,Southampton,ratings,36,6.19
+1821123,home,18,Southampton,ratings,37,6.19
+1821123,home,18,Southampton,ratings,39,6.19727272727273
+1821123,home,18,Southampton,ratings,40,6.23909090909091
+1821123,home,18,Southampton,ratings,41,6.24727272727273
+1821123,home,18,Southampton,ratings,42,6.24545454545455
+1821123,home,18,Southampton,ratings,43,6.24363636363636
+1821123,home,18,Southampton,ratings,44,6.24545454545455
+1821123,home,18,Southampton,ratings,45,6.25181818181818
+1821123,home,18,Southampton,ratings,46,6.28454545454545
+1821123,home,18,Southampton,ratings,47,6.29
+1821123,home,18,Southampton,ratings,48,6.3175
+1821123,home,18,Southampton,ratings,49,6.32166666666667
+1821123,home,18,Southampton,ratings,50,6.3575
+1821123,home,18,Southampton,ratings,51,6.37916666666667
+1821123,home,18,Southampton,ratings,52,6.39
+1821123,home,18,Southampton,ratings,53,6.39333333333333
+1821123,home,18,Southampton,ratings,54,6.38583333333333
+1821123,home,18,Southampton,ratings,55,6.4125
+1821123,home,18,Southampton,ratings,56,6.415
+1821123,home,18,Southampton,ratings,57,6.41416666666667
+1821123,home,18,Southampton,ratings,58,6.4175
+1821123,home,18,Southampton,ratings,59,6.45
+1821123,home,18,Southampton,ratings,60,6.45416666666667
+1821123,home,18,Southampton,ratings,61,6.46166666666667
+1821123,home,18,Southampton,ratings,62,6.40357142857143
+1821123,home,18,Southampton,ratings,63,6.41785714285714
+1821123,home,18,Southampton,ratings,64,6.42642857142857
+1821123,home,18,Southampton,ratings,65,6.425
+1821123,home,18,Southampton,ratings,67,6.425
+1821123,home,18,Southampton,ratings,68,6.42642857142857
+1821123,home,18,Southampton,ratings,69,6.38642857142857
+1821123,home,18,Southampton,ratings,70,6.46928571428571
+1821123,home,18,Southampton,ratings,71,6.47642857142857
+1821123,home,18,Southampton,ratings,72,6.48285714285714
+1821123,home,18,Southampton,ratings,73,6.49642857142857
+1821123,home,18,Southampton,ratings,74,6.375
+1821123,home,18,Southampton,ratings,75,6.37428571428571
+1821123,home,18,Southampton,ratings,76,6.37857142857143
+1821123,home,18,Southampton,ratings,77,6.39357142857143
+1821123,home,18,Southampton,ratings,78,6.39357142857143
+1821123,home,18,Southampton,ratings,79,6.39214285714286
+1821123,home,18,Southampton,ratings,80,6.27357142857143
+1821123,home,18,Southampton,ratings,81,6.27571428571429
+1821123,home,18,Southampton,ratings,82,6.28071428571429
+1821123,home,18,Southampton,ratings,83,6.27
+1821123,home,18,Southampton,ratings,84,6.268
+1821123,home,18,Southampton,ratings,85,6.28733333333333
+1821123,home,18,Southampton,ratings,86,6.284
+1821123,home,18,Southampton,ratings,87,6.29933333333333
+1821123,home,18,Southampton,ratings,88,6.3
+1821123,home,18,Southampton,ratings,89,6.302
+1821123,home,18,Southampton,ratings,90,6.283125
+1821123,home,18,Southampton,ratings,92,6.283125
+1821123,home,18,Southampton,ratings,93,6.270625
+1821123,home,18,Southampton,ratings,95,6.239375
+1821123,home,18,Southampton,ratings,96,6.24625
+1821123,home,18,Southampton,ratings,97,6.2575
+1821123,home,18,Southampton,ratings,98,6.260625
+1821123,home,18,Southampton,ratings,99,6.269375
+1821123,home,18,Southampton,shotsBlocked,8,1.0
+1821123,home,18,Southampton,shotsOffTarget,40,1.0
+1821123,home,18,Southampton,shotsOffTarget,61,1.0
+1821123,home,18,Southampton,shotsOffTarget,64,1.0
+1821123,home,18,Southampton,shotsOffTarget,99,1.0
+1821123,home,18,Southampton,shotsOnTarget,15,1.0
+1821123,home,18,Southampton,shotsOnTarget,89,1.0
+1821123,home,18,Southampton,shotsTotal,8,1.0
+1821123,home,18,Southampton,shotsTotal,15,1.0
+1821123,home,18,Southampton,shotsTotal,40,1.0
+1821123,home,18,Southampton,shotsTotal,61,1.0
+1821123,home,18,Southampton,shotsTotal,64,1.0
+1821123,home,18,Southampton,shotsTotal,89,1.0
+1821123,home,18,Southampton,shotsTotal,99,1.0
+1821123,home,18,Southampton,tackleSuccess,4,100.0
+1821123,home,18,Southampton,tackleSuccess,7,0.0
+1821123,home,18,Southampton,tackleSuccess,27,100.0
+1821123,home,18,Southampton,tackleSuccess,33,100.0
+1821123,home,18,Southampton,tackleSuccess,37,0.0
+1821123,home,18,Southampton,tackleSuccess,39,100.0
+1821123,home,18,Southampton,tackleSuccess,40,100.0
+1821123,home,18,Southampton,tackleSuccess,41,100.0
+1821123,home,18,Southampton,tackleSuccess,48,66.67
+1821123,home,18,Southampton,tackleSuccess,51,100.0
+1821123,home,18,Southampton,tackleSuccess,52,100.0
+1821123,home,18,Southampton,tackleSuccess,54,0.0
+1821123,home,18,Southampton,tackleSuccess,55,100.0
+1821123,home,18,Southampton,tackleSuccess,59,100.0
+1821123,home,18,Southampton,tackleSuccess,63,100.0
+1821123,home,18,Southampton,tackleSuccess,77,100.0
+1821123,home,18,Southampton,tackleSuccess,93,100.0
+1821123,home,18,Southampton,tackleSuccessful,4,1.0
+1821123,home,18,Southampton,tackleSuccessful,27,1.0
+1821123,home,18,Southampton,tackleSuccessful,33,1.0
+1821123,home,18,Southampton,tackleSuccessful,39,2.0
+1821123,home,18,Southampton,tackleSuccessful,40,1.0
+1821123,home,18,Southampton,tackleSuccessful,41,1.0
+1821123,home,18,Southampton,tackleSuccessful,48,2.0
+1821123,home,18,Southampton,tackleSuccessful,51,2.0
+1821123,home,18,Southampton,tackleSuccessful,52,1.0
+1821123,home,18,Southampton,tackleSuccessful,55,1.0
+1821123,home,18,Southampton,tackleSuccessful,59,1.0
+1821123,home,18,Southampton,tackleSuccessful,63,2.0
+1821123,home,18,Southampton,tackleSuccessful,77,1.0
+1821123,home,18,Southampton,tackleSuccessful,93,1.0
+1821123,home,18,Southampton,tackleUnsuccesful,7,1.0
+1821123,home,18,Southampton,tackleUnsuccesful,37,1.0
+1821123,home,18,Southampton,tackleUnsuccesful,48,1.0
+1821123,home,18,Southampton,tackleUnsuccesful,54,1.0
+1821123,home,18,Southampton,tacklesTotal,4,1.0
+1821123,home,18,Southampton,tacklesTotal,7,1.0
+1821123,home,18,Southampton,tacklesTotal,27,1.0
+1821123,home,18,Southampton,tacklesTotal,33,1.0
+1821123,home,18,Southampton,tacklesTotal,37,1.0
+1821123,home,18,Southampton,tacklesTotal,39,2.0
+1821123,home,18,Southampton,tacklesTotal,40,1.0
+1821123,home,18,Southampton,tacklesTotal,41,1.0
+1821123,home,18,Southampton,tacklesTotal,48,3.0
+1821123,home,18,Southampton,tacklesTotal,51,2.0
+1821123,home,18,Southampton,tacklesTotal,52,1.0
+1821123,home,18,Southampton,tacklesTotal,54,1.0
+1821123,home,18,Southampton,tacklesTotal,55,1.0
+1821123,home,18,Southampton,tacklesTotal,59,1.0
+1821123,home,18,Southampton,tacklesTotal,63,2.0
+1821123,home,18,Southampton,tacklesTotal,77,1.0
+1821123,home,18,Southampton,tacklesTotal,93,1.0
+1821123,home,18,Southampton,throwInsAccurate,2,1.0
+1821123,home,18,Southampton,throwInsAccurate,9,1.0
+1821123,home,18,Southampton,throwInsAccurate,14,1.0
+1821123,home,18,Southampton,throwInsAccurate,43,1.0
+1821123,home,18,Southampton,throwInsAccurate,58,1.0
+1821123,home,18,Southampton,throwInsAccurate,83,1.0
+1821123,home,18,Southampton,throwInsTotal,2,1.0
+1821123,home,18,Southampton,throwInsTotal,9,1.0
+1821123,home,18,Southampton,throwInsTotal,14,1.0
+1821123,home,18,Southampton,throwInsTotal,43,1.0
+1821123,home,18,Southampton,throwInsTotal,58,1.0
+1821123,home,18,Southampton,throwInsTotal,83,1.0
+1821123,home,18,Southampton,touches,0,1.0
+1821123,home,18,Southampton,touches,1,2.0
+1821123,home,18,Southampton,touches,2,3.0
+1821123,home,18,Southampton,touches,3,1.0
+1821123,home,18,Southampton,touches,4,16.0
+1821123,home,18,Southampton,touches,5,8.0
+1821123,home,18,Southampton,touches,6,4.0
+1821123,home,18,Southampton,touches,7,2.0
+1821123,home,18,Southampton,touches,8,10.0
+1821123,home,18,Southampton,touches,9,5.0
+1821123,home,18,Southampton,touches,10,1.0
+1821123,home,18,Southampton,touches,11,2.0
+1821123,home,18,Southampton,touches,12,6.0
+1821123,home,18,Southampton,touches,13,9.0
+1821123,home,18,Southampton,touches,14,5.0
+1821123,home,18,Southampton,touches,15,3.0
+1821123,home,18,Southampton,touches,18,10.0
+1821123,home,18,Southampton,touches,19,4.0
+1821123,home,18,Southampton,touches,20,4.0
+1821123,home,18,Southampton,touches,21,14.0
+1821123,home,18,Southampton,touches,22,2.0
+1821123,home,18,Southampton,touches,23,2.0
+1821123,home,18,Southampton,touches,24,7.0
+1821123,home,18,Southampton,touches,25,4.0
+1821123,home,18,Southampton,touches,26,2.0
+1821123,home,18,Southampton,touches,27,14.0
+1821123,home,18,Southampton,touches,28,7.0
+1821123,home,18,Southampton,touches,29,2.0
+1821123,home,18,Southampton,touches,30,2.0
+1821123,home,18,Southampton,touches,31,2.0
+1821123,home,18,Southampton,touches,32,2.0
+1821123,home,18,Southampton,touches,33,5.0
+1821123,home,18,Southampton,touches,34,2.0
+1821123,home,18,Southampton,touches,35,9.0
+1821123,home,18,Southampton,touches,36,3.0
+1821123,home,18,Southampton,touches,37,6.0
+1821123,home,18,Southampton,touches,39,10.0
+1821123,home,18,Southampton,touches,40,17.0
+1821123,home,18,Southampton,touches,41,13.0
+1821123,home,18,Southampton,touches,42,6.0
+1821123,home,18,Southampton,touches,43,9.0
+1821123,home,18,Southampton,touches,44,13.0
+1821123,home,18,Southampton,touches,45,7.0
+1821123,home,18,Southampton,touches,46,3.0
+1821123,home,18,Southampton,touches,47,7.0
+1821123,home,18,Southampton,touches,48,5.0
+1821123,home,18,Southampton,touches,49,1.0
+1821123,home,18,Southampton,touches,50,5.0
+1821123,home,18,Southampton,touches,51,11.0
+1821123,home,18,Southampton,touches,52,2.0
+1821123,home,18,Southampton,touches,53,2.0
+1821123,home,18,Southampton,touches,54,3.0
+1821123,home,18,Southampton,touches,55,3.0
+1821123,home,18,Southampton,touches,56,3.0
+1821123,home,18,Southampton,touches,57,8.0
+1821123,home,18,Southampton,touches,58,9.0
+1821123,home,18,Southampton,touches,59,6.0
+1821123,home,18,Southampton,touches,60,1.0
+1821123,home,18,Southampton,touches,61,11.0
+1821123,home,18,Southampton,touches,63,5.0
+1821123,home,18,Southampton,touches,64,8.0
+1821123,home,18,Southampton,touches,67,7.0
+1821123,home,18,Southampton,touches,68,11.0
+1821123,home,18,Southampton,touches,69,12.0
+1821123,home,18,Southampton,touches,70,2.0
+1821123,home,18,Southampton,touches,71,2.0
+1821123,home,18,Southampton,touches,72,1.0
+1821123,home,18,Southampton,touches,73,5.0
+1821123,home,18,Southampton,touches,74,1.0
+1821123,home,18,Southampton,touches,75,2.0
+1821123,home,18,Southampton,touches,76,6.0
+1821123,home,18,Southampton,touches,77,5.0
+1821123,home,18,Southampton,touches,78,9.0
+1821123,home,18,Southampton,touches,79,6.0
+1821123,home,18,Southampton,touches,81,7.0
+1821123,home,18,Southampton,touches,82,11.0
+1821123,home,18,Southampton,touches,83,9.0
+1821123,home,18,Southampton,touches,84,16.0
+1821123,home,18,Southampton,touches,85,6.0
+1821123,home,18,Southampton,touches,86,3.0
+1821123,home,18,Southampton,touches,87,11.0
+1821123,home,18,Southampton,touches,88,5.0
+1821123,home,18,Southampton,touches,89,7.0
+1821123,home,18,Southampton,touches,92,3.0
+1821123,home,18,Southampton,touches,93,4.0
+1821123,home,18,Southampton,touches,95,1.0
+1821123,home,18,Southampton,touches,96,8.0
+1821123,home,18,Southampton,touches,97,17.0
+1821123,home,18,Southampton,touches,98,6.0
+1821123,home,18,Southampton,touches,99,2.0

@@ -1,0 +1,100 @@
+﻿match_id,team_side,team_id,team_name,formation_index,formation_id,formation_name,period,start_minute_expanded,end_minute_expanded,captain_player_id,slot_number,player_id,player_name,shirt_no,horizontal,vertical
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,1,316858,Aaron Ramsdale,30,5.0,0.0
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,2,313672,Kyle Walker-Peters,2,1.0,5.5
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,3,332402,Ryan Manning,3,9.0,5.5
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,4,92550,Jack Stephens,5,8.0,2.5
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,5,136742,Jan Bednarek,35,5.0,2.5
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,6,384061,Taylor Harwood-Bellis,6,2.0,2.5
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,7,447231,Mateus Fernandes,18,3.5,5.5
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,8,404616,Lesley Ugochukwu,26,6.5,5.5
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,9,122182,Paul Onuachu,32,5.0,8.5
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,10,382363,Cameron Archer,19,2.5,8.5
+1821123,home,18,Southampton,0,13,343,16,0,47,92550,11,422135,Kamaldeen Sulemana,20,7.5,8.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,1,316858,Aaron Ramsdale,30,5.0,0.0
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,2,313672,Kyle Walker-Peters,2,1.0,5.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,3,332402,Ryan Manning,3,9.0,5.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,4,92550,Jack Stephens,5,8.0,2.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,5,136742,Jan Bednarek,35,5.0,2.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,6,384061,Taylor Harwood-Bellis,6,2.0,2.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,7,447231,Mateus Fernandes,18,3.5,5.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,8,404616,Lesley Ugochukwu,26,6.5,5.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,9,382363,Cameron Archer,19,5.0,8.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,10,438067,Tyler Dibling,33,2.5,8.5
+1821123,home,18,Southampton,1,13,343,2,47,62,92550,11,422135,Kamaldeen Sulemana,20,7.5,8.5
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,1,316858,Aaron Ramsdale,30,5.0,0.0
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,2,313672,Kyle Walker-Peters,2,1.0,6.0
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,3,332402,Ryan Manning,3,9.0,6.0
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,4,92550,Jack Stephens,5,8.0,2.5
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,5,136742,Jan Bednarek,35,5.0,2.5
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,6,384061,Taylor Harwood-Bellis,6,2.0,2.5
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,7,390036,Will Smallbone,8,3.0,6.0
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,8,447231,Mateus Fernandes,18,7.0,6.0
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,9,397143,Ross Stewart,11,3.5,9.0
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,10,438067,Tyler Dibling,33,6.5,9.0
+1821123,home,18,Southampton,2,12,352,2,62,83,92550,11,404616,Lesley Ugochukwu,26,5.0,6.0
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,1,316858,Aaron Ramsdale,30,5.0,0.0
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,2,379783,Yukinari Sugawara,16,1.0,6.0
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,3,313672,Kyle Walker-Peters,2,9.0,6.0
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,4,92550,Jack Stephens,5,8.0,2.5
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,5,136742,Jan Bednarek,35,5.0,2.5
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,6,384061,Taylor Harwood-Bellis,6,2.0,2.5
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,7,390036,Will Smallbone,8,3.0,6.0
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,8,447231,Mateus Fernandes,18,7.0,6.0
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,9,397143,Ross Stewart,11,3.5,9.0
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,10,438067,Tyler Dibling,33,6.5,9.0
+1821123,home,18,Southampton,3,12,352,2,83,90,92550,11,404616,Lesley Ugochukwu,26,5.0,6.0
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,1,316858,Aaron Ramsdale,30,5.0,0.0
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,2,379783,Yukinari Sugawara,16,1.0,6.0
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,3,313672,Kyle Walker-Peters,2,9.0,6.0
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,4,92550,Jack Stephens,5,8.0,2.5
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,5,136742,Jan Bednarek,35,5.0,2.5
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,6,384061,Taylor Harwood-Bellis,6,2.0,2.5
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,7,390036,Will Smallbone,8,3.0,6.0
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,8,538255,Jay Robinson,46,7.0,6.0
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,9,397143,Ross Stewart,11,3.5,9.0
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,10,438067,Tyler Dibling,33,6.5,9.0
+1821123,home,18,Southampton,4,12,352,2,90,97,92550,11,404616,Lesley Ugochukwu,26,5.0,6.0
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,1,102248,Emiliano Martínez,23,5.0,0.0
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,2,322043,Matty Cash,2,1.0,2.5
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,3,384134,Ian Maatsen,22,9.0,2.5
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,4,136345,Youri Tielemans,8,6.5,5.0
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,5,301440,Ezri Konsa,4,3.5,2.5
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,6,123167,Tyrone Mings,5,6.5,2.5
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,7,362824,Morgan Rogers,27,2.0,7.0
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,8,400815,Amadou Onana,24,3.5,5.0
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,9,300299,Marcus Rashford,9,5.0,9.0
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,10,137467,Marco Asensio,21,5.0,7.0
+1821123,away,24,Aston Villa,0,8,4231,16,0,67,102248,11,369813,Jacob Ramsey,41,8.0,7.0
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,1,102248,Emiliano Martínez,23,5.0,0.0
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,2,322043,Matty Cash,2,1.0,2.5
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,3,384134,Ian Maatsen,22,9.0,2.5
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,4,136345,Youri Tielemans,8,6.5,5.0
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,5,301440,Ezri Konsa,4,3.5,2.5
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,6,123167,Tyrone Mings,5,6.5,2.5
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,7,351354,Donyell Malen,17,2.0,7.0
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,8,400815,Amadou Onana,24,3.5,5.0
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,9,148503,Ollie Watkins,11,5.0,9.0
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,10,137467,Marco Asensio,21,5.0,7.0
+1821123,away,24,Aston Villa,1,8,4231,2,67,86,102248,11,362824,Morgan Rogers,27,8.0,7.0
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,1,102248,Emiliano Martínez,23,5.0,0.0
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,2,469329,Andrés García,16,1.0,2.5
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,3,384134,Ian Maatsen,22,9.0,2.5
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,4,136345,Youri Tielemans,8,6.5,5.0
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,5,301440,Ezri Konsa,4,3.5,2.5
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,6,123167,Tyrone Mings,5,6.5,2.5
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,7,351354,Donyell Malen,17,2.0,7.0
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,8,400815,Amadou Onana,24,3.5,5.0
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,9,148503,Ollie Watkins,11,5.0,9.0
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,10,137467,Marco Asensio,21,5.0,7.0
+1821123,away,24,Aston Villa,2,8,4231,2,86,90,318449,11,318449,John McGinn,7,8.0,7.0
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,1,102248,Emiliano Martínez,23,5.0,0.0
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,2,469329,Andrés García,16,1.0,2.5
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,3,384134,Ian Maatsen,22,9.0,2.5
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,4,136345,Youri Tielemans,8,6.5,5.0
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,5,301440,Ezri Konsa,4,3.5,2.5
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,6,123167,Tyrone Mings,5,6.5,2.5
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,7,351354,Donyell Malen,17,2.0,7.0
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,8,331790,Boubacar Kamara,44,3.5,5.0
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,9,148503,Ollie Watkins,11,5.0,9.0
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,10,137467,Marco Asensio,21,5.0,7.0
+1821123,away,24,Aston Villa,3,8,4231,2,90,97,318449,11,318449,John McGinn,7,8.0,7.0

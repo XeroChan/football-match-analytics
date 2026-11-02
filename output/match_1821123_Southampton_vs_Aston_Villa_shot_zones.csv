@@ -1,0 +1,28 @@
+﻿match_id,team_side,team_id,team_name,zone,minute,count,goal_count
+1821123,away,24,Aston Villa,missHighCentre,35,1,0
+1821123,away,24,Aston Villa,missHighCentre,36,1,0
+1821123,away,24,Aston Villa,missLeft,17,1,0
+1821123,away,24,Aston Villa,missRight,20,1,0
+1821123,away,24,Aston Villa,missRight,52,1,0
+1821123,away,24,Aston Villa,missRight,60,1,0
+1821123,away,24,Aston Villa,onTargetHighCentre,74,1,1
+1821123,away,24,Aston Villa,onTargetHighRight,8,1,0
+1821123,away,24,Aston Villa,onTargetHighRight,39,1,0
+1821123,away,24,Aston Villa,onTargetLowCentre,0,1,0
+1821123,away,24,Aston Villa,onTargetLowCentre,19,1,0
+1821123,away,24,Aston Villa,onTargetLowCentre,32,1,0
+1821123,away,24,Aston Villa,onTargetLowCentre,46,1,0
+1821123,away,24,Aston Villa,onTargetLowCentre,50,1,0
+1821123,away,24,Aston Villa,onTargetLowCentre,70,1,0
+1821123,away,24,Aston Villa,onTargetLowLeft,48,1,0
+1821123,away,24,Aston Villa,onTargetLowLeft,80,1,1
+1821123,away,24,Aston Villa,onTargetLowLeft,85,1,0
+1821123,away,24,Aston Villa,onTargetLowRight,20,1,0
+1821123,away,24,Aston Villa,onTargetLowRight,48,1,0
+1821123,away,24,Aston Villa,onTargetLowRight,95,2,1
+1821123,home,18,Southampton,missHighRight,61,1,0
+1821123,home,18,Southampton,missLeft,40,1,0
+1821123,home,18,Southampton,missRight,99,1,0
+1821123,home,18,Southampton,onTargetLowLeft,8,1,0
+1821123,home,18,Southampton,onTargetLowLeft,15,1,0
+1821123,home,18,Southampton,onTargetLowRight,89,1,0

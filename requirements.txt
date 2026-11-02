@@ -8,3 +8,4 @@ mplsoccer
 matplotlib
 seaborn
 numpy
+pytest

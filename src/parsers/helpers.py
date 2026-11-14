@@ -70,7 +70,8 @@ def build_player_lookup(players_df: Optional[pd.DataFrame]) -> dict[int, dict[st
         for c in ("player_name", "shirt_no", "position", "is_first_eleven")
         if c in valid.columns
     ]
-    return valid.set_index("player_id")[cols].to_dict("index")
+    raw_lookup = valid.set_index("player_id")[cols].to_dict("index")
+    return {int(str(k)): {str(ck): cv for ck, cv in v.items()} for k, v in raw_lookup.items()}
 
 
 def resolve_player_name(

@@ -208,9 +208,12 @@ def parse_events(
         related_player_id = to_int(ev.get("relatedPlayerId"))
 
         satisfied_ids = ev.get("satisfiedEventsTypes") or []
-        satisfied_names = [
-            event_type_names.get(to_int(t), str(t)) for t in satisfied_ids
-        ]
+        satisfied_names: list[str] = []
+        for t in satisfied_ids:
+            tid = to_int(t)
+            satisfied_names.append(
+                event_type_names.get(tid, str(t)) if tid is not None else str(t)
+            )
         satisfiers = ev.get("satisfiers") or []
         satisfier_names: list[str] = []
         satisfier_ids: list[str] = []

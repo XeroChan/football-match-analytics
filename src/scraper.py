@@ -352,8 +352,13 @@ class WhoScoredScraper:
 
         assert self._driver is not None
         try:
-            logger.info("Navigating to match URL: %s", match_url)
-            self._driver.get(match_url)
+            try:
+                logger.info("Navigating to match URL: %s", match_url)
+                self._driver.get(match_url)
+            except WebDriverException as exc:
+                raise WhoScoredScraperError(
+                    f"Browser navigation failed for {match_url}: {exc}"
+                ) from exc
 
             # Method 1 (Primary & Most Reliable): Poll the browser's parsed JS object
             match_data = self._poll_js_match_data()
@@ -363,7 +368,12 @@ class WhoScoredScraper:
                 logger.info(
                     "JS global not populated within timeout; trying HTML balanced-brace fallback..."
                 )
-                html_source = self._driver.page_source
+                try:
+                    html_source = self._driver.page_source
+                except WebDriverException as exc:
+                    raise WhoScoredScraperError(
+                        f"Failed to read page source from {match_url}: {exc}"
+                    ) from exc
                 match_data = self.extract_all_from_html(html_source)
                 if match_data:
                     logger.warning(
@@ -396,6 +406,7 @@ class WhoScoredScraper:
         """
         Scrapes an array/sequence of WhoScored Match Centre Live URLs within a single
         browser session and returns a list of extracted `matchCentreData` dictionaries.
+        Invalid or unreachable URLs are logged and skipped without aborting the batch.
         """
         if not match_urls:
             return []
@@ -405,12 +416,20 @@ class WhoScoredScraper:
             self.start()
 
         payloads: list[dict[str, Any]] = []
+        total = len(match_urls)
         try:
-            for url in match_urls:
+            for idx, url in enumerate(match_urls, start=1):
                 try:
+                    logger.info("[%d/%d] Scraping match URL: %s", idx, total, url)
                     payloads.append(self.scrape_match(url))
-                except WhoScoredScraperError as exc:
-                    logger.error("Failed to scrape %s: %s", url, exc)
+                except (WhoScoredScraperError, Exception) as exc:
+                    logger.error(
+                        "[%d/%d] Skipping URL (failed to scrape): %s -> %s",
+                        idx,
+                        total,
+                        url,
+                        exc,
+                    )
             return payloads
         finally:
             if own_driver:

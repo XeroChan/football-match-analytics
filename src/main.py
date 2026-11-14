@@ -109,6 +109,10 @@ DEFAULT_MATCH_URLS: list[str] = [
     "https://www.whoscored.com/matches/1733110/live/",
     "https://www.whoscored.com/matches/1733155/live/",
     "https://www.whoscored.com/matches/1733200/live/",
+    "https://www.whoscored.com/matches/1990125/live/",
+    "https://www.whoscored.com/matches/1990140/live/",
+    "https://www.whoscored.com/matches/1990110/live/",
+    "https://www.whoscored.com/matches/1990155/live/",
 
     # 11. FA Cup (England)
     "https://www.whoscored.com/matches/1889763/live/",
@@ -128,32 +132,8 @@ DEFAULT_MATCH_URLS: list[str] = [
     "https://www.whoscored.com/matches/1807215/live/",
 
     # 17. Süper Lig (Turkey)
-    "https://www.whoscored.com/matches/1751110/live/",
-    "https://www.whoscored.com/matches/1751155/live/",
-    "https://www.whoscored.com/matches/1751200/live/",
-    "https://www.whoscored.com/matches/1841110/live/",
-    "https://www.whoscored.com/matches/1841155/live/",
-    "https://www.whoscored.com/matches/1841200/live/",
-    "https://www.whoscored.com/matches/1841245/live/",
-    "https://www.whoscored.com/matches/1841290/live/",
-    "https://www.whoscored.com/matches/1924110/live/",
-    "https://www.whoscored.com/matches/1924155/live/",
-    "https://www.whoscored.com/matches/1924200/live/",
-    "https://www.whoscored.com/matches/1924245/live/",
 
     # 18. League Cup / EFL Cup (England)
-    "https://www.whoscored.com/matches/1785110/live/",
-    "https://www.whoscored.com/matches/1785105/live/",
-    "https://www.whoscored.com/matches/1785100/live/",
-    "https://www.whoscored.com/matches/1861110/live/",
-    "https://www.whoscored.com/matches/1861115/live/",
-    "https://www.whoscored.com/matches/1861120/live/",
-    "https://www.whoscored.com/matches/1861125/live/",
-    "https://www.whoscored.com/matches/1861130/live/",
-    "https://www.whoscored.com/matches/1879110/live/",
-    "https://www.whoscored.com/matches/1879115/live/",
-    "https://www.whoscored.com/matches/1951110/live/",
-    "https://www.whoscored.com/matches/1951145/live/",
 
     # 19. Russian Premier League
     "https://www.whoscored.com/matches/1824200/live/",
@@ -162,50 +142,12 @@ DEFAULT_MATCH_URLS: list[str] = [
     "https://www.whoscored.com/matches/1906110/live/",
 
     # 20. Jupiler Pro League (Belgium)
-    "https://www.whoscored.com/matches/1747110/live/",
-    "https://www.whoscored.com/matches/1747155/live/",
-    "https://www.whoscored.com/matches/1747200/live/",
-    "https://www.whoscored.com/matches/1837110/live/",
-    "https://www.whoscored.com/matches/1837155/live/",
-    "https://www.whoscored.com/matches/1837200/live/",
-    "https://www.whoscored.com/matches/1837245/live/",
-    "https://www.whoscored.com/matches/1837290/live/",
     "https://www.whoscored.com/matches/1975471/live/",
     "https://www.whoscored.com/matches/1975510/live/",
-    "https://www.whoscored.com/matches/1975555/live/",
-    "https://www.whoscored.com/matches/1975600/live/",
 
     # 21. 2. Bundesliga (Germany)
-    "https://www.whoscored.com/matches/1744110/live/",
-    "https://www.whoscored.com/matches/1744155/live/",
-    "https://www.whoscored.com/matches/1744200/live/",
-    "https://www.whoscored.com/matches/1835510/live/",
-    "https://www.whoscored.com/matches/1835555/live/",
-    "https://www.whoscored.com/matches/1835600/live/",
-    "https://www.whoscored.com/matches/1835645/live/",
-    "https://www.whoscored.com/matches/1835690/live/",
-    "https://www.whoscored.com/matches/1920110/live/",
-    "https://www.whoscored.com/matches/1920155/live/",
-    "https://www.whoscored.com/matches/1920200/live/",
-    "https://www.whoscored.com/matches/1920245/live/",
 
     # 22. UEFA Nations League A
-    "https://www.whoscored.com/matches/1810110/live/",
-    "https://www.whoscored.com/matches/1810115/live/",
-    "https://www.whoscored.com/matches/1810120/live/",
-    "https://www.whoscored.com/matches/1810125/live/",
-    "https://www.whoscored.com/matches/1810130/live/",
-    "https://www.whoscored.com/matches/1810135/live/",
-    "https://www.whoscored.com/matches/1810150/live/",
-    "https://www.whoscored.com/matches/1810165/live/",
-    "https://www.whoscored.com/matches/1810180/live/",
-    "https://www.whoscored.com/matches/1810195/live/",
-    "https://www.whoscored.com/matches/1810210/live/",
-    "https://www.whoscored.com/matches/1810225/live/",
-    "https://www.whoscored.com/matches/1990110/live/",
-    "https://www.whoscored.com/matches/1990125/live/",
-    "https://www.whoscored.com/matches/1990140/live/",
-    "https://www.whoscored.com/matches/1990155/live/"
 ]
 
 

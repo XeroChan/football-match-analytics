@@ -18,7 +18,7 @@ import json
 import logging
 import re
 import time
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 
 from selenium import webdriver
 from selenium.common.exceptions import JavascriptException, WebDriverException
@@ -392,6 +392,30 @@ class WhoScoredScraper:
             if own_driver:
                 self.close()
 
+    def scrape_matches(self, match_urls: Sequence[str]) -> list[dict[str, Any]]:
+        """
+        Scrapes an array/sequence of WhoScored Match Centre Live URLs within a single
+        browser session and returns a list of extracted `matchCentreData` dictionaries.
+        """
+        if not match_urls:
+            return []
+
+        own_driver = self._driver is None
+        if own_driver:
+            self.start()
+
+        payloads: list[dict[str, Any]] = []
+        try:
+            for url in match_urls:
+                try:
+                    payloads.append(self.scrape_match(url))
+                except WhoScoredScraperError as exc:
+                    logger.error("Failed to scrape %s: %s", url, exc)
+            return payloads
+        finally:
+            if own_driver:
+                self.close()
+
 
 def scrape_whoscored_match_json(match_url: str, headless: bool = False) -> dict[str, Any]:
     """
@@ -400,3 +424,14 @@ def scrape_whoscored_match_json(match_url: str, headless: bool = False) -> dict[
     """
     with WhoScoredScraper(headless=headless) as scraper:
         return scraper.scrape_match(match_url)
+
+
+def scrape_whoscored_matches_json(
+    match_urls: Sequence[str],
+    headless: bool = False,
+) -> list[dict[str, Any]]:
+    """
+    Convenience function to scrape an array of WhoScored match URLs in one browser session.
+    """
+    with WhoScoredScraper(headless=headless) as scraper:
+        return scraper.scrape_matches(match_urls)

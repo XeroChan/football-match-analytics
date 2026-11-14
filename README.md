@@ -11,7 +11,9 @@ football-match-analytics/
 ├── data/
 │   ├── raw/                  # Surowe pliki .json (np. match_1821123_..._raw.json)
 │   └── processed/            # Przetworzone tabele w formacie .parquet (szybka analiza wielu meczów)
-├── output/                   # Przetworzone tabele w formacie .csv (podgląd w Excelu / Data Wranglerze)
+│       └── combined/         # Połączone tabele .parquet ze wszystkich przetworzonych meczów
+├── output/                   # Przetworzone tabele per-mecz w formacie .csv (podgląd w Excelu / Data Wranglerze)
+│   └── combined/             # Połączone tabele .csv ze wszystkich przetworzonych meczów (combined_*.csv)
 ├── notebooks/
 │   ├── 01_eda_events.ipynb   # Notatnik Jupyter korzystający z modułu src.parser
 │   ├── 02_eda_events.ipynb   # Kontrola jakości i eksploracja zdarzeń

@@ -4,17 +4,18 @@ main.py
 Main CLI and pipeline orchestrator for scraping WhoScored Match Centre data
 and exporting structured datasets (`events`, `players`, `formations`, `metadata`,
 `player_stats`, `team_stats`, `shot_zones`, `minute_mapping`, `lookups`, `common_events`)
-in Parquet (`data/processed/`) and CSV (`output/`) formats alongside raw JSON backups.
+in Parquet (`data/processed/`) and CSV (`output/`) formats alongside raw JSON backups,
+plus combined multi-match datasets in `output/combined/` and `data/processed/combined/`.
 
 Usage examples:
-    1. Scrape (or load from local cache) the default match URL:
+    1. Scrape (or load from local cache) the configured array of match URLs (`DEFAULT_MATCH_URLS`):
        python -m src.main
 
     2. Scrape one or more custom WhoScored Live match URLs:
-       python -m src.main --url "https://www.whoscored.com/Matches/1821123/Live/..."
+       python -m src.main --url "https://www.whoscored.com/Matches/1821123/Live/..." "https://..."
 
-    3. Re-generate Parquet & CSV files offline from saved raw JSON backups:
-       python -m src.main --from-json "data/raw/match_1821123_Southampton_vs_Aston_Villa_raw.json"
+    3. Re-generate Parquet, per-match CSV, and combined CSV files offline from saved raw JSON backups:
+       python -m src.main --from-json data/raw/*_raw.json
 """
 
 from __future__ import annotations
@@ -27,11 +28,23 @@ from typing import Any, Sequence
 from src.exporter import ExportedFiles, MatchDataExporter
 from src.models import ParsedMatchDataset
 from src.parser import MatchDataParser
-from src.scraper import WhoScoredScraper, WhoScoredScraperError
+from src.scraper import WhoScoredScraper
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MATCH_URL = "https://www.whoscored.com/Matches/1821123/Live/England-Premier-League"
+# Array of WhoScored Live match URLs to scrape/process by default when running `python -m src.main`.
+DEFAULT_MATCH_URLS: list[str] = [
+    "https://www.whoscored.com/matches/1821123/live/england-premier-league-2024-2025-southampton-aston_villa",
+    "https://www.whoscored.com/matches/1983593/live/england-premier-league-2026-2027-chelsea-bournemouth",
+    "https://www.whoscored.com/matches/1983603/live/england-premier-league-2026-2027-liverpool-manchester-city",
+    "https://www.whoscored.com/matches/1993972/live/spain-laliga-2026-2027-barcelona-deportivo-alaves",
+    "https://www.whoscored.com/matches/1993980/live/spain-laliga-2026-2027-levante-atletico-madrid",
+    "https://www.whoscored.com/matches/1993983/live/spain-laliga-2026-2027-racing-santander-real-madrid",
+    "https://www.whoscored.com/matches/1995426/live/germany-bundesliga-2026-2027-werder-bremen-paderborn",
+    "https://www.whoscored.com/matches/1998572/live/international-fifa-world-cup-2026-switzerland-colombia",
+    "https://www.whoscored.com/matches/2002449/live/international-fifa-world-cup-2026-france-spain",
+    "https://www.whoscored.com/matches/2029242/live/europe-champions-league-2026-2027-viking-bayern-munich",
+]
 
 
 def configure_logging(verbose: bool = False) -> None:
@@ -46,7 +59,9 @@ def configure_logging(verbose: bool = False) -> None:
 
 def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) -> None:
     """Prints a human-readable overview of the parsed match and exported files."""
-    meta = dataset.metadata_df.iloc[0] if not dataset.metadata_df.empty else {}
+    meta: dict[Any, Any] = (
+        dataset.metadata_df.iloc[0].to_dict() if not dataset.metadata_df.empty else {}
+    )
     home_team = meta.get("home_team_name", "Home")
     away_team = meta.get("away_team_name", "Away")
     score = meta.get("score", "N/A")
@@ -76,6 +91,29 @@ def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) 
     print("=" * 72 + "\n")
 
 
+def print_combined_summary(
+    match_count: int,
+    combined_dataset: ParsedMatchDataset,
+    exported: ExportedFiles,
+) -> None:
+    """Prints a summary of the combined multi-match dataset and exported combined files."""
+    print("\n" + "=" * 72)
+    print(f"Combined Dataset Summary ({match_count} matches joined)")
+    print("=" * 72)
+    for table_name, df in combined_dataset.tables().items():
+        if not df.empty:
+            print(f"  {table_name:<16} : {len(df):,} rows ({len(df.columns)} cols)")
+
+    print("\nExported Combined Files:")
+    for table_name, csv_path in exported.csv_files.items():
+        label = f"[{table_name} CSV]"
+        print(f"  {label:<16} {csv_path.resolve()}")
+    if exported.parquet_files:
+        parquet_dir = next(iter(exported.parquet_files.values())).parent.resolve()
+        print(f"  [Parquet Dir]    {parquet_dir} ({len(exported.parquet_files)} tables)")
+    print("=" * 72 + "\n")
+
+
 def process_match_payload(
     raw_data: dict[str, Any],
     parser: MatchDataParser,
@@ -95,20 +133,37 @@ def process_match_payload(
     return dataset, exported
 
 
+def _normalize_url_list(urls: str | Sequence[str] | None) -> list[str]:
+    """Normalizes a single URL string or sequence of URLs into a flat list of non-empty URLs."""
+    if urls is None:
+        return []
+    if isinstance(urls, str):
+        stripped = urls.strip()
+        return [stripped] if stripped else []
+    return [u.strip() for u in urls if u.strip()]
+
+
 def run_pipeline(
-    urls: Sequence[str] | None = None,
+    urls: str | Sequence[str] | None = None,
     from_json_files: Sequence[str | Path] | None = None,
     output_dir: str | Path = "output",
     processed_dir: str | Path = "data/processed",
+    combined_dir: str | Path | None = None,
+    export_combined: bool = True,
     headless: bool = False,
     force_scrape: bool = False,
 ) -> list[tuple[ParsedMatchDataset, ExportedFiles]]:
     """
-    Runs the end-to-end scraping, parsing, and export pipeline.
-    Automatically reuses cached `data/raw/match_<id>_*.json` files unless `force_scrape=True`.
+    Runs the end-to-end scraping, parsing, and export pipeline for one or an array of URLs.
+    Automatically reuses cached `data/raw/match_<id>_*.json` files unless `force_scrape=True`,
+    and exports joined multi-match tables to `output/combined/` when `export_combined=True`.
     """
     parser = MatchDataParser()
-    exporter = MatchDataExporter(output_dir=output_dir, processed_dir=processed_dir)
+    exporter = MatchDataExporter(
+        output_dir=output_dir,
+        processed_dir=processed_dir,
+        combined_dir=combined_dir,
+    )
     results: list[tuple[ParsedMatchDataset, ExportedFiles]] = []
 
     if from_json_files:
@@ -119,8 +174,9 @@ def run_pipeline(
                 process_match_payload(raw_data, parser, exporter, raw_json_path=json_path)
             )
 
+    normalized_urls = _normalize_url_list(urls)
     urls_to_scrape: list[str] = []
-    for url in urls or []:
+    for url in normalized_urls:
         match_id = WhoScoredScraper.extract_match_id_from_url(url)
         cached_json = None if force_scrape else exporter.find_cached_raw_json(match_id)
         if cached_json is not None:
@@ -134,19 +190,21 @@ def run_pipeline(
 
     if urls_to_scrape:
         with WhoScoredScraper(headless=headless) as scraper:
-            for url in urls_to_scrape:
-                try:
-                    raw_data = scraper.scrape_match(url)
-                    results.append(
-                        process_match_payload(
-                            raw_data,
-                            parser,
-                            exporter,
-                            overwrite_raw_json=force_scrape,
-                        )
+            raw_payloads = scraper.scrape_matches(urls_to_scrape)
+            for raw_data in raw_payloads:
+                results.append(
+                    process_match_payload(
+                        raw_data,
+                        parser,
+                        exporter,
+                        overwrite_raw_json=force_scrape,
                     )
-                except WhoScoredScraperError as exc:
-                    logger.error("Failed to scrape %s: %s", url, exc)
+                )
+
+    if export_combined and results:
+        datasets = [ds for ds, _ in results]
+        combined_ds, combined_exported = exporter.export_combined(datasets)
+        print_combined_summary(len(datasets), combined_ds, combined_exported)
 
     return results
 
@@ -159,7 +217,7 @@ def parse_cli_args() -> argparse.Namespace:
         "--url",
         "-u",
         nargs="+",
-        help=f"One or more WhoScored Live match URLs (default: {DEFAULT_MATCH_URL}).",
+        help="One or more WhoScored Live match URLs (defaults to DEFAULT_MATCH_URLS).",
     )
     cli.add_argument(
         "--from-json",
@@ -171,7 +229,18 @@ def parse_cli_args() -> argparse.Namespace:
         "--output-dir",
         "-o",
         default="output",
-        help="Directory where CSV files will be saved (default: 'output').",
+        help="Directory where per-match CSV files will be saved (default: 'output').",
+    )
+    cli.add_argument(
+        "--combined-dir",
+        "-c",
+        default=None,
+        help="Directory where combined CSV files will be saved (default: '<output-dir>/combined').",
+    )
+    cli.add_argument(
+        "--no-combined",
+        action="store_true",
+        help="Skip generating combined CSV/Parquet tables across all processed matches.",
     )
     cli.add_argument(
         "--processed-dir",
@@ -204,13 +273,15 @@ if __name__ == "__main__":
 
     target_urls = args.url
     if not target_urls and not args.from_json:
-        target_urls = [DEFAULT_MATCH_URL]
+        target_urls = DEFAULT_MATCH_URLS
 
     run_pipeline(
         urls=target_urls,
         from_json_files=args.from_json,
         output_dir=args.output_dir,
         processed_dir=args.processed_dir,
+        combined_dir=args.combined_dir,
+        export_combined=not args.no_combined,
         headless=args.headless,
         force_scrape=args.force_scrape,
     )

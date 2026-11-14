@@ -11,7 +11,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, Sequence, Union
 
 import pandas as pd
 
@@ -26,7 +26,8 @@ class MatchDataExporter:
     """
     Exports the raw `matchCentreData` JSON to `raw_dir`, Parquet tables to `processed_dir`,
     and CSV tables (`events`, `players`, `formations`, `metadata`, `player_stats`,
-    `team_stats`, `shot_zones`, `minute_mapping`, `lookups`, `common_events`) to `output_dir`.
+    `team_stats`, `shot_zones`, `minute_mapping`, `lookups`, `common_events`) to `output_dir`,
+    plus multi-match combined datasets to `combined_dir` (`output/combined/`).
     """
 
     def __init__(
@@ -34,12 +35,22 @@ class MatchDataExporter:
         output_dir: Union[str, Path] = "output",
         raw_dir: Union[str, Path] = "data/raw",
         processed_dir: Union[str, Path] = "data/processed",
+        combined_dir: Optional[Union[str, Path]] = None,
+        combined_processed_dir: Optional[Union[str, Path]] = None,
         export_parquet: bool = True,
         export_csv: bool = True,
     ) -> None:
         self.output_dir = Path(output_dir)
         self.raw_dir = Path(raw_dir)
         self.processed_dir = Path(processed_dir)
+        self.combined_dir = (
+            Path(combined_dir) if combined_dir is not None else self.output_dir / "combined"
+        )
+        self.combined_processed_dir = (
+            Path(combined_processed_dir)
+            if combined_processed_dir is not None
+            else self.processed_dir / "combined"
+        )
         self.export_parquet = export_parquet
         self.export_csv = export_csv
 
@@ -105,13 +116,19 @@ class MatchDataExporter:
         table_name: str,
         csv_files: dict[str, Path],
         parquet_files: dict[str, Path],
+        csv_dir: Optional[Path] = None,
+        parquet_dir: Optional[Path] = None,
     ) -> None:
         """Writes a non-empty DataFrame to CSV and/or Parquet."""
         if df.empty:
             return
 
+        target_csv_dir = csv_dir if csv_dir is not None else self.output_dir
+        target_parquet_dir = parquet_dir if parquet_dir is not None else self.processed_dir
+
         if self.export_csv:
-            csv_path = self.output_dir / f"{prefix}_{table_name}.csv"
+            target_csv_dir.mkdir(parents=True, exist_ok=True)
+            csv_path = target_csv_dir / f"{prefix}_{table_name}.csv"
             df.to_csv(csv_path, index=False, encoding="utf-8-sig")
             csv_files[table_name] = csv_path
             logger.info(
@@ -123,7 +140,8 @@ class MatchDataExporter:
             )
 
         if self.export_parquet:
-            parquet_path = self.processed_dir / f"{prefix}_{table_name}.parquet"
+            target_parquet_dir.mkdir(parents=True, exist_ok=True)
+            parquet_path = target_parquet_dir / f"{prefix}_{table_name}.parquet"
             try:
                 df.to_parquet(parquet_path, index=False)
                 parquet_files[table_name] = parquet_path
@@ -160,3 +178,34 @@ class MatchDataExporter:
             csv_files=csv_files,
             parquet_files=parquet_files,
         )
+
+    def export_combined(
+        self,
+        datasets: Sequence[ParsedMatchDataset],
+        prefix: str = "combined",
+    ) -> tuple[ParsedMatchDataset, ExportedFiles]:
+        """
+        Combines multiple `ParsedMatchDataset` instances into one dataset and exports
+        all non-empty tables to `self.combined_dir` (CSV) and `self.combined_processed_dir` (Parquet).
+        """
+        combined_dataset = ParsedMatchDataset.combine(datasets)
+        csv_files: dict[str, Path] = {}
+        parquet_files: dict[str, Path] = {}
+
+        for table_name, df in combined_dataset.tables().items():
+            self._write_table(
+                df,
+                prefix,
+                table_name,
+                csv_files,
+                parquet_files,
+                csv_dir=self.combined_dir,
+                parquet_dir=self.combined_processed_dir,
+            )
+
+        exported = ExportedFiles(
+            raw_json_path=self.combined_dir,
+            csv_files=csv_files,
+            parquet_files=parquet_files,
+        )
+        return combined_dataset, exported

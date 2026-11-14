@@ -114,3 +114,43 @@ def test_exporter_round_trip_csv_and_parquet(tmp_path: Path) -> None:
         assert len(csv_df) == len(df)
         assert len(parquet_df) == len(df)
 
+
+@pytest.mark.skipif(len(RAW_FILES) < 2, reason=f"Need at least 2 raw JSON files in {RAW_DIR}")
+def test_exporter_combined_catalog_and_tables(tmp_path: Path) -> None:
+    """
+    Checks that `MatchDataExporter.export_combined` joins multiple `ParsedMatchDataset`
+    instances and writes combined CSVs into a separate `output/combined/` catalog.
+    """
+    parser = MatchDataParser()
+    datasets = [
+        parser.parse_all(json.loads(f.read_text(encoding="utf-8")))
+        for f in RAW_FILES[:2]
+    ]
+    exporter = MatchDataExporter(
+        output_dir=tmp_path / "output",
+        raw_dir=tmp_path / "raw",
+        processed_dir=tmp_path / "processed",
+        export_parquet=True,
+        export_csv=True,
+    )
+    combined_ds, exported = exporter.export_combined(datasets)
+
+    assert exporter.combined_dir == tmp_path / "output" / "combined"
+    assert exporter.combined_processed_dir == tmp_path / "processed" / "combined"
+
+    non_empty_tables = {name: df for name, df in combined_ds.tables().items() if not df.empty}
+    assert set(exported.csv_files.keys()) == set(non_empty_tables.keys())
+    assert set(exported.parquet_files.keys()) == set(non_empty_tables.keys())
+
+    for name, df in non_empty_tables.items():
+        csv_path = exported.csv_files[name]
+        assert csv_path.parent == exporter.combined_dir
+        assert csv_path.name == f"combined_{name}.csv"
+        csv_df = pd.read_csv(csv_path)
+        assert len(csv_df) == len(df)
+
+    expected_events = sum(len(ds.events_df) for ds in datasets)
+    assert len(combined_ds.events_df) == expected_events
+    assert len(combined_ds.metadata_df) == 2
+
+

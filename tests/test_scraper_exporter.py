@@ -40,9 +40,25 @@ def test_scraper_html_fallback_preserves_lookup_tables() -> None:
     extracted = WhoScoredScraper.extract_all_from_html(html, match_url=url)
     assert extracted is not None
     assert extracted["matchId"] == 999
-    assert extracted["_sourceUrl"] == url
+    assert extracted["_sourceUrl"] == "https://www.whoscored.com/matches/999/live/"
     assert extracted["_matchCentreEventTypeJson"] == {"pass": 1, "goal": 16}
     assert extracted["_formationIdNameMappings"] == {"2": "442"}
+
+
+def test_scraper_normalizes_match_url() -> None:
+    """Checks that any WhoScored match URL strips trailing slugs and normalizes to `/matches/<id>/live/`."""
+    assert (
+        WhoScoredScraper.normalize_match_url(
+            "https://www.whoscored.com/Matches/1729376/Live/england-premier-league-garbage"
+        )
+        == "https://www.whoscored.com/matches/1729376/live/"
+    )
+    assert (
+        WhoScoredScraper.normalize_match_url(
+            "https://www.whoscored.com/matches/1729401/show/some-random-slug"
+        )
+        == "https://www.whoscored.com/matches/1729401/live/"
+    )
 
 
 def test_scraper_detects_unsaved_page_args() -> None:

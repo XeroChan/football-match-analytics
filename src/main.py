@@ -67,10 +67,6 @@ DEFAULT_MATCH_URLS: list[str] = [
     "https://www.whoscored.com/matches/1835012/live/",
     "https://www.whoscored.com/matches/1835068/live/",
     "https://www.whoscored.com/matches/1835115/live/",
-    "https://www.whoscored.com/matches/1901397/live/",
-    "https://www.whoscored.com/matches/1901425/live/",
-    "https://www.whoscored.com/matches/1981110/live/",
-    "https://www.whoscored.com/matches/1981245/live/",
 
     # 4. Bundesliga (Germany)
     "https://www.whoscored.com/matches/1743590/live/",
@@ -112,10 +108,11 @@ DEFAULT_MATCH_URLS: list[str] = [
     "https://www.whoscored.com/matches/1990125/live/",
     "https://www.whoscored.com/matches/1990140/live/",
     "https://www.whoscored.com/matches/1990110/live/",
-    "https://www.whoscored.com/matches/1990155/live/",
 
     # 11. FA Cup (England)
     "https://www.whoscored.com/matches/1889763/live/",
+
+    ## =============================================
 
     # 12. Major League Soccer (USA)
 
@@ -142,8 +139,6 @@ DEFAULT_MATCH_URLS: list[str] = [
     "https://www.whoscored.com/matches/1906110/live/",
 
     # 20. Jupiler Pro League (Belgium)
-    "https://www.whoscored.com/matches/1975471/live/",
-    "https://www.whoscored.com/matches/1975510/live/",
 
     # 21. 2. Bundesliga (Germany)
 

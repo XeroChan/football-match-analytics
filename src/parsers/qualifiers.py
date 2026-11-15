@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from src.parsers.helpers import to_int
+from src.parsers.helpers import as_dict, to_int
 
 KEY_VALUE_QUALIFIERS: dict[str, str] = {
     "Zone": "qualifier_zone",
@@ -54,10 +54,7 @@ BOOLEAN_FLAG_QUALIFIERS: dict[str, str] = {
 BODY_PART_QUALIFIERS: set[str] = {"RightFoot", "LeftFoot", "Head", "OtherBodyPart"}
 
 
-def extract_qualifiers_info(
-    qualifiers: Any,
-    include_raw_json_columns: bool = True,
-) -> dict[str, Any]:
+def extract_qualifiers_info(qualifiers: Any) -> dict[str, Any]:
     """Flattens an event's `qualifiers` list into top-level columns."""
     result: dict[str, Any] = {
         "qualifier_names": "",
@@ -65,9 +62,8 @@ def extract_qualifiers_info(
         "body_part": None,
         **dict.fromkeys(KEY_VALUE_QUALIFIERS.values()),
         **dict.fromkeys(BOOLEAN_FLAG_QUALIFIERS.values(), False),
+        "qualifiers_json": "{}",
     }
-    if include_raw_json_columns:
-        result["qualifiers_json"] = "{}"
 
     if not isinstance(qualifiers, list) or not qualifiers:
         return result
@@ -79,8 +75,7 @@ def extract_qualifiers_info(
     for q in qualifiers:
         if not isinstance(q, dict):
             continue
-        raw_type = q.get("type")
-        q_type = raw_type if isinstance(raw_type, dict) else {}
+        q_type = as_dict(q.get("type"))
         raw_name = q_type.get("displayName")
         raw_type_id = to_int(q_type.get("value"))
         if raw_type_id is not None:
@@ -105,6 +100,5 @@ def extract_qualifiers_info(
 
     result["qualifier_names"] = "|".join(sorted(set(names)))
     result["qualifier_type_ids"] = "|".join(str(tid) for tid in sorted(set(type_ids)))
-    if include_raw_json_columns:
-        result["qualifiers_json"] = json.dumps(kv_map, ensure_ascii=False)
+    result["qualifiers_json"] = json.dumps(kv_map, ensure_ascii=False)
     return result

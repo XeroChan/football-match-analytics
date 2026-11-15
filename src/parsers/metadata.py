@@ -13,7 +13,7 @@ from typing import Any
 
 import pandas as pd
 
-from src.parsers.helpers import clean_score, sort_long_table, to_int
+from src.parsers.helpers import as_dict, clean_score, sort_long_table, to_int
 
 # Periods for which fixed metadata columns are always emitted (1H, 2H, ET1, ET2, PSO).
 METADATA_PERIODS = (1, 2, 3, 4, 5)
@@ -21,13 +21,8 @@ METADATA_PERIODS = (1, 2, 3, 4, 5)
 
 def parse_match_metadata(match_data: dict[str, Any]) -> pd.DataFrame:
     """Extracts match-level summary information (teams, score, date, venue, referee)."""
-    home = match_data.get("home") or {}
-    away = match_data.get("away") or {}
-    raw_referee = match_data.get("referee")
-    referee = raw_referee if isinstance(raw_referee, dict) else {}
-
-    home_formations = home.get("formations") or []
-    away_formations = away.get("formations") or []
+    teams = (("home", as_dict(match_data.get("home"))), ("away", as_dict(match_data.get("away"))))
+    referee = as_dict(match_data.get("referee"))
 
     record: dict[str, Any] = {
         "match_id": match_data.get("matchId"),
@@ -51,24 +46,22 @@ def parse_match_metadata(match_data: dict[str, Any]) -> pd.DataFrame:
         "et_score": clean_score(match_data.get("etScore")),
         "pk_score": match_data.get("pkScore"),
         "decided_on_penalties": str(match_data.get("score") or "").strip().startswith("*"),
-        "home_team_id": home.get("teamId"),
-        "home_team_name": home.get("name"),
-        "home_field": home.get("field"),
-        "home_country_name": home.get("countryName"),
-        "home_manager_name": home.get("managerName"),
-        "home_average_age": home.get("averageAge"),
-        "home_starting_formation": (
-            home_formations[0].get("formationName") if home_formations else None
-        ),
-        "away_team_id": away.get("teamId"),
-        "away_team_name": away.get("name"),
-        "away_field": away.get("field"),
-        "away_country_name": away.get("countryName"),
-        "away_manager_name": away.get("managerName"),
-        "away_average_age": away.get("averageAge"),
-        "away_starting_formation": (
-            away_formations[0].get("formationName") if away_formations else None
-        ),
+        **{
+            f"{side}_{col}": val
+            for side, team in teams
+            for col, val in (
+                ("team_id", team.get("teamId")),
+                ("team_name", team.get("name")),
+                ("field", team.get("field")),
+                ("country_name", team.get("countryName")),
+                ("manager_name", team.get("managerName")),
+                ("average_age", team.get("averageAge")),
+                (
+                    "starting_formation",
+                    (team.get("formations") or [{}])[0].get("formationName"),
+                ),
+            )
+        },
         "max_minute": match_data.get("maxMinute"),
         "expanded_max_minute": match_data.get("expandedMaxMinute"),
         "minute_expanded": match_data.get("minuteExpanded"),
@@ -79,9 +72,8 @@ def parse_match_metadata(match_data: dict[str, Any]) -> pd.DataFrame:
     }
 
     # `home/away.scores` -> {fulltime, halftime, running, ...}
-    for side, team in (("home", home), ("away", away)):
-        raw_scores = team.get("scores")
-        scores = raw_scores if isinstance(raw_scores, dict) else {}
+    for side, team in teams:
+        scores = as_dict(team.get("scores"))
         for key in ("halftime", "fulltime", "running"):
             record[f"{side}_score_{key}"] = scores.get(key)
         for key in sorted(set(scores.keys()) - {"halftime", "fulltime", "running"}):

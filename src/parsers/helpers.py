@@ -25,38 +25,45 @@ LONG_TABLE_INT_COLS = (
 )
 
 
+def as_dict(value: Any) -> dict[str, Any]:
+    """Returns `value` if it is a dict-like mapping, otherwise an empty dict."""
+    return value if hasattr(value, "get") else {}
+
+
 def clean_score(value: Any) -> str | None:
     """Removes the penalty-shootout marker '*' from WhoScored score strings."""
     return str(value).replace("*", "").strip() if value is not None else None
 
 
-def display_name(value: Any) -> str | None:
-    """Returns `displayName` from WhoScored `{displayName, value}` objects."""
-    return value.get("displayName") if isinstance(value, dict) else None
+def _to_num(value: Any, typ: type[int | float]) -> Any:
+    try:
+        return typ(value) if pd.notna(value) else None
+    except (TypeError, ValueError):
+        return None
 
 
 def to_int(value: Any) -> int | None:
-    try:
-        return int(value) if pd.notna(value) else None
-    except (TypeError, ValueError):
-        return None
+    return _to_num(value, int)
 
 
 def to_float(value: Any) -> float | None:
-    try:
-        return float(value) if pd.notna(value) else None
-    except (TypeError, ValueError):
-        return None
+    return _to_num(value, float)
 
 
 def iter_teams(
     match_data: dict[str, Any],
-) -> Iterator[tuple[str, dict[str, Any], Any, Any]]:
-    """Yields `(side, team_dict, team_id, team_name)` for `'home'` and `'away'`."""
+) -> Iterator[tuple[dict[str, Any], dict[str, Any]]]:
+    """Yields `(team_dict, base_row)` for `'home'` and `'away'`."""
+    match_id = match_data.get("matchId")
     for side in ("home", "away"):
-        raw_team = match_data.get(side)
-        team = raw_team if isinstance(raw_team, dict) else {}
-        yield side, team, team.get("teamId"), team.get("name")
+        team = as_dict(match_data.get(side))
+        base = {
+            "match_id": match_id,
+            "team_side": side,
+            "team_id": team.get("teamId"),
+            "team_name": team.get("name"),
+        }
+        yield team, base
 
 
 def build_player_lookup(players_df: pd.DataFrame | None) -> dict[int, dict[str, Any]]:
@@ -92,7 +99,7 @@ def resolve_player_name(
 
 def extract_final_rating(stats: Any) -> float | None:
     """Extracts the final recorded player rating from `player['stats']['ratings']`."""
-    ratings = stats.get("ratings") if isinstance(stats, dict) else None
+    ratings = as_dict(stats).get("ratings")
     if not isinstance(ratings, dict) or not ratings:
         return None
     try:

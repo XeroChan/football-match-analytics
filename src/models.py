@@ -8,7 +8,7 @@ Data containers for parsed match tables (`ParsedMatchDataset`) and exported file
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
@@ -70,30 +70,15 @@ class ParsedMatchDataset:
         Combines a sequence of `ParsedMatchDataset` objects into a single multi-match
         `ParsedMatchDataset` by concatenating each corresponding table.
         """
-        if not datasets:
-            return cls(
-                match_id="combined",
-                metadata_df=pd.DataFrame(),
-                players_df=pd.DataFrame(),
-                events_df=pd.DataFrame(),
-            )
-
+        dedup = {"lookups_df": ("lookup_type", "lookup_id", "name")}
         match_ids = [ds.match_id for ds in datasets if ds.match_id is not None]
         return cls(
             match_id=f"combined_{len(datasets)}_matches" if match_ids else "combined",
-            metadata_df=_concat_frames([ds.metadata_df for ds in datasets]),
-            players_df=_concat_frames([ds.players_df for ds in datasets]),
-            events_df=_concat_frames([ds.events_df for ds in datasets]),
-            formations_df=_concat_frames([ds.formations_df for ds in datasets]),
-            player_stats_df=_concat_frames([ds.player_stats_df for ds in datasets]),
-            team_stats_df=_concat_frames([ds.team_stats_df for ds in datasets]),
-            shot_zones_df=_concat_frames([ds.shot_zones_df for ds in datasets]),
-            minute_mapping_df=_concat_frames([ds.minute_mapping_df for ds in datasets]),
-            lookups_df=_concat_frames(
-                [ds.lookups_df for ds in datasets],
-                deduplicate_cols=("lookup_type", "lookup_id", "name"),
-            ),
-            common_events_df=_concat_frames([ds.common_events_df for ds in datasets]),
+            **{
+                f.name: _concat_frames([getattr(ds, f.name) for ds in datasets], dedup.get(f.name))
+                for f in fields(cls)
+                if f.name != "match_id"
+            },
         )
 
 

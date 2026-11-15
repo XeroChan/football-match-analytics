@@ -8,12 +8,13 @@ pass receivers.
 from __future__ import annotations
 
 import json
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
 from src.parsers.helpers import (
+    as_dict,
     build_player_lookup,
     cast_int_columns,
     clean_score,
@@ -22,7 +23,6 @@ from src.parsers.helpers import (
     resolve_player_name,
     to_int,
 )
-from src.parsers.lineups import parse_players
 from src.parsers.qualifiers import extract_qualifiers_info
 
 INT_EVENT_COLUMNS: tuple[str, ...] = (
@@ -51,8 +51,6 @@ INT_EVENT_COLUMNS: tuple[str, ...] = (
 )
 
 FLOAT_EVENT_COLUMNS: tuple[str, ...] = ("x", "y", "end_x", "end_y", "pass_length", "pass_angle")
-
-EventLike = Union[dict[str, Any], "_MergedEventView"]
 
 
 class _MergedEventView:
@@ -89,10 +87,6 @@ def _merge_event_lists(lists: list[list[Any]]) -> list[Any]:
     return list(dict.fromkeys(item for lst in non_empty for item in lst))
 
 
-def _as_mapping(value: Any) -> EventLike:
-    return value if isinstance(value, (dict, _MergedEventView)) else {}
-
-
 def enrich_with_pass_receivers(df: pd.DataFrame) -> pd.DataFrame:
     """
     Adds pass receiver columns (`receiver_id`, `receiver_name`, `receiver_is_first_eleven`)
@@ -101,15 +95,16 @@ def enrich_with_pass_receivers(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df
 
-    df = df.copy()
     on_ball = df.loc[df["player_id"].notna()]
-    next_cols = ["team_id", "player_id", "player_name", "is_first_eleven"]
-    shifted = on_ball.groupby("period", sort=False, dropna=False)[next_cols].shift(-1)
-
-    df["next_team_id"] = shifted["team_id"]
-    df["next_player_id"] = shifted["player_id"]
-    df["next_player_name"] = shifted["player_name"]
-    df["next_player_is_first_eleven"] = shifted["is_first_eleven"]
+    next_map = {
+        "next_team_id": "team_id",
+        "next_player_id": "player_id",
+        "next_player_name": "player_name",
+        "next_player_is_first_eleven": "is_first_eleven",
+    }
+    shifted = on_ball.groupby("period", sort=False, dropna=False)[list(next_map.values())].shift(-1)
+    for dst_col, src_col in next_map.items():
+        df[dst_col] = shifted[src_col]
 
     valid_pass_receiver = (
         (df["event_type"] == "Pass")
@@ -120,11 +115,10 @@ def enrich_with_pass_receivers(df: pd.DataFrame) -> pd.DataFrame:
         & (df["player_id"] != df["next_player_id"])
     )
 
-    df["receiver_id"] = np.where(valid_pass_receiver, df["next_player_id"], None)
-    df["receiver_name"] = np.where(valid_pass_receiver, df["next_player_name"], None)
-    df["receiver_is_first_eleven"] = np.where(
-        valid_pass_receiver, df["next_player_is_first_eleven"], None,
-    )
+    for suffix in ("id", "name", "is_first_eleven"):
+        df[f"receiver_{suffix}"] = np.where(
+            valid_pass_receiver, df[f"next_player_{suffix}"], None,
+        )
 
     cast_int_columns(df, INT_EVENT_COLUMNS)
     for float_col in FLOAT_EVENT_COLUMNS:
@@ -137,7 +131,6 @@ def enrich_with_pass_receivers(df: pd.DataFrame) -> pd.DataFrame:
 def parse_events(
     match_data: dict[str, Any],
     players_df: pd.DataFrame | None = None,
-    include_raw_json_columns: bool = True,
 ) -> pd.DataFrame:
     """
     Parses ALL chronological match events from `matchCentreData["events"]` for both teams,
@@ -148,9 +141,6 @@ def parse_events(
     if not events:
         return pd.DataFrame()
 
-    if players_df is None:
-        players_df = parse_players(match_data)
-
     match_id = match_data.get("matchId")
     player_name_dict = {
         str(k): str(v)
@@ -158,16 +148,16 @@ def parse_events(
     }
     event_type_names = event_type_id_to_name(match_data)
 
-    team_map: dict[Any, dict[str, str]] = {}
+    team_map: dict[Any, dict[str, Any]] = {}
     incidents_by_id: dict[Any, list[dict[str, Any]]] = {}
     orphan_incidents: list[dict[str, Any]] = []
     event_ids = {
         ev.get("id") for ev in events if isinstance(ev, dict) and ev.get("id") is not None
     }
 
-    for side, info, team_id_val, team_name_val in iter_teams(match_data):
-        if team_id_val is not None:
-            team_map[team_id_val] = {"team_name": team_name_val, "team_side": side}
+    for info, base in iter_teams(match_data):
+        if base["team_id"] is not None:
+            team_map[base["team_id"]] = base
         for inc in info.get("incidentEvents") or []:
             if not isinstance(inc, dict):
                 continue
@@ -177,13 +167,10 @@ def parse_events(
             else:
                 orphan_incidents.append(inc)
 
-    all_events: list[tuple[EventLike, bool]] = [
-        (
-            _MergedEventView([ev, *incidents_by_id[ev.get("id")]])
-            if isinstance(ev, dict) and ev.get("id") in incidents_by_id
-            else ev,
-            isinstance(ev, dict) and ev.get("id") in incidents_by_id,
-        )
+    all_events: list[tuple[Any, bool]] = [
+        (_MergedEventView([ev, *incs]), True)
+        if isinstance(ev, dict) and (incs := incidents_by_id.get(ev.get("id")))
+        else (ev, False)
         for ev in events
     ] + [(inc, True) for inc in orphan_incidents]
 
@@ -191,11 +178,11 @@ def parse_events(
 
     parsed_rows: list[dict[str, Any]] = []
     for idx, (ev, is_incident) in enumerate(all_events):
-        ev_type = _as_mapping(ev.get("type"))
-        outcome = _as_mapping(ev.get("outcomeType"))
-        period = _as_mapping(ev.get("period"))
-        card = _as_mapping(ev.get("cardType"))
-        minute_info = _as_mapping(ev.get("minuteInfo"))
+        ev_type = as_dict(ev.get("type"))
+        outcome = as_dict(ev.get("outcomeType"))
+        period = as_dict(ev.get("period"))
+        card = as_dict(ev.get("cardType"))
+        minute_info = as_dict(ev.get("minuteInfo"))
 
         team_id = ev.get("teamId")
         team_meta = team_map.get(team_id, {})
@@ -208,24 +195,15 @@ def parse_events(
         related_player_id = to_int(ev.get("relatedPlayerId"))
 
         satisfied_ids = ev.get("satisfiedEventsTypes") or []
-        satisfied_names: list[str] = []
-        for t in satisfied_ids:
-            tid = to_int(t)
-            satisfied_names.append(
-                event_type_names.get(tid, str(t)) if tid is not None else str(t),
-            )
-        satisfiers = ev.get("satisfiers") or []
-        satisfier_names: list[str] = []
-        satisfier_ids: list[str] = []
-        for s in satisfiers:
-            if not isinstance(s, dict):
-                continue
-            s_name = s.get("name")
-            s_id = to_int(s.get("id"))
-            if s_name and str(s_name) not in satisfier_names:
-                satisfier_names.append(str(s_name))
-            if s_id is not None and str(s_id) not in satisfier_ids:
-                satisfier_ids.append(str(s_id))
+        satisfied_names = [
+            event_type_names.get(tid, str(t)) if (tid := to_int(t)) is not None else str(t)
+            for t in satisfied_ids
+        ]
+        satisfiers = [s for s in (ev.get("satisfiers") or []) if isinstance(s, dict)]
+        satisfier_names = dict.fromkeys(str(s["name"]) for s in satisfiers if s.get("name"))
+        satisfier_ids = dict.fromkeys(
+            str(sid) for s in satisfiers if (sid := to_int(s.get("id"))) is not None
+        )
 
         row: dict[str, Any] = {
             "match_id": match_id,
@@ -270,26 +248,19 @@ def parse_events(
             ),
             "event_field": ev.get("field"),
             "event_text": ev.get("text"),
-            "minute_info_minute": to_int(minute_info.get("minute")),
+            "minute_info_minute": minute_info.get("minute"),
             "minute_info_minute_string": minute_info.get("minuteString"),
-            "minute_info_expanded_minute": to_int(minute_info.get("expandedMinute")),
-            "minute_info_period": to_int(minute_info.get("period")),
+            "minute_info_expanded_minute": minute_info.get("expandedMinute"),
+            "minute_info_period": minute_info.get("period"),
             "minute_info_extra_time": minute_info.get("extraTime"),
             "minute_info_is_end_of_period": bool(minute_info.get("isEndOfPeriod", False)),
             "minute_info_is_penalty_shootout": bool(minute_info.get("isPenaltyShootOut", False)),
             "satisfiers": "|".join(satisfier_names),
             "satisfier_ids": "|".join(satisfier_ids),
             "satisfied_event_type_names": "|".join(satisfied_names),
+            "satisfied_events_types": json.dumps(satisfied_ids),
+            **extract_qualifiers_info(ev.get("qualifiers")),
         }
-        if include_raw_json_columns:
-            row["satisfied_events_types"] = json.dumps(satisfied_ids)
-
-        row.update(
-            extract_qualifiers_info(
-                ev.get("qualifiers"),
-                include_raw_json_columns=include_raw_json_columns,
-            ),
-        )
 
         # Top-level `relatedEventId` (incident events) fills the gap when the
         # `RelatedEventId` qualifier is absent.
@@ -299,5 +270,4 @@ def parse_events(
 
         parsed_rows.append(row)
 
-    df = pd.DataFrame(parsed_rows)
-    return enrich_with_pass_receivers(df)
+    return enrich_with_pass_receivers(pd.DataFrame(parsed_rows))

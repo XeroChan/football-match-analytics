@@ -18,7 +18,6 @@ import json
 import logging
 import re
 import time
-from collections.abc import Sequence
 from typing import Any, ClassVar, Self
 
 from selenium import webdriver
@@ -53,7 +52,6 @@ class WhoScoredScraper:
         "matchCentreEventTypeJson": "_matchCentreEventTypeJson",
         "formationIdNameMappings": "_formationIdNameMappings",
     }
-    SAVED_PAGE_ARG_KEYS = tuple(SAVED_PAGE_ARG_MAP.keys())
 
     def __init__(
         self,
@@ -229,13 +227,13 @@ class WhoScoredScraper:
 
     @classmethod
     def find_unsaved_page_args(cls, page_args: Any) -> list[dict[str, Any]]:
-        """Returns entries from `page_args` whose `key` is not in `SAVED_PAGE_ARG_KEYS`."""
+        """Returns entries from `page_args` whose `key` is not in `SAVED_PAGE_ARG_MAP`."""
         if not isinstance(page_args, list):
             return []
         return [
             a
             for a in page_args
-            if isinstance(a, dict) and a.get("key") not in cls.SAVED_PAGE_ARG_KEYS
+            if isinstance(a, dict) and a.get("key") not in cls.SAVED_PAGE_ARG_MAP
         ]
 
     @classmethod
@@ -309,7 +307,7 @@ class WhoScoredScraper:
         """
 
         deadline = time.time() + self.timeout_seconds
-        saved_keys = list(self.SAVED_PAGE_ARG_KEYS)
+        saved_keys = list(self.SAVED_PAGE_ARG_MAP)
         while time.time() < deadline:
             try:
                 result = self._driver.execute_script(js_query, saved_keys)
@@ -345,112 +343,51 @@ class WhoScoredScraper:
             WhoScoredScraperError: If `matchCentreData` cannot be retrieved via JS or HTML fallback.
         """
         match_url = self.build_match_url(match_id)
-        own_driver = self._driver is None
-        if own_driver:
-            self.start()
-
         assert self._driver is not None
+
         try:
+            logger.info("Navigating to match URL: %s", match_url)
+            self._driver.get(match_url)
+        except WebDriverException as exc:
+            raise WhoScoredScraperError(
+                f"Browser navigation failed for {match_url}: {exc}",
+            ) from exc
+
+        # Method 1 (Primary & Most Reliable): Poll the browser's parsed JS object
+        match_data = self._poll_js_match_data()
+
+        # Method 2 (Fallback): Parse HTML source with balanced-brace JSON extraction
+        if not match_data:
+            logger.info(
+                "JS global not populated within timeout; "
+                "trying HTML balanced-brace fallback...",
+            )
             try:
-                logger.info("Navigating to match URL: %s", match_url)
-                self._driver.get(match_url)
+                html_source = self._driver.page_source
             except WebDriverException as exc:
                 raise WhoScoredScraperError(
-                    f"Browser navigation failed for {match_url}: {exc}",
+                    f"Failed to read page source from {match_url}: {exc}",
                 ) from exc
-
-            # Method 1 (Primary & Most Reliable): Poll the browser's parsed JS object
-            match_data = self._poll_js_match_data()
-
-            # Method 2 (Fallback): Parse HTML source with balanced-brace JSON extraction
-            if not match_data:
-                logger.info(
-                    "JS global not populated within timeout; "
-                    "trying HTML balanced-brace fallback...",
-                )
-                try:
-                    html_source = self._driver.page_source
-                except WebDriverException as exc:
-                    raise WhoScoredScraperError(
-                        f"Failed to read page source from {match_url}: {exc}",
-                    ) from exc
-                match_data = self.extract_all_from_html(html_source)
-                if match_data:
-                    logger.warning(
-                        "HTML fallback used: page args keys cannot be enumerated, so unsaved "
-                        "keys are NOT reported for this match.",
-                    )
-
-            if not match_data:
-                raise WhoScoredScraperError(
-                    f"Could not extract 'matchCentreData' from {match_url}. "
-                    "Ensure the URL points to a valid WhoScored '/Live/' match centre page "
-                    "and was not blocked by a Cloudflare CAPTCHA challenge.",
+            match_data = self.extract_all_from_html(html_source)
+            if match_data:
+                logger.warning(
+                    "HTML fallback used: page args keys cannot be enumerated, so unsaved "
+                    "keys are NOT reported for this match.",
                 )
 
-            self._attach_source_metadata(match_data, match_id)
-
-            events_count = len(match_data.get("events", []))
-            logger.info(
-                "Successfully extracted match data (matchId=%s, total_events=%d).",
-                match_data.get("matchId", "unknown"),
-                events_count,
+        if not match_data:
+            raise WhoScoredScraperError(
+                f"Could not extract 'matchCentreData' from {match_url}. "
+                "Ensure the URL points to a valid WhoScored '/Live/' match centre page "
+                "and was not blocked by a Cloudflare CAPTCHA challenge.",
             )
-            return match_data
 
-        finally:
-            if own_driver:
-                self.close()
+        self._attach_source_metadata(match_data, match_id)
 
-    def scrape_matches(self, match_ids: Sequence[int]) -> list[dict[str, Any]]:
-        """
-        Scrapes an array/sequence of WhoScored Match IDs within a single
-        browser session and returns a list of extracted `matchCentreData` dictionaries.
-        Invalid or unreachable matches are logged and skipped without aborting the batch.
-        """
-        if not match_ids:
-            return []
-
-        own_driver = self._driver is None
-        if own_driver:
-            self.start()
-
-        payloads: list[dict[str, Any]] = []
-        total = len(match_ids)
-        try:
-            for idx, match_id in enumerate(match_ids, start=1):
-                url = self.build_match_url(match_id)
-                try:
-                    logger.info("[%d/%d] Scraping matchId=%s (%s)", idx, total, match_id, url)
-                    payloads.append(self.scrape_match(match_id))
-                except (WhoScoredScraperError, WebDriverException, ValueError) as exc:
-                    logger.error(
-                        "[%d/%d] Skipping matchId=%s (failed to scrape): %s",
-                        idx,
-                        total,
-                        match_id,
-                        exc,
-                    )
-            return payloads
-        finally:
-            if own_driver:
-                self.close()
-
-
-def scrape_whoscored_match_json(match_id: int, headless: bool = False) -> dict[str, Any]:
-    """
-    Convenience function to scrape a single WhoScored match by ID.
-    """
-    with WhoScoredScraper(headless=headless) as scraper:
-        return scraper.scrape_match(match_id)
-
-
-def scrape_whoscored_matches_json(
-    match_ids: Sequence[int],
-    headless: bool = False,
-) -> list[dict[str, Any]]:
-    """
-    Convenience function to scrape an array of WhoScored match IDs in one browser session.
-    """
-    with WhoScoredScraper(headless=headless) as scraper:
-        return scraper.scrape_matches(match_ids)
+        events_count = len(match_data.get("events", []))
+        logger.info(
+            "Successfully extracted match data (matchId=%s, total_events=%d).",
+            match_data.get("matchId", "unknown"),
+            events_count,
+        )
+        return match_data

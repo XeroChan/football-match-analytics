@@ -36,8 +36,7 @@ def test_scraper_html_fallback_preserves_lookup_tables() -> None:
     };
     </script>
     """
-    url = "https://www.whoscored.com/Matches/999/Live/Test"
-    extracted = WhoScoredScraper.extract_all_from_html(html, match_url=url)
+    extracted = WhoScoredScraper.extract_all_from_html(html, match_id=999)
     assert extracted is not None
     assert extracted["matchId"] == 999
     assert extracted["_sourceUrl"] == "https://www.whoscored.com/matches/999/live/"
@@ -45,18 +44,14 @@ def test_scraper_html_fallback_preserves_lookup_tables() -> None:
     assert extracted["_formationIdNameMappings"] == {"2": "442"}
 
 
-def test_scraper_normalizes_match_url() -> None:
-    """Checks that any WhoScored match URL normalizes to `/matches/<id>/live/`."""
+def test_scraper_builds_match_url() -> None:
+    """Checks that `WhoScoredScraper.build_match_url` builds `/matches/<id>/live/`."""
     assert (
-        WhoScoredScraper.normalize_match_url(
-            "https://www.whoscored.com/Matches/1729376/Live/england-premier-league-garbage",
-        )
+        WhoScoredScraper.build_match_url(1729376)
         == "https://www.whoscored.com/matches/1729376/live/"
     )
     assert (
-        WhoScoredScraper.normalize_match_url(
-            "https://www.whoscored.com/matches/1729401/show/some-random-slug",
-        )
+        WhoScoredScraper.build_match_url(1729401)
         == "https://www.whoscored.com/matches/1729401/live/"
     )
 

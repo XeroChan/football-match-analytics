@@ -8,11 +8,11 @@ in Parquet (`data/processed/`) and CSV (`output/`) formats alongside raw JSON ba
 plus combined multi-match datasets in `output/combined/` and `data/processed/combined/`.
 
 Usage examples:
-    1. Scrape (or load from local cache) the configured array of match URLs (`DEFAULT_MATCH_URLS`):
+    1. Scrape (or load from local cache) the configured array of match IDs (`DEFAULT_MATCH_IDS`):
        python -m src.main
 
-    2. Scrape one or more custom WhoScored Live match URLs:
-       python -m src.main --url "https://www.whoscored.com/matches/1729376/live/" "https://..."
+    2. Scrape one or more custom WhoScored match IDs:
+       python -m src.main --match-id 1729376 1729390
 
     3. Re-generate Parquet, per-match CSV, and combined CSV files offline from saved raw JSONs:
        python -m src.main --from-json data/raw/*_raw.json
@@ -27,301 +27,12 @@ from pathlib import Path
 from typing import Any
 
 from src.exporter import ExportedFiles, MatchDataExporter
+from src.match_ids import DEFAULT_MATCH_IDS
 from src.models import ParsedMatchDataset
 from src.parser import MatchDataParser
 from src.scraper import WhoScoredScraper, WhoScoredScraperError
 
 logger = logging.getLogger(__name__)
-
-# Array of WhoScored Live match URLs to scrape/process by default when running `python -m src.main`.
-DEFAULT_MATCH_URLS: list[str] = [
-    # 1. Premier League (England)
-    "https://www.whoscored.com/matches/1729376/live/",
-    "https://www.whoscored.com/matches/1729390/live/",
-    "https://www.whoscored.com/matches/1729401/live/",
-    "https://www.whoscored.com/matches/1729415/live/",
-    "https://www.whoscored.com/matches/1821106/live/",
-    "https://www.whoscored.com/matches/1821123/live/",
-    "https://www.whoscored.com/matches/1821174/live/",
-    "https://www.whoscored.com/matches/1821210/live/",
-    "https://www.whoscored.com/matches/1821245/live/",
-    "https://www.whoscored.com/matches/1821288/live/",
-    "https://www.whoscored.com/matches/1903158/live/",
-    "https://www.whoscored.com/matches/1903399/live/",
-    "https://www.whoscored.com/matches/1903417/live/",
-    "https://www.whoscored.com/matches/1903205/live/",
-    "https://www.whoscored.com/matches/1903122/live/",
-    "https://www.whoscored.com/matches/1729380/live/",
-
-    # 2. LaLiga (Spain)
-    "https://www.whoscored.com/matches/1734890/live/",
-    "https://www.whoscored.com/matches/1734912/live/",
-    "https://www.whoscored.com/matches/1734935/live/",
-    "https://www.whoscored.com/matches/1825720/live/",
-    "https://www.whoscored.com/matches/1821643/live/",
-    "https://www.whoscored.com/matches/1821651/live/",
-    "https://www.whoscored.com/matches/1821650/live/",
-    "https://www.whoscored.com/matches/1821696/live/",
-    "https://www.whoscored.com/matches/1821702/live/",
-    "https://www.whoscored.com/matches/1821701/live/",
-    "https://www.whoscored.com/matches/1913998/live/",
-    "https://www.whoscored.com/matches/1914050/live/",
-    "https://www.whoscored.com/matches/1914112/live/",
-    "https://www.whoscored.com/matches/1914198/live/",
-    "https://www.whoscored.com/matches/1993915/live/",
-
-    # 3. Serie A (Italy)
-    "https://www.whoscored.com/matches/1746280/live/",
-    "https://www.whoscored.com/matches/1746315/live/",
-    "https://www.whoscored.com/matches/1746350/live/",
-    "https://www.whoscored.com/matches/1834910/live/",
-    "https://www.whoscored.com/matches/1834955/live/",
-    "https://www.whoscored.com/matches/1835012/live/",
-    "https://www.whoscored.com/matches/1835068/live/",
-    "https://www.whoscored.com/matches/1835115/live/",
-    "https://www.whoscored.com/matches/1835039/live/",
-    "https://www.whoscored.com/matches/1835132/live/",
-    "https://www.whoscored.com/matches/1834999/live/",
-    "https://www.whoscored.com/matches/1834987/live/",
-    "https://www.whoscored.com/matches/1901147/live/",
-    "https://www.whoscored.com/matches/1901196/live/",
-    "https://www.whoscored.com/matches/1980961/live/",
-
-    # 4. Bundesliga (Germany)
-    "https://www.whoscored.com/matches/1743590/live/",
-    "https://www.whoscored.com/matches/1743635/live/",
-    "https://www.whoscored.com/matches/1743680/live/",
-    "https://www.whoscored.com/matches/1834355/live/",
-    "https://www.whoscored.com/matches/1834402/live/",
-    "https://www.whoscored.com/matches/1834448/live/",
-    "https://www.whoscored.com/matches/1834490/live/",
-    "https://www.whoscored.com/matches/1834354/live/",
-    "https://www.whoscored.com/matches/1834527/live/",
-    "https://www.whoscored.com/matches/1834530/live/",
-    "https://www.whoscored.com/matches/1834363/live/",
-    "https://www.whoscored.com/matches/1910603/live/",
-    "https://www.whoscored.com/matches/1910601/live/",
-    "https://www.whoscored.com/matches/1910668/live/",
-    "https://www.whoscored.com/matches/1910626/live/",
-
-    # 5. UEFA Champions League
-    "https://www.whoscored.com/matches/1866120/live/",
-    "https://www.whoscored.com/matches/1866145/live/",
-    "https://www.whoscored.com/matches/1866180/live/",
-    "https://www.whoscored.com/matches/1866215/live/",
-    "https://www.whoscored.com/matches/1946390/live/",
-    "https://www.whoscored.com/matches/1946412/live/",
-    "https://www.whoscored.com/matches/1946445/live/",
-    "https://www.whoscored.com/matches/1972182/live/",
-    "https://www.whoscored.com/matches/1972187/live/",
-    "https://www.whoscored.com/matches/1972181/live/",
-    "https://www.whoscored.com/matches/1972194/live/",
-    "https://www.whoscored.com/matches/1972192/live/",
-    "https://www.whoscored.com/matches/1978405/live/",
-    "https://www.whoscored.com/matches/1978407/live/",
-    "https://www.whoscored.com/matches/2029229/live/",
-    "https://www.whoscored.com/matches/2029185/live/",
-    "https://www.whoscored.com/matches/2029184/live/",
-    "https://www.whoscored.com/matches/2029136/live/",
-
-    # 6. UEFA Europa League
-    "https://www.whoscored.com/matches/1789459/live/",
-    "https://www.whoscored.com/matches/1789453/live/",
-    "https://www.whoscored.com/matches/1789447/live/",
-    "https://www.whoscored.com/matches/1789449/live/",
-    "https://www.whoscored.com/matches/1805537/live/",
-    "https://www.whoscored.com/matches/1805547/live/",
-    "https://www.whoscored.com/matches/1809768/live/",
-    "https://www.whoscored.com/matches/1809772/live/",
-    "https://www.whoscored.com/matches/1866252/live/",
-    "https://www.whoscored.com/matches/1866278/live/",
-    "https://www.whoscored.com/matches/1866365/live/",
-    "https://www.whoscored.com/matches/1866327/live/",
-    "https://www.whoscored.com/matches/1866353/live/",
-    "https://www.whoscored.com/matches/1866305/live/",
-    "https://www.whoscored.com/matches/1866261/live/",
-
-
-    # 7. Ligue 1 (France)
-    "https://www.whoscored.com/matches/1741210/live/",
-    "https://www.whoscored.com/matches/1741245/live/",
-    "https://www.whoscored.com/matches/1741280/live/",
-    "https://www.whoscored.com/matches/1741079/live/",
-    "https://www.whoscored.com/matches/1741081/live/",
-    "https://www.whoscored.com/matches/1824815/live/",
-    "https://www.whoscored.com/matches/1824786/live/",
-    "https://www.whoscored.com/matches/1824818/live/",
-    "https://www.whoscored.com/matches/1824817/live/",
-    "https://www.whoscored.com/matches/1824824/live/",
-    "https://www.whoscored.com/matches/1824831/live/",
-    "https://www.whoscored.com/matches/1824825/live/",
-    "https://www.whoscored.com/matches/1824829/live/",
-    "https://www.whoscored.com/matches/1825026/live/",
-    "https://www.whoscored.com/matches/1824941/live/",
-    "https://www.whoscored.com/matches/1824943/live/",
-    "https://www.whoscored.com/matches/1825025/live/",
-    "https://www.whoscored.com/matches/1911455/live/",
-    "https://www.whoscored.com/matches/1911454/live/",
-    "https://www.whoscored.com/matches/1911491/live/",
-    "https://www.whoscored.com/matches/1911495/live/",
-    "https://www.whoscored.com/matches/1984060/live/",
-
-    # 8. Championship (England)
-    "https://www.whoscored.com/matches/1731715/live/",
-    "https://www.whoscored.com/matches/1732127/live/",
-    "https://www.whoscored.com/matches/1732159/live/",
-    "https://www.whoscored.com/matches/1732072/live/",
-    "https://www.whoscored.com/matches/1732158/live/",
-    "https://www.whoscored.com/matches/1731814/live/",
-    "https://www.whoscored.com/matches/1732077/live/",
-    "https://www.whoscored.com/matches/1827726/live/",
-    "https://www.whoscored.com/matches/1826859/live/",
-    "https://www.whoscored.com/matches/1826892/live/",
-    "https://www.whoscored.com/matches/1826886/live/",
-    "https://www.whoscored.com/matches/1827038/live/",
-    "https://www.whoscored.com/matches/1827047/live/",
-    "https://www.whoscored.com/matches/1827048/live/",
-    "https://www.whoscored.com/matches/1827746/live/",
-    "https://www.whoscored.com/matches/1827732/live/",
-    "https://www.whoscored.com/matches/1827762/live/",
-    "https://www.whoscored.com/matches/1908609/live/",
-    "https://www.whoscored.com/matches/1908597/live/",
-    "https://www.whoscored.com/matches/1908439/live/",
-    "https://www.whoscored.com/matches/1908433/live/",
-    "https://www.whoscored.com/matches/1908553/live/",
-    "https://www.whoscored.com/matches/1908663/live/",
-    "https://www.whoscored.com/matches/1908783/live/",
-    "https://www.whoscored.com/matches/1988975/live/",
-    "https://www.whoscored.com/matches/1988989/live/",
-    "https://www.whoscored.com/matches/1989012/live/",
-
-    # 9. League One (England)
-    "https://www.whoscored.com/matches/1732517/live/",
-    "https://www.whoscored.com/matches/1732521/live/",
-    "https://www.whoscored.com/matches/1732520/live/",
-    "https://www.whoscored.com/matches/1732244/live/",
-    "https://www.whoscored.com/matches/1732683/live/",
-    "https://www.whoscored.com/matches/1732249/live/",
-    "https://www.whoscored.com/matches/1732248/live/",
-    "https://www.whoscored.com/matches/1732281/live/",
-    "https://www.whoscored.com/matches/1732337/live/",
-    "https://www.whoscored.com/matches/1732448/live/",
-    "https://www.whoscored.com/matches/1732439/live/",
-    "https://www.whoscored.com/matches/1732432/live/",
-    "https://www.whoscored.com/matches/1732284/live/",
-    "https://www.whoscored.com/matches/1733185/live/",
-    "https://www.whoscored.com/matches/1827412/live/",
-    "https://www.whoscored.com/matches/1827393/live/",
-    "https://www.whoscored.com/matches/1827537/live/",
-    "https://www.whoscored.com/matches/1827491/live/",
-    "https://www.whoscored.com/matches/1827316/live/",
-    "https://www.whoscored.com/matches/1827480/live/",
-    "https://www.whoscored.com/matches/1827450/live/",
-    "https://www.whoscored.com/matches/1909078/live/",
-    "https://www.whoscored.com/matches/1909123/live/",
-    "https://www.whoscored.com/matches/1909084/live/",
-    "https://www.whoscored.com/matches/1909148/live/",
-    "https://www.whoscored.com/matches/1909197/live/",
-    "https://www.whoscored.com/matches/1909113/live/",
-    "https://www.whoscored.com/matches/1909371/live/",
-    "https://www.whoscored.com/matches/1989473/live/",
-    "https://www.whoscored.com/matches/1989435/live/",
-    "https://www.whoscored.com/matches/1732610/live/",
-
-    # 10. League Two (England)
-    "https://www.whoscored.com/matches/1732749/live/",
-    "https://www.whoscored.com/matches/1732764/live/",
-    "https://www.whoscored.com/matches/1733213/live/",
-    "https://www.whoscored.com/matches/1733186/live/",
-    "https://www.whoscored.com/matches/1733183/live/",
-    "https://www.whoscored.com/matches/1732835/live/",
-    "https://www.whoscored.com/matches/1732839/live/",
-    "https://www.whoscored.com/matches/1732837/live/",
-    "https://www.whoscored.com/matches/1732826/live/",
-    "https://www.whoscored.com/matches/1733260/live/",
-    "https://www.whoscored.com/matches/1732744/live/",
-    "https://www.whoscored.com/matches/1732968/live/",
-    "https://www.whoscored.com/matches/1733046/live/",
-    "https://www.whoscored.com/matches/1828505/live/",
-    "https://www.whoscored.com/matches/1828482/live/",
-    "https://www.whoscored.com/matches/1828478/live/",
-    "https://www.whoscored.com/matches/1828521/live/",
-    "https://www.whoscored.com/matches/1828712/live/",
-    "https://www.whoscored.com/matches/1828593/live/",
-    "https://www.whoscored.com/matches/1828713/live/",
-    "https://www.whoscored.com/matches/1909641/live/",
-    "https://www.whoscored.com/matches/1909662/live/",
-    "https://www.whoscored.com/matches/1909674/live/",
-    "https://www.whoscored.com/matches/1909894/live/",
-    "https://www.whoscored.com/matches/1909764/live/",
-    "https://www.whoscored.com/matches/1909767/live/",
-    "https://www.whoscored.com/matches/1909773/live/",
-    "https://www.whoscored.com/matches/1909971/live/",
-    "https://www.whoscored.com/matches/1909968/live/",
-    "https://www.whoscored.com/matches/1990026/live/",
-    "https://www.whoscored.com/matches/1990039/live/",
-    "https://www.whoscored.com/matches/1990166/live/",
-    "https://www.whoscored.com/matches/1990151/live/",
-    "https://www.whoscored.com/matches/1990132/live/",
-    "https://www.whoscored.com/matches/1990141/live/",
-    "https://www.whoscored.com/matches/1990228/live/",
-
-
-    # 11. FA Cup (England)
-    "https://www.whoscored.com/matches/1787371/live/england-fa-cup-2023-2024-crystal-palace-everton",
-    "https://www.whoscored.com/matches/1787379/live/england-fa-cup-2023-2024-gillingham-sheffield-united",
-    "https://www.whoscored.com/matches/1795070/live/england-fa-cup-2023-2024-bournemouth-swansea",
-    "https://www.whoscored.com/matches/1796264/live/england-fa-cup-2023-2024-bristol-city-nottingham-forest",
-    "https://www.whoscored.com/matches/1795066/live/england-fa-cup-2023-2024-tottenham-manchester-city",
-    "https://www.whoscored.com/matches/1802659/live/england-fa-cup-2023-2024-aston-villa-chelsea",
-    "https://www.whoscored.com/matches/1803504/live/england-fa-cup-2023-2024-coventry-maidstone-united",
-    "https://www.whoscored.com/matches/1802658/live/england-fa-cup-2023-2024-bournemouth-leicester",
-    "https://www.whoscored.com/matches/1872773/live/england-fa-cup-2024-2025-sheffield-united-cardiff",
-    "https://www.whoscored.com/matches/1872768/live/england-fa-cup-2024-2025-everton-peterborough",
-    "https://www.whoscored.com/matches/1872775/live/england-fa-cup-2024-2025-fulham-watford",
-    "https://www.whoscored.com/matches/1884450/live/england-fa-cup-2024-2025-leyton-orient-manchester-city",
-    "https://www.whoscored.com/matches/1883912/live/england-fa-cup-2024-2025-stoke-cardiff",
-    "https://www.whoscored.com/matches/1889764/live/england-fa-cup-2024-2025-newcastle-brighton",
-    "https://www.whoscored.com/matches/1889766/live/england-fa-cup-2024-2025-manchester-city-plymouth",
-    "https://www.whoscored.com/matches/1893260/live/england-fa-cup-2024-2025-preston-aston-villa",
-    "https://www.whoscored.com/matches/1954180/live/england-fa-cup-2025-2026-preston-wigan",
-    "https://www.whoscored.com/matches/1954176/live/england-fa-cup-2025-2026-wolves-shrewsbury",
-    "https://www.whoscored.com/matches/1954207/live/england-fa-cup-2025-2026-boreham-wood-burton",
-    "https://www.whoscored.com/matches/1962041/live/england-fa-cup-2025-2026-wrexham-ipswich",
-    "https://www.whoscored.com/matches/1962049/live/england-fa-cup-2025-2026-grimsby-wolves",
-    "https://www.whoscored.com/matches/1973839/live/england-fa-cup-2025-2026-west-ham-leeds",
-
-
-    # 12. Major League Soccer (USA)
-
-    # 13. Eredivisie (Netherlands)
-
-    # 14. Liga Portugal
-
-    # 15. Scottish Premiership
-
-    # 16. Brasileirão (Brazil)
-    "https://www.whoscored.com/matches/1807113/live/",
-    "https://www.whoscored.com/matches/1807145/live/",
-    "https://www.whoscored.com/matches/1807180/live/",
-    "https://www.whoscored.com/matches/1807215/live/",
-
-    # 17. Süper Lig (Turkey)
-
-    # 18. League Cup / EFL Cup (England)
-
-    # 19. Russian Premier League
-    "https://www.whoscored.com/matches/1824200/live/",
-    "https://www.whoscored.com/matches/1824245/live/",
-    "https://www.whoscored.com/matches/1824290/live/",
-    "https://www.whoscored.com/matches/1906110/live/",
-
-    # 20. Jupiler Pro League (Belgium)
-
-    # 21. 2. Bundesliga (Germany)
-
-    # 22. UEFA Nations League A
-]
 
 
 def configure_logging(verbose: bool = False) -> None:
@@ -410,18 +121,8 @@ def process_match_payload(
     return dataset, exported
 
 
-def _normalize_url_list(urls: str | Sequence[str] | None) -> list[str]:
-    """Normalizes a single URL or sequence of URLs into canonical `/matches/<id>/live/` URLs."""
-    if urls is None:
-        return []
-    if isinstance(urls, str):
-        stripped = urls.strip()
-        return [WhoScoredScraper.normalize_match_url(stripped)] if stripped else []
-    return [WhoScoredScraper.normalize_match_url(u) for u in urls if u.strip()]
-
-
 def run_pipeline(
-    urls: str | Sequence[str] | None = None,
+    match_ids: int | Sequence[int] | None = None,
     from_json_files: Sequence[str | Path] | None = None,
     output_dir: str | Path = "output",
     processed_dir: str | Path = "data/processed",
@@ -431,7 +132,7 @@ def run_pipeline(
     force_scrape: bool = False,
 ) -> list[tuple[ParsedMatchDataset, ExportedFiles]]:
     """
-    Runs the end-to-end scraping, parsing, and export pipeline for one or an array of URLs.
+    Runs the end-to-end scraping, parsing, and export pipeline for one or an array of match IDs.
     Automatically reuses cached `data/raw/match_<id>_*.json` files unless `force_scrape=True`,
     and exports joined multi-match tables to `output/combined/` when `export_combined=True`.
     """
@@ -456,10 +157,13 @@ def run_pipeline(
                 logger.error("Skipping JSON file %s due to error: %s", json_path, exc)
                 failed_items.append((str(json_path), str(exc)))
 
-    normalized_urls = _normalize_url_list(urls)
-    urls_to_scrape: list[str] = []
-    for url in normalized_urls:
-        match_id = WhoScoredScraper.extract_match_id_from_url(url)
+    normalized_ids: list[int] = (
+        [match_ids]
+        if isinstance(match_ids, int)
+        else [int(mid) for mid in (match_ids or [])]
+    )
+    ids_to_scrape: list[int] = []
+    for match_id in normalized_ids:
         cached_json = None if force_scrape else exporter.find_cached_raw_json(match_id)
         if cached_json is not None:
             logger.info("Using cached raw JSON for matchId=%s: %s", match_id, cached_json)
@@ -469,18 +173,23 @@ def run_pipeline(
                     process_match_payload(raw_data, parser, exporter, raw_json_path=cached_json),
                 )
             except (OSError, ValueError, KeyError, TypeError) as exc:
-                logger.error("Skipping cached JSON %s (%s) due to error: %s", cached_json, url, exc)
-                failed_items.append((url, str(exc)))
+                logger.error(
+                    "Skipping cached JSON %s (matchId=%s) due to error: %s",
+                    cached_json,
+                    match_id,
+                    exc,
+                )
+                failed_items.append((f"matchId={match_id}", str(exc)))
         else:
-            urls_to_scrape.append(url)
+            ids_to_scrape.append(match_id)
 
-    if urls_to_scrape:
-        total_to_scrape = len(urls_to_scrape)
+    if ids_to_scrape:
+        total_to_scrape = len(ids_to_scrape)
         with WhoScoredScraper(headless=headless) as scraper:
-            for idx, url in enumerate(urls_to_scrape, start=1):
-                logger.info("[%d/%d] Scraping match URL: %s", idx, total_to_scrape, url)
+            for idx, match_id in enumerate(ids_to_scrape, start=1):
+                logger.info("[%d/%d] Scraping matchId=%s", idx, total_to_scrape, match_id)
                 try:
-                    raw_data = scraper.scrape_match(url)
+                    raw_data = scraper.scrape_match(match_id)
                     results.append(
                         process_match_payload(
                             raw_data,
@@ -491,13 +200,13 @@ def run_pipeline(
                     )
                 except (WhoScoredScraperError, OSError, ValueError, KeyError, TypeError) as exc:
                     logger.error(
-                        "[%d/%d] Skipping URL (failed to scrape/process): %s -> %s",
+                        "[%d/%d] Skipping matchId=%s (failed to scrape/process): %s",
                         idx,
                         total_to_scrape,
-                        url,
+                        match_id,
                         exc,
                     )
-                    failed_items.append((url, str(exc)))
+                    failed_items.append((f"matchId={match_id}", str(exc)))
 
     if export_combined and results:
         datasets = [ds for ds, _ in results]
@@ -506,7 +215,7 @@ def run_pipeline(
 
     if failed_items:
         print("\n" + "!" * 72)
-        print(f"Skipped {len(failed_items)} Failed URL(s) / File(s):")
+        print(f"Skipped {len(failed_items)} Failed Match(es) / File(s):")
         print("!" * 72)
         for source, reason in failed_items:
             print(f"  - {source}\n    Reason: {reason}")
@@ -520,10 +229,11 @@ def parse_cli_args() -> argparse.Namespace:
         description="Scrape WhoScored match data and export Parquet + CSV tables for analytics.",
     )
     cli.add_argument(
-        "--url",
-        "-u",
+        "--match-id",
+        "-m",
+        type=int,
         nargs="+",
-        help="One or more WhoScored Live match URLs (defaults to DEFAULT_MATCH_URLS).",
+        help="One or more WhoScored numeric match IDs (defaults to DEFAULT_MATCH_IDS).",
     )
     cli.add_argument(
         "--from-json",
@@ -557,7 +267,7 @@ def parse_cli_args() -> argparse.Namespace:
     cli.add_argument(
         "--force-scrape",
         action="store_true",
-        help="Re-scrape URLs via Selenium even if a raw JSON backup already exists in data/raw/.",
+        help="Re-scrape via Selenium even if a raw JSON backup already exists in data/raw/.",
     )
     cli.add_argument(
         "--headless",
@@ -577,12 +287,12 @@ if __name__ == "__main__":
     args = parse_cli_args()
     configure_logging(verbose=args.verbose)
 
-    target_urls = args.url
-    if not target_urls and not args.from_json:
-        target_urls = DEFAULT_MATCH_URLS
+    target_match_ids = args.match_id
+    if not target_match_ids and not args.from_json:
+        target_match_ids = DEFAULT_MATCH_IDS
 
     run_pipeline(
-        urls=target_urls,
+        match_ids=target_match_ids,
         from_json_files=args.from_json,
         output_dir=args.output_dir,
         processed_dir=args.processed_dir,

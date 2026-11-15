@@ -38,7 +38,7 @@ class WhoScoredScraper:
 
     Example usage:
         >>> with WhoScoredScraper(headless=False) as scraper:
-        ...     raw_data = scraper.scrape_match("https://www.whoscored.com/matches/1729376/live/")
+        ...     raw_data = scraper.scrape_match(1729376)
     """
 
     DEFAULT_USER_AGENT = (
@@ -131,27 +131,9 @@ class WhoScoredScraper:
                 self._driver = None
 
     @staticmethod
-    def extract_match_id_from_url(match_url: str) -> int | None:
-        """
-        Extracts the numeric match ID from a WhoScored URL.
-
-        Example:
-            "https://www.whoscored.com/matches/1729376/live/" -> 1729376
-        """
-        match = re.search(r"/matches/(\d+)", match_url, re.IGNORECASE)
-        return int(match.group(1)) if match else None
-
-    @classmethod
-    def normalize_match_url(cls, match_url: str) -> str:
-        """
-        Canonicalizes any WhoScored match URL to `https://www.whoscored.com/matches/<id>/live/`,
-        stripping any trailing slug or path segments after `/live/`.
-        """
-        cleaned = match_url.strip()
-        match_id = cls.extract_match_id_from_url(cleaned)
-        if match_id is not None:
-            return f"https://www.whoscored.com/matches/{match_id}/live/"
-        return cleaned
+    def build_match_url(match_id: int) -> str:
+        """Builds the canonical WhoScored Match Centre Live URL for a given `match_id`."""
+        return f"https://www.whoscored.com/matches/{int(match_id)}/live/"
 
     @staticmethod
     def extract_json_object_from_html(
@@ -212,22 +194,20 @@ class WhoScoredScraper:
     def _attach_source_metadata(
         cls,
         match_data: dict[str, Any],
-        match_url: str | None = None,
+        match_id: int | None = None,
     ) -> dict[str, Any]:
-        """Attaches URL-derived `matchId` and canonical `_sourceUrl` to `match_data`."""
-        if match_url:
-            canonical_url = cls.normalize_match_url(match_url)
-            url_match_id = cls.extract_match_id_from_url(canonical_url)
-            if url_match_id and "matchId" not in match_data:
-                match_data["matchId"] = url_match_id
-            match_data["_sourceUrl"] = canonical_url
+        """Attaches `matchId` and canonical `_sourceUrl` to `match_data`."""
+        if match_id is not None:
+            if "matchId" not in match_data:
+                match_data["matchId"] = int(match_id)
+            match_data["_sourceUrl"] = cls.build_match_url(match_id)
         return match_data
 
     @classmethod
     def extract_all_from_html(
         cls,
         html_source: str,
-        match_url: str | None = None,
+        match_id: int | None = None,
     ) -> dict[str, Any] | None:
         """
         Extracts `matchCentreData` plus all auxiliary lookup dicts defined in
@@ -245,7 +225,7 @@ class WhoScoredScraper:
                 match_data[data_key] = extra
             else:
                 logger.warning("HTML fallback: '%s' not found in page source.", page_key)
-        return cls._attach_source_metadata(match_data, match_url)
+        return cls._attach_source_metadata(match_data, match_id)
 
     @classmethod
     def find_unsaved_page_args(cls, page_args: Any) -> list[dict[str, Any]]:
@@ -350,12 +330,13 @@ class WhoScoredScraper:
 
         return None
 
-    def scrape_match(self, match_url: str) -> dict[str, Any]:
+    def scrape_match(self, match_id: int) -> dict[str, Any]:
         """
-        Navigates to a WhoScored Match Centre Live URL and extracts the `matchCentreData` payload.
+        Navigates to a WhoScored Match Centre Live URL for `match_id` and extracts
+        the `matchCentreData` payload.
 
         Args:
-            match_url: URL to the WhoScored `/matches/<id>/live/` match page.
+            match_id: Numeric WhoScored match ID (e.g. 1729376).
 
         Returns:
             Dictionary containing the complete `matchCentreData` structure.
@@ -363,7 +344,7 @@ class WhoScoredScraper:
         Raises:
             WhoScoredScraperError: If `matchCentreData` cannot be retrieved via JS or HTML fallback.
         """
-        match_url = self.normalize_match_url(match_url)
+        match_url = self.build_match_url(match_id)
         own_driver = self._driver is None
         if own_driver:
             self.start()
@@ -407,7 +388,7 @@ class WhoScoredScraper:
                     "and was not blocked by a Cloudflare CAPTCHA challenge.",
                 )
 
-            self._attach_source_metadata(match_data, match_url)
+            self._attach_source_metadata(match_data, match_id)
 
             events_count = len(match_data.get("events", []))
             logger.info(
@@ -421,13 +402,13 @@ class WhoScoredScraper:
             if own_driver:
                 self.close()
 
-    def scrape_matches(self, match_urls: Sequence[str]) -> list[dict[str, Any]]:
+    def scrape_matches(self, match_ids: Sequence[int]) -> list[dict[str, Any]]:
         """
-        Scrapes an array/sequence of WhoScored Match Centre Live URLs within a single
+        Scrapes an array/sequence of WhoScored Match IDs within a single
         browser session and returns a list of extracted `matchCentreData` dictionaries.
-        Invalid or unreachable URLs are logged and skipped without aborting the batch.
+        Invalid or unreachable matches are logged and skipped without aborting the batch.
         """
-        if not match_urls:
+        if not match_ids:
             return []
 
         own_driver = self._driver is None
@@ -435,19 +416,19 @@ class WhoScoredScraper:
             self.start()
 
         payloads: list[dict[str, Any]] = []
-        total = len(match_urls)
+        total = len(match_ids)
         try:
-            for idx, raw_url in enumerate(match_urls, start=1):
-                url = self.normalize_match_url(raw_url)
+            for idx, match_id in enumerate(match_ids, start=1):
+                url = self.build_match_url(match_id)
                 try:
-                    logger.info("[%d/%d] Scraping match URL: %s", idx, total, url)
-                    payloads.append(self.scrape_match(url))
+                    logger.info("[%d/%d] Scraping matchId=%s (%s)", idx, total, match_id, url)
+                    payloads.append(self.scrape_match(match_id))
                 except (WhoScoredScraperError, WebDriverException, ValueError) as exc:
                     logger.error(
-                        "[%d/%d] Skipping URL (failed to scrape): %s -> %s",
+                        "[%d/%d] Skipping matchId=%s (failed to scrape): %s",
                         idx,
                         total,
-                        url,
+                        match_id,
                         exc,
                     )
             return payloads
@@ -456,21 +437,20 @@ class WhoScoredScraper:
                 self.close()
 
 
-def scrape_whoscored_match_json(match_url: str, headless: bool = False) -> dict[str, Any]:
+def scrape_whoscored_match_json(match_id: int, headless: bool = False) -> dict[str, Any]:
     """
-    Convenience function (backward-compatible with original script signature)
-    to scrape a single WhoScored match URL.
+    Convenience function to scrape a single WhoScored match by ID.
     """
     with WhoScoredScraper(headless=headless) as scraper:
-        return scraper.scrape_match(match_url)
+        return scraper.scrape_match(match_id)
 
 
 def scrape_whoscored_matches_json(
-    match_urls: Sequence[str],
+    match_ids: Sequence[int],
     headless: bool = False,
 ) -> list[dict[str, Any]]:
     """
-    Convenience function to scrape an array of WhoScored match URLs in one browser session.
+    Convenience function to scrape an array of WhoScored match IDs in one browser session.
     """
     with WhoScoredScraper(headless=headless) as scraper:
-        return scraper.scrape_matches(match_urls)
+        return scraper.scrape_matches(match_ids)

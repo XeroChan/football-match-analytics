@@ -6,7 +6,7 @@ Parsers for player rosters/lineups (`players_df`) and tactical formations (`form
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 import pandas as pd
 
@@ -63,17 +63,17 @@ def parse_players(match_data: dict[str, Any]) -> pd.DataFrame:
                     "height_cm": player.get("height"),
                     "weight_kg": player.get("weight"),
                     "final_rating": extract_final_rating(player.get("stats")),
-                }
+                },
             )
 
     return cast_int_columns(
-        pd.DataFrame(rows), ("subbed_in_period_value", "subbed_out_period_value")
+        pd.DataFrame(rows), ("subbed_in_period_value", "subbed_out_period_value"),
     )
 
 
 def parse_formations(
     match_data: dict[str, Any],
-    players_df: Optional[pd.DataFrame] = None,
+    players_df: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """
     Extracts team tactical formations and active pitch coordinates per player slot
@@ -97,7 +97,7 @@ def parse_formations(
             sub_off_pid = to_int(formation.get("subOffPlayerId"))
 
             total_entries = max(
-                len(positions), len(player_ids), len(jersey_numbers), len(slots)
+                len(positions), len(player_ids), len(jersey_numbers), len(slots),
             )
             for slot_idx in range(total_entries):
                 pos = positions[slot_idx] if slot_idx < len(positions) else None
@@ -133,7 +133,7 @@ def parse_formations(
                         ),
                         "horizontal": pos_dict.get("horizontal") if pos_dict else None,
                         "vertical": pos_dict.get("vertical") if pos_dict else None,
-                    }
+                    },
                 )
 
     return pd.DataFrame(rows)

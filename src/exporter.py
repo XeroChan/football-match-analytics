@@ -10,8 +10,9 @@ from __future__ import annotations
 import json
 import logging
 import re
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional, Sequence, Union
+from typing import Any
 
 import pandas as pd
 
@@ -32,11 +33,11 @@ class MatchDataExporter:
 
     def __init__(
         self,
-        output_dir: Union[str, Path] = "output",
-        raw_dir: Union[str, Path] = "data/raw",
-        processed_dir: Union[str, Path] = "data/processed",
-        combined_dir: Optional[Union[str, Path]] = None,
-        combined_processed_dir: Optional[Union[str, Path]] = None,
+        output_dir: str | Path = "output",
+        raw_dir: str | Path = "data/raw",
+        processed_dir: str | Path = "data/processed",
+        combined_dir: str | Path | None = None,
+        combined_processed_dir: str | Path | None = None,
         export_parquet: bool = True,
         export_csv: bool = True,
     ) -> None:
@@ -69,7 +70,7 @@ class MatchDataExporter:
         return re.sub(r"[-\s]+", "_", text)
 
     def _build_file_prefix(self, match_data: dict[str, Any]) -> str:
-        """Builds a human-readable file prefix such as `match_1821123_Southampton_vs_Aston_Villa`."""
+        """Builds a human-readable file prefix (e.g. `match_1821123_Southampton_vs_Aston_Villa`)."""
         match_id = match_data.get("matchId") or "unknown"
         home_name = self._slugify((match_data.get("home") or {}).get("name"))
         away_name = self._slugify((match_data.get("away") or {}).get("name"))
@@ -78,7 +79,7 @@ class MatchDataExporter:
             return f"match_{match_id}_{home_name}_vs_{away_name}"
         return f"match_{match_id}"
 
-    def find_cached_raw_json(self, match_id: Any) -> Optional[Path]:
+    def find_cached_raw_json(self, match_id: Any) -> Path | None:
         """Finds an existing raw JSON file in `raw_dir` for the given `match_id`, if present."""
         if not match_id:
             return None
@@ -103,7 +104,7 @@ class MatchDataExporter:
         return json_path
 
     @staticmethod
-    def load_raw_json(json_path: Union[str, Path]) -> dict[str, Any]:
+    def load_raw_json(json_path: str | Path) -> dict[str, Any]:
         """Loads a previously saved raw match JSON file from disk."""
         path = Path(json_path)
         with path.open("r", encoding="utf-8") as f:
@@ -116,8 +117,8 @@ class MatchDataExporter:
         table_name: str,
         csv_files: dict[str, Path],
         parquet_files: dict[str, Path],
-        csv_dir: Optional[Path] = None,
-        parquet_dir: Optional[Path] = None,
+        csv_dir: Path | None = None,
+        parquet_dir: Path | None = None,
     ) -> None:
         """Writes a non-empty DataFrame to CSV and/or Parquet."""
         if df.empty:
@@ -146,14 +147,14 @@ class MatchDataExporter:
                 df.to_parquet(parquet_path, index=False)
                 parquet_files[table_name] = parquet_path
                 logger.info("Saved %s Parquet to: %s", table_name, parquet_path)
-            except Exception as exc:
+            except (OSError, ImportError, ValueError) as exc:
                 logger.warning("Skipping Parquet export for %s (%s)", table_name, exc)
 
     def export_all(
         self,
         match_data: dict[str, Any],
         dataset: ParsedMatchDataset,
-        raw_json_path: Optional[Union[str, Path]] = None,
+        raw_json_path: str | Path | None = None,
         overwrite_raw_json: bool = False,
     ) -> ExportedFiles:
         """
@@ -165,7 +166,7 @@ class MatchDataExporter:
             saved_raw_path = Path(raw_json_path)
         else:
             saved_raw_path = self.save_raw_json(
-                match_data, prefix=prefix, overwrite=overwrite_raw_json
+                match_data, prefix=prefix, overwrite=overwrite_raw_json,
             )
 
         csv_files: dict[str, Path] = {}
@@ -186,7 +187,8 @@ class MatchDataExporter:
     ) -> tuple[ParsedMatchDataset, ExportedFiles]:
         """
         Combines multiple `ParsedMatchDataset` instances into one dataset and exports
-        all non-empty tables to `self.combined_dir` (CSV) and `self.combined_processed_dir` (Parquet).
+        all non-empty tables to `self.combined_dir` (CSV) and
+        `self.combined_processed_dir` (Parquet).
         """
         combined_dataset = ParsedMatchDataset.combine(datasets)
         csv_files: dict[str, Path] = {}

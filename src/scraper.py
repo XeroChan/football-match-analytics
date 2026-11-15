@@ -1,4 +1,4 @@
-"""
+r"""
 scraper.py
 ==========
 Responsible for fetching raw match data (`matchCentreData`) from WhoScored Match Centre URLs.
@@ -18,7 +18,8 @@ import json
 import logging
 import re
 import time
-from typing import Any, Optional, Sequence
+from collections.abc import Sequence
+from typing import Any, ClassVar, Self
 
 from selenium import webdriver
 from selenium.common.exceptions import JavascriptException, WebDriverException
@@ -47,7 +48,7 @@ class WhoScoredScraper:
 
     # Keys of `require.config.params['args']` that are persisted into the raw JSON,
     # paired with their target key on the saved dictionary (`None` means root `matchCentreData`).
-    SAVED_PAGE_ARG_MAP: dict[str, Optional[str]] = {
+    SAVED_PAGE_ARG_MAP: ClassVar[dict[str, str | None]] = {
         "matchCentreData": None,
         "matchCentreEventTypeJson": "_matchCentreEventTypeJson",
         "formationIdNameMappings": "_formationIdNameMappings",
@@ -59,7 +60,7 @@ class WhoScoredScraper:
         headless: bool = False,
         timeout_seconds: int = 25,
         poll_interval: float = 1.0,
-        user_agent: Optional[str] = None,
+        user_agent: str | None = None,
     ) -> None:
         """
         Initialize scraper configuration.
@@ -75,13 +76,13 @@ class WhoScoredScraper:
         self.timeout_seconds = timeout_seconds
         self.poll_interval = poll_interval
         self.user_agent = user_agent or self.DEFAULT_USER_AGENT
-        self._driver: Optional[webdriver.Chrome] = None
+        self._driver: webdriver.Chrome | None = None
 
-    def __enter__(self) -> WhoScoredScraper:
+    def __enter__(self) -> Self:
         self.start()
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
         self.close()
 
     def _build_chrome_options(self) -> Options:
@@ -112,11 +113,11 @@ class WhoScoredScraper:
                         "source": (
                             "Object.defineProperty(navigator, 'webdriver', "
                             "{get: () => undefined})"
-                        )
+                        ),
                     },
                 )
-            except Exception:
-                pass
+            except WebDriverException as exc:
+                logger.debug("Could not mask navigator.webdriver via CDP: %s", exc)
 
     def close(self) -> None:
         """Closes the Chrome WebDriver instance and releases system resources."""
@@ -124,13 +125,13 @@ class WhoScoredScraper:
             logger.info("Closing Chrome WebDriver...")
             try:
                 self._driver.quit()
-            except Exception as exc:
+            except WebDriverException as exc:
                 logger.warning("Error while closing WebDriver: %s", exc)
             finally:
                 self._driver = None
 
     @staticmethod
-    def extract_match_id_from_url(match_url: str) -> Optional[int]:
+    def extract_match_id_from_url(match_url: str) -> int | None:
         """
         Extracts the numeric match ID from a WhoScored URL.
 
@@ -156,7 +157,7 @@ class WhoScoredScraper:
     def extract_json_object_from_html(
         html_source: str,
         key: str = "matchCentreData",
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Safely extracts a nested JSON object assigned to `key` from raw HTML/JS source
         by counting balanced curly braces `{}` (respecting string literals and escapes).
@@ -198,7 +199,8 @@ class WhoScoredScraper:
                             return json.loads(json_str)
                         except json.JSONDecodeError as exc:
                             logger.warning(
-                                "Balanced brace extraction found block for '%s' but JSON parsing failed: %s",
+                                "Balanced brace extraction found block for '%s' "
+                                "but JSON parsing failed: %s",
                                 key,
                                 exc,
                             )
@@ -210,9 +212,9 @@ class WhoScoredScraper:
     def _attach_source_metadata(
         cls,
         match_data: dict[str, Any],
-        match_url: Optional[str] = None,
+        match_url: str | None = None,
     ) -> dict[str, Any]:
-        """Attaches URL-derived `matchId` (if missing) and canonical `_sourceUrl` to `match_data`."""
+        """Attaches URL-derived `matchId` and canonical `_sourceUrl` to `match_data`."""
         if match_url:
             canonical_url = cls.normalize_match_url(match_url)
             url_match_id = cls.extract_match_id_from_url(canonical_url)
@@ -225,8 +227,8 @@ class WhoScoredScraper:
     def extract_all_from_html(
         cls,
         html_source: str,
-        match_url: Optional[str] = None,
-    ) -> Optional[dict[str, Any]]:
+        match_url: str | None = None,
+    ) -> dict[str, Any] | None:
         """
         Extracts `matchCentreData` plus all auxiliary lookup dicts defined in
         `SAVED_PAGE_ARG_MAP` from raw HTML source using balanced-brace parsing.
@@ -284,7 +286,7 @@ class WhoScoredScraper:
                 arg.get("preview"),
             )
 
-    def _poll_js_match_data(self) -> Optional[dict[str, Any]]:
+    def _poll_js_match_data(self) -> dict[str, Any] | None:
         """
         Polls the browser window for `matchCentreData` until it is available or times out.
         Also captures all auxiliary dictionaries listed in `SAVED_PAGE_ARG_MAP` if present
@@ -306,7 +308,9 @@ class WhoScoredScraper:
                         else if (type === 'object') size = Object.keys(v).length;
                         else if (type === 'string') size = v.length;
                         var s = type === 'function' ? String(v) : JSON.stringify(v);
-                        preview = s === undefined ? null : (s.length > 300 ? s.slice(0, 300) + '...' : s);
+                        preview = s === undefined
+                            ? null
+                            : (s.length > 300 ? s.slice(0, 300) + '...' : s);
                     } catch (e) { preview = '<unserializable: ' + e + '>'; }
                     return {key: key, type: type, size: size, preview: preview};
                 });
@@ -331,7 +335,7 @@ class WhoScoredScraper:
                 result = self._driver.execute_script(js_query, saved_keys)
                 saved_args = result.get("savedArgs") if isinstance(result, dict) else None
                 if isinstance(saved_args, dict) and isinstance(
-                    saved_args.get("matchCentreData"), dict
+                    saved_args.get("matchCentreData"), dict,
                 ):
                     match_data: dict[str, Any] = saved_args["matchCentreData"]
                     self._report_unsaved_page_args(result.get("pageArgs"))
@@ -348,7 +352,7 @@ class WhoScoredScraper:
 
     def scrape_match(self, match_url: str) -> dict[str, Any]:
         """
-        Navigates to a WhoScored Match Centre Live URL and extracts the full `matchCentreData` payload.
+        Navigates to a WhoScored Match Centre Live URL and extracts the `matchCentreData` payload.
 
         Args:
             match_url: URL to the WhoScored `/matches/<id>/live/` match page.
@@ -371,7 +375,7 @@ class WhoScoredScraper:
                 self._driver.get(match_url)
             except WebDriverException as exc:
                 raise WhoScoredScraperError(
-                    f"Browser navigation failed for {match_url}: {exc}"
+                    f"Browser navigation failed for {match_url}: {exc}",
                 ) from exc
 
             # Method 1 (Primary & Most Reliable): Poll the browser's parsed JS object
@@ -380,26 +384,27 @@ class WhoScoredScraper:
             # Method 2 (Fallback): Parse HTML source with balanced-brace JSON extraction
             if not match_data:
                 logger.info(
-                    "JS global not populated within timeout; trying HTML balanced-brace fallback..."
+                    "JS global not populated within timeout; "
+                    "trying HTML balanced-brace fallback...",
                 )
                 try:
                     html_source = self._driver.page_source
                 except WebDriverException as exc:
                     raise WhoScoredScraperError(
-                        f"Failed to read page source from {match_url}: {exc}"
+                        f"Failed to read page source from {match_url}: {exc}",
                     ) from exc
                 match_data = self.extract_all_from_html(html_source)
                 if match_data:
                     logger.warning(
                         "HTML fallback used: page args keys cannot be enumerated, so unsaved "
-                        "keys are NOT reported for this match."
+                        "keys are NOT reported for this match.",
                     )
 
             if not match_data:
                 raise WhoScoredScraperError(
                     f"Could not extract 'matchCentreData' from {match_url}. "
                     "Ensure the URL points to a valid WhoScored '/Live/' match centre page "
-                    "and was not blocked by a Cloudflare CAPTCHA challenge."
+                    "and was not blocked by a Cloudflare CAPTCHA challenge.",
                 )
 
             self._attach_source_metadata(match_data, match_url)
@@ -437,7 +442,7 @@ class WhoScoredScraper:
                 try:
                     logger.info("[%d/%d] Scraping match URL: %s", idx, total, url)
                     payloads.append(self.scrape_match(url))
-                except (WhoScoredScraperError, Exception) as exc:
+                except (WhoScoredScraperError, WebDriverException, ValueError) as exc:
                     logger.error(
                         "[%d/%d] Skipping URL (failed to scrape): %s -> %s",
                         idx,

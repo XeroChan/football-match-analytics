@@ -7,9 +7,10 @@ Data containers for parsed match tables (`ParsedMatchDataset`) and exported file
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 import pandas as pd
 
@@ -103,4 +104,3 @@ class ExportedFiles:
     raw_json_path: Path
     csv_files: dict[str, Path] = field(default_factory=dict)
     parquet_files: dict[str, Path] = field(default_factory=dict)
-

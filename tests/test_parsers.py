@@ -49,7 +49,7 @@ def test_incident_event_list_merge_preserves_all_qualifiers_and_satisfiers() -> 
                         {"type": {"displayName": "BigChance", "value": 214}},
                         {"type": {"displayName": "RelatedEventId", "value": 55}, "value": "9"},
                     ],
-                }
+                },
             ],
         },
         "away": {"teamId": 2, "name": "Away FC", "incidentEvents": []},
@@ -68,7 +68,7 @@ def test_incident_event_list_merge_preserves_all_qualifiers_and_satisfiers() -> 
                     {"type": {"displayName": "Zone", "value": 56}, "value": "Center"},
                     {"type": {"displayName": "RightFoot", "value": 20}},
                 ],
-            }
+            },
         ],
     }
 
@@ -133,15 +133,33 @@ def test_pass_receiver_inference() -> None:
             "teamId": 10,
             "name": "Home",
             "players": [
-                {"playerId": 1, "name": "Alice", "shirtNo": 8, "position": "MC", "isFirstEleven": True},
-                {"playerId": 2, "name": "Bob", "shirtNo": 9, "position": "FW", "isFirstEleven": True},
+                {
+                    "playerId": 1,
+                    "name": "Alice",
+                    "shirtNo": 8,
+                    "position": "MC",
+                    "isFirstEleven": True,
+                },
+                {
+                    "playerId": 2,
+                    "name": "Bob",
+                    "shirtNo": 9,
+                    "position": "FW",
+                    "isFirstEleven": True,
+                },
             ],
         },
         "away": {
             "teamId": 20,
             "name": "Away",
             "players": [
-                {"playerId": 3, "name": "Charlie", "shirtNo": 4, "position": "DC", "isFirstEleven": True},
+                {
+                    "playerId": 3,
+                    "name": "Charlie",
+                    "shirtNo": 4,
+                    "position": "DC",
+                    "isFirstEleven": True,
+                },
             ],
         },
         "events": [
@@ -199,4 +217,3 @@ def test_parse_common_events_flattens_and_preserves_raw_json() -> None:
     assert df.loc[0, "meta_kind"] == "var"
     assert json.loads(df.loc[0, "meta_tags"]) == ["check", "confirmed"]
     assert json.loads(df.loc[0, "raw_json"]) == payload["commonEvents"][0]
-

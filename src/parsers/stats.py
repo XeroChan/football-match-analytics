@@ -8,7 +8,7 @@ and goal-mouth shot zones (`shot_zones_df`).
 from __future__ import annotations
 
 from collections.abc import Set as AbstractSet
-from typing import Any, Optional
+from typing import Any
 
 import pandas as pd
 
@@ -22,12 +22,12 @@ SKIPPED_TEAM_STAT_KEYS = {"minutesWithStats"}
 def _flatten_minute_stats(
     stats: Any,
     skip_keys: AbstractSet[str] = frozenset(),
-) -> list[tuple[str, Optional[int], Optional[float]]]:
-    """Flattens a `{stat_name: {minute: value}}` mapping into `(stat_name, minute, value)` tuples."""
+) -> list[tuple[str, int | None, float | None]]:
+    """Flattens `{stat_name: {minute: value}}` into `(stat_name, minute, value)` tuples."""
     if not isinstance(stats, dict):
         return []
 
-    rows: list[tuple[str, Optional[int], Optional[float]]] = []
+    rows: list[tuple[str, int | None, float | None]] = []
     for stat_name, per_minute in stats.items():
         if stat_name in skip_keys or not isinstance(per_minute, dict):
             continue
@@ -60,11 +60,11 @@ def parse_player_stats(match_data: dict[str, Any]) -> pd.DataFrame:
                         "stat_name": stat_name,
                         "minute": minute,
                         "value": value,
-                    }
+                    },
                 )
 
     return sort_long_table(
-        pd.DataFrame(rows), ["team_side", "player_id", "stat_name", "minute"]
+        pd.DataFrame(rows), ["team_side", "player_id", "stat_name", "minute"],
     )
 
 
@@ -78,7 +78,7 @@ def parse_team_stats(match_data: dict[str, Any]) -> pd.DataFrame:
 
     for side, team, team_id, team_name in iter_teams(match_data):
         for stat_name, minute, value in _flatten_minute_stats(
-            team.get("stats"), skip_keys=SKIPPED_TEAM_STAT_KEYS
+            team.get("stats"), skip_keys=SKIPPED_TEAM_STAT_KEYS,
         ):
             rows.append(
                 {
@@ -89,7 +89,7 @@ def parse_team_stats(match_data: dict[str, Any]) -> pd.DataFrame:
                     "stat_name": stat_name,
                     "minute": minute,
                     "value": value,
-                }
+                },
             )
 
     return sort_long_table(pd.DataFrame(rows), ["team_side", "stat_name", "minute"])
@@ -123,7 +123,7 @@ def parse_shot_zones(match_data: dict[str, Any]) -> pd.DataFrame:
                         "minute": to_int(minute),
                         "count": values.get("count"),
                         "goal_count": values.get("goalCount"),
-                    }
+                    },
                 )
 
     return sort_long_table(pd.DataFrame(rows), ["team_side", "zone", "minute"])

@@ -92,7 +92,7 @@ def parse_match_metadata(match_data: dict[str, Any]) -> pd.DataFrame:
     end_minutes = match_data.get("periodEndMinutes") or {}
     periods = sorted(
         set(METADATA_PERIODS)
-        | {p for p in (to_int(k) for k in (*limits.keys(), *end_minutes.keys())) if p is not None}
+        | {p for p in (to_int(k) for k in (*limits.keys(), *end_minutes.keys())) if p is not None},
     )
     for p in periods:
         record[f"period_{p}_minute_limit"] = limits.get(str(p), limits.get(p))
@@ -116,7 +116,7 @@ def parse_minute_mapping(match_data: dict[str, Any]) -> pd.DataFrame:
                     "period_value": to_int(period),
                     "minute": to_int(minute),
                     "expanded_minute": to_int(expanded),
-                }
+                },
             )
 
     return sort_long_table(pd.DataFrame(rows), ["period_value", "minute"])
@@ -135,7 +135,7 @@ def parse_lookups(match_data: dict[str, Any]) -> pd.DataFrame:
 
     for formation_id, name in (match_data.get("_formationIdNameMappings") or {}).items():
         rows.append(
-            {"lookup_type": "formation", "lookup_id": to_int(formation_id), "name": name}
+            {"lookup_type": "formation", "lookup_id": to_int(formation_id), "name": name},
         )
 
     return sort_long_table(pd.DataFrame(rows), ["lookup_type", "lookup_id"])
@@ -168,4 +168,3 @@ def parse_common_events(match_data: dict[str, Any]) -> pd.DataFrame:
 
     df = pd.DataFrame(rows)
     return df[[c for c in df.columns if c != "raw_json"] + ["raw_json"]]
-

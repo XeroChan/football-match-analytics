@@ -46,16 +46,16 @@ def test_scraper_html_fallback_preserves_lookup_tables() -> None:
 
 
 def test_scraper_normalizes_match_url() -> None:
-    """Checks that any WhoScored match URL strips trailing slugs and normalizes to `/matches/<id>/live/`."""
+    """Checks that any WhoScored match URL normalizes to `/matches/<id>/live/`."""
     assert (
         WhoScoredScraper.normalize_match_url(
-            "https://www.whoscored.com/Matches/1729376/Live/england-premier-league-garbage"
+            "https://www.whoscored.com/Matches/1729376/Live/england-premier-league-garbage",
         )
         == "https://www.whoscored.com/matches/1729376/live/"
     )
     assert (
         WhoScoredScraper.normalize_match_url(
-            "https://www.whoscored.com/matches/1729401/show/some-random-slug"
+            "https://www.whoscored.com/matches/1729401/show/some-random-slug",
         )
         == "https://www.whoscored.com/matches/1729401/live/"
     )
@@ -74,7 +74,10 @@ def test_scraper_detects_unsaved_page_args() -> None:
 
 
 def test_exporter_raw_json_overwrite_and_reuse(tmp_path: Path) -> None:
-    """Checks that `save_raw_json(overwrite=True)` updates existing files and `export_all(raw_json_path=...)` skips redundant writes."""
+    """
+    Checks that `save_raw_json(overwrite=True)` updates existing files and
+    `export_all(raw_json_path=...)` skips redundant writes.
+    """
     exporter = MatchDataExporter(
         output_dir=tmp_path / "output",
         raw_dir=tmp_path / "raw",
@@ -168,5 +171,3 @@ def test_exporter_combined_catalog_and_tables(tmp_path: Path) -> None:
     expected_events = sum(len(ds.events_df) for ds in datasets)
     assert len(combined_ds.events_df) == expected_events
     assert len(combined_ds.metadata_df) == 2
-
-

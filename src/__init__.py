@@ -22,4 +22,3 @@ __all__ = [
     "scrape_whoscored_match_json",
     "scrape_whoscored_matches_json",
 ]
-

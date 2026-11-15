@@ -8,7 +8,7 @@ used across sub-parsers.
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
-from typing import Any, Optional
+from typing import Any
 
 import pandas as pd
 
@@ -25,24 +25,24 @@ LONG_TABLE_INT_COLS = (
 )
 
 
-def clean_score(value: Any) -> Optional[str]:
+def clean_score(value: Any) -> str | None:
     """Removes the penalty-shootout marker '*' from WhoScored score strings."""
     return str(value).replace("*", "").strip() if value is not None else None
 
 
-def display_name(value: Any) -> Optional[str]:
+def display_name(value: Any) -> str | None:
     """Returns `displayName` from WhoScored `{displayName, value}` objects."""
     return value.get("displayName") if isinstance(value, dict) else None
 
 
-def to_int(value: Any) -> Optional[int]:
+def to_int(value: Any) -> int | None:
     try:
         return int(value) if pd.notna(value) else None
     except (TypeError, ValueError):
         return None
 
 
-def to_float(value: Any) -> Optional[float]:
+def to_float(value: Any) -> float | None:
     try:
         return float(value) if pd.notna(value) else None
     except (TypeError, ValueError):
@@ -59,7 +59,7 @@ def iter_teams(
         yield side, team, team.get("teamId"), team.get("name")
 
 
-def build_player_lookup(players_df: Optional[pd.DataFrame]) -> dict[int, dict[str, Any]]:
+def build_player_lookup(players_df: pd.DataFrame | None) -> dict[int, dict[str, Any]]:
     """Builds a `{player_id: row_dict}` lookup map from `players_df`."""
     if players_df is None or players_df.empty or "player_id" not in players_df.columns:
         return {}
@@ -75,10 +75,10 @@ def build_player_lookup(players_df: Optional[pd.DataFrame]) -> dict[int, dict[st
 
 
 def resolve_player_name(
-    player_id: Optional[int],
+    player_id: int | None,
     player_meta_map: dict[int, dict[str, Any]],
-    fallback_names: Optional[dict[str, str]] = None,
-) -> Optional[str]:
+    fallback_names: dict[str, str] | None = None,
+) -> str | None:
     """Resolves a player's display name from `player_meta_map` or `playerIdNameDictionary`."""
     if player_id is None:
         return None
@@ -90,13 +90,13 @@ def resolve_player_name(
     return None
 
 
-def extract_final_rating(stats: Any) -> Optional[float]:
+def extract_final_rating(stats: Any) -> float | None:
     """Extracts the final recorded player rating from `player['stats']['ratings']`."""
     ratings = stats.get("ratings") if isinstance(stats, dict) else None
     if not isinstance(ratings, dict) or not ratings:
         return None
     try:
-        last_key = max(ratings.keys(), key=lambda k: int(k))
+        last_key = max(ratings.keys(), key=int)
         return float(ratings[last_key])
     except (ValueError, TypeError):
         return None

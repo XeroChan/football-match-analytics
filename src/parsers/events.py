@@ -8,7 +8,7 @@ pass receivers.
 from __future__ import annotations
 
 import json
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 import numpy as np
 import pandas as pd
@@ -80,7 +80,7 @@ class _MergedEventView:
 
 
 def _merge_event_lists(lists: list[list[Any]]) -> list[Any]:
-    """Merges parallel lists (such as `qualifiers`, `satisfiers`, or `satisfiedEventsTypes`) across event sources."""
+    """Merges parallel lists (e.g. `qualifiers`, `satisfiers`) across event sources."""
     non_empty = [lst for lst in lists if lst]
     if not non_empty:
         return []
@@ -123,7 +123,7 @@ def enrich_with_pass_receivers(df: pd.DataFrame) -> pd.DataFrame:
     df["receiver_id"] = np.where(valid_pass_receiver, df["next_player_id"], None)
     df["receiver_name"] = np.where(valid_pass_receiver, df["next_player_name"], None)
     df["receiver_is_first_eleven"] = np.where(
-        valid_pass_receiver, df["next_player_is_first_eleven"], None
+        valid_pass_receiver, df["next_player_is_first_eleven"], None,
     )
 
     cast_int_columns(df, INT_EVENT_COLUMNS)
@@ -136,7 +136,7 @@ def enrich_with_pass_receivers(df: pd.DataFrame) -> pd.DataFrame:
 
 def parse_events(
     match_data: dict[str, Any],
-    players_df: Optional[pd.DataFrame] = None,
+    players_df: pd.DataFrame | None = None,
     include_raw_json_columns: bool = True,
 ) -> pd.DataFrame:
     """
@@ -212,7 +212,7 @@ def parse_events(
         for t in satisfied_ids:
             tid = to_int(t)
             satisfied_names.append(
-                event_type_names.get(tid, str(t)) if tid is not None else str(t)
+                event_type_names.get(tid, str(t)) if tid is not None else str(t),
             )
         satisfiers = ev.get("satisfiers") or []
         satisfier_names: list[str] = []
@@ -266,7 +266,7 @@ def parse_events(
             "card_type_value": card.get("value"),
             "related_player_id": related_player_id,
             "related_player_name": resolve_player_name(
-                related_player_id, player_meta_map, player_name_dict
+                related_player_id, player_meta_map, player_name_dict,
             ),
             "event_field": ev.get("field"),
             "event_text": ev.get("text"),
@@ -288,7 +288,7 @@ def parse_events(
             extract_qualifiers_info(
                 ev.get("qualifiers"),
                 include_raw_json_columns=include_raw_json_columns,
-            )
+            ),
         )
 
         # Top-level `relatedEventId` (incident events) fills the gap when the

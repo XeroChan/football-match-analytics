@@ -8,7 +8,7 @@ structured Pandas DataFrames.
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 import pandas as pd
 
@@ -58,7 +58,7 @@ class MatchDataParser:
     def parse_events(
         self,
         match_data: dict[str, Any],
-        players_df: Optional[pd.DataFrame] = None,
+        players_df: pd.DataFrame | None = None,
     ) -> pd.DataFrame:
         return parse_events(
             match_data,

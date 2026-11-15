@@ -63,8 +63,8 @@ def extract_qualifiers_info(
         "qualifier_names": "",
         "qualifier_type_ids": "",
         "body_part": None,
-        **{col: None for col in KEY_VALUE_QUALIFIERS.values()},
-        **{col: False for col in BOOLEAN_FLAG_QUALIFIERS.values()},
+        **dict.fromkeys(KEY_VALUE_QUALIFIERS.values()),
+        **dict.fromkeys(BOOLEAN_FLAG_QUALIFIERS.values(), False),
     }
     if include_raw_json_columns:
         result["qualifiers_json"] = "{}"
@@ -108,4 +108,3 @@ def extract_qualifiers_info(
     if include_raw_json_columns:
         result["qualifiers_json"] = json.dumps(kv_map, ensure_ascii=False)
     return result
-

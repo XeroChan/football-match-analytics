@@ -2,7 +2,6 @@ selenium
 pandas
 ipykernel
 polars 
-pyarrow
 duckdb
 mplsoccer
 matplotlib

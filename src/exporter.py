@@ -2,7 +2,7 @@
 exporter.py
 ===========
 Handles persisting raw WhoScored JSON payloads and structured Pandas DataFrames
-to disk (Parquet in `data/processed/` and CSV in `output/`) with deterministic filenames.
+to disk (CSV in `output/`) with deterministic filenames.
 """
 
 from __future__ import annotations
@@ -14,8 +14,6 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
-
 from src.models import ExportedFiles, ParsedMatchDataset
 
 __all__ = ["ExportedFiles", "MatchDataExporter"]
@@ -25,41 +23,24 @@ logger = logging.getLogger(__name__)
 
 class MatchDataExporter:
     """
-    Exports the raw `matchCentreData` JSON to `raw_dir`, Parquet tables to `processed_dir`,
-    and CSV tables (`events`, `players`, `formations`, `metadata`, `player_stats`,
-    `team_stats`, `shot_zones`, `minute_mapping`, `lookups`, `common_events`) to `output_dir`,
-    plus multi-match combined datasets to `combined_dir` (`output/combined/`).
+    Exports the raw `matchCentreData` JSON to `raw_dir` and CSV tables (`events`, `players`,
+    `formations`, `metadata`, `player_stats`, `team_stats`, `shot_zones`, `minute_mapping`,
+    `lookups`, `common_events`) to `output_dir`, plus multi-match combined datasets to
+    `combined_dir` (`output/combined/`).
     """
 
     def __init__(
         self,
         output_dir: str | Path = "output",
         raw_dir: str | Path = "data/raw",
-        processed_dir: str | Path = "data/processed",
         combined_dir: str | Path | None = None,
-        combined_processed_dir: str | Path | None = None,
-        export_parquet: bool = True,
-        export_csv: bool = True,
     ) -> None:
         self.output_dir = Path(output_dir)
         self.raw_dir = Path(raw_dir)
-        self.processed_dir = Path(processed_dir)
         self.combined_dir = (
             Path(combined_dir) if combined_dir is not None else self.output_dir / "combined"
         )
-        self.combined_processed_dir = (
-            Path(combined_processed_dir)
-            if combined_processed_dir is not None
-            else self.processed_dir / "combined"
-        )
-        self.export_parquet = export_parquet
-        self.export_csv = export_csv
-
         self.raw_dir.mkdir(parents=True, exist_ok=True)
-        if self.export_csv:
-            self.output_dir.mkdir(parents=True, exist_ok=True)
-        if self.export_parquet:
-            self.processed_dir.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def _slugify(value: Any) -> str:
@@ -106,30 +87,22 @@ class MatchDataExporter:
     @staticmethod
     def load_raw_json(json_path: str | Path) -> dict[str, Any]:
         """Loads a previously saved raw match JSON file from disk."""
-        path = Path(json_path)
-        with path.open("r", encoding="utf-8") as f:
+        with Path(json_path).open("r", encoding="utf-8") as f:
             return json.load(f)
 
-    def _write_table(
-        self,
-        df: pd.DataFrame,
+    @staticmethod
+    def _write_tables(
+        dataset: ParsedMatchDataset,
         prefix: str,
-        table_name: str,
-        csv_files: dict[str, Path],
-        parquet_files: dict[str, Path],
-        csv_dir: Path | None = None,
-        parquet_dir: Path | None = None,
-    ) -> None:
-        """Writes a non-empty DataFrame to CSV and/or Parquet."""
-        if df.empty:
-            return
-
-        target_csv_dir = csv_dir if csv_dir is not None else self.output_dir
-        target_parquet_dir = parquet_dir if parquet_dir is not None else self.processed_dir
-
-        if self.export_csv:
-            target_csv_dir.mkdir(parents=True, exist_ok=True)
-            csv_path = target_csv_dir / f"{prefix}_{table_name}.csv"
+        csv_dir: Path,
+    ) -> dict[str, Path]:
+        """Writes every non-empty table of `dataset` to `csv_dir` and returns the CSV paths."""
+        csv_dir.mkdir(parents=True, exist_ok=True)
+        csv_files: dict[str, Path] = {}
+        for table_name, df in dataset.tables().items():
+            if df.empty:
+                continue
+            csv_path = csv_dir / f"{prefix}_{table_name}.csv"
             df.to_csv(csv_path, index=False, encoding="utf-8-sig")
             csv_files[table_name] = csv_path
             logger.info(
@@ -139,16 +112,7 @@ class MatchDataExporter:
                 len(df.columns),
                 csv_path,
             )
-
-        if self.export_parquet:
-            target_parquet_dir.mkdir(parents=True, exist_ok=True)
-            parquet_path = target_parquet_dir / f"{prefix}_{table_name}.parquet"
-            try:
-                df.to_parquet(parquet_path, index=False)
-                parquet_files[table_name] = parquet_path
-                logger.info("Saved %s Parquet to: %s", table_name, parquet_path)
-            except (OSError, ImportError, ValueError) as exc:
-                logger.warning("Skipping Parquet export for %s (%s)", table_name, exc)
+        return csv_files
 
     def export_all(
         self,
@@ -159,7 +123,7 @@ class MatchDataExporter:
     ) -> ExportedFiles:
         """
         Saves the raw JSON backup (unless an existing `raw_json_path` is provided)
-        and exports all non-empty structured tables to CSV and Parquet.
+        and exports all non-empty structured tables to CSV.
         """
         prefix = self._build_file_prefix(match_data)
         if raw_json_path is not None:
@@ -169,15 +133,9 @@ class MatchDataExporter:
                 match_data, prefix=prefix, overwrite=overwrite_raw_json,
             )
 
-        csv_files: dict[str, Path] = {}
-        parquet_files: dict[str, Path] = {}
-        for table_name, df in dataset.tables().items():
-            self._write_table(df, prefix, table_name, csv_files, parquet_files)
-
         return ExportedFiles(
             raw_json_path=saved_raw_path,
-            csv_files=csv_files,
-            parquet_files=parquet_files,
+            csv_files=self._write_tables(dataset, prefix, self.output_dir),
         )
 
     def export_combined(
@@ -187,27 +145,10 @@ class MatchDataExporter:
     ) -> tuple[ParsedMatchDataset, ExportedFiles]:
         """
         Combines multiple `ParsedMatchDataset` instances into one dataset and exports
-        all non-empty tables to `self.combined_dir` (CSV) and
-        `self.combined_processed_dir` (Parquet).
+        all non-empty tables as CSV to `self.combined_dir`.
         """
         combined_dataset = ParsedMatchDataset.combine(datasets)
-        csv_files: dict[str, Path] = {}
-        parquet_files: dict[str, Path] = {}
-
-        for table_name, df in combined_dataset.tables().items():
-            self._write_table(
-                df,
-                prefix,
-                table_name,
-                csv_files,
-                parquet_files,
-                csv_dir=self.combined_dir,
-                parquet_dir=self.combined_processed_dir,
-            )
-
         exported = ExportedFiles(
-            raw_json_path=self.combined_dir,
-            csv_files=csv_files,
-            parquet_files=parquet_files,
+            csv_files=self._write_tables(combined_dataset, prefix, self.combined_dir),
         )
         return combined_dataset, exported

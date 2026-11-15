@@ -99,8 +99,7 @@ class ParsedMatchDataset:
 
 @dataclass
 class ExportedFiles:
-    """Paths of all files generated for a single match export."""
+    """Paths of all files generated for a single match (or combined) export."""
 
-    raw_json_path: Path
+    raw_json_path: Path | None = None
     csv_files: dict[str, Path] = field(default_factory=dict)
-    parquet_files: dict[str, Path] = field(default_factory=dict)

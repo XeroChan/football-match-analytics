@@ -2,7 +2,7 @@
 test_scraper_exporter.py
 ========================
 Unit and integration tests for the Web -> Raw JSON boundary (`WhoScoredScraper`) and
-the Dataset -> CSV/Parquet boundary (`MatchDataExporter`).
+the Dataset -> CSV boundary (`MatchDataExporter`).
 """
 
 from __future__ import annotations
@@ -73,13 +73,7 @@ def test_exporter_raw_json_overwrite_and_reuse(tmp_path: Path) -> None:
     Checks that `save_raw_json(overwrite=True)` updates existing files and
     `export_all(raw_json_path=...)` skips redundant writes.
     """
-    exporter = MatchDataExporter(
-        output_dir=tmp_path / "output",
-        raw_dir=tmp_path / "raw",
-        processed_dir=tmp_path / "processed",
-        export_parquet=False,
-        export_csv=False,
-    )
+    exporter = MatchDataExporter(output_dir=tmp_path / "output", raw_dir=tmp_path / "raw")
     payload_v1 = {"matchId": 101, "score": "1 : 0", "home": {"name": "A"}, "away": {"name": "B"}}
     payload_v2 = {"matchId": 101, "score": "2 : 1", "home": {"name": "A"}, "away": {"name": "B"}}
 
@@ -100,33 +94,23 @@ def test_exporter_raw_json_overwrite_and_reuse(tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(not RAW_FILES, reason=f"No raw JSON files in {RAW_DIR}")
-def test_exporter_round_trip_csv_and_parquet(tmp_path: Path) -> None:
+def test_exporter_round_trip_csv(tmp_path: Path) -> None:
     """
-    Checks that `MatchDataExporter.export_all` writes every non-empty table to both CSV
-    and Parquet and that reloading those files preserves row counts and column schemas.
+    Checks that `MatchDataExporter.export_all` writes every non-empty table to CSV
+    and that reloading those files preserves row counts and column schemas.
     """
     raw = json.loads(RAW_FILES[0].read_text(encoding="utf-8"))
     dataset = MatchDataParser().parse_all(raw)
-    exporter = MatchDataExporter(
-        output_dir=tmp_path / "output",
-        raw_dir=tmp_path / "raw",
-        processed_dir=tmp_path / "processed",
-        export_parquet=True,
-        export_csv=True,
-    )
+    exporter = MatchDataExporter(output_dir=tmp_path / "output", raw_dir=tmp_path / "raw")
     exported = exporter.export_all(raw, dataset)
 
     non_empty_tables = {name: df for name, df in dataset.tables().items() if not df.empty}
     assert set(exported.csv_files.keys()) == set(non_empty_tables.keys())
-    assert set(exported.parquet_files.keys()) == set(non_empty_tables.keys())
 
     for name, df in non_empty_tables.items():
         csv_df = pd.read_csv(exported.csv_files[name])
-        parquet_df = pd.read_parquet(exported.parquet_files[name])
         assert list(csv_df.columns) == list(df.columns)
-        assert list(parquet_df.columns) == list(df.columns)
         assert len(csv_df) == len(df)
-        assert len(parquet_df) == len(df)
 
 
 @pytest.mark.skipif(len(RAW_FILES) < 2, reason=f"Need at least 2 raw JSON files in {RAW_DIR}")
@@ -140,21 +124,13 @@ def test_exporter_combined_catalog_and_tables(tmp_path: Path) -> None:
         parser.parse_all(json.loads(f.read_text(encoding="utf-8")))
         for f in RAW_FILES[:2]
     ]
-    exporter = MatchDataExporter(
-        output_dir=tmp_path / "output",
-        raw_dir=tmp_path / "raw",
-        processed_dir=tmp_path / "processed",
-        export_parquet=True,
-        export_csv=True,
-    )
+    exporter = MatchDataExporter(output_dir=tmp_path / "output", raw_dir=tmp_path / "raw")
     combined_ds, exported = exporter.export_combined(datasets)
 
     assert exporter.combined_dir == tmp_path / "output" / "combined"
-    assert exporter.combined_processed_dir == tmp_path / "processed" / "combined"
 
     non_empty_tables = {name: df for name, df in combined_ds.tables().items() if not df.empty}
     assert set(exported.csv_files.keys()) == set(non_empty_tables.keys())
-    assert set(exported.parquet_files.keys()) == set(non_empty_tables.keys())
 
     for name, df in non_empty_tables.items():
         csv_path = exported.csv_files[name]

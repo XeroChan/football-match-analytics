@@ -4,8 +4,8 @@ main.py
 Main CLI and pipeline orchestrator for scraping WhoScored Match Centre data
 and exporting structured datasets (`events`, `players`, `formations`, `metadata`,
 `player_stats`, `team_stats`, `shot_zones`, `minute_mapping`, `lookups`, `common_events`)
-in Parquet (`data/processed/`) and CSV (`output/`) formats alongside raw JSON backups,
-plus combined multi-match datasets in `output/combined/` and `data/processed/combined/`.
+as CSV files (`output/`) alongside raw JSON backups (`data/raw/`),
+plus combined multi-match datasets in `output/combined/`.
 
 Usage examples:
     1. Scrape (or load from local cache) the configured array of match IDs (`DEFAULT_MATCH_IDS`):
@@ -14,7 +14,7 @@ Usage examples:
     2. Scrape one or more custom WhoScored match IDs:
        python -m src.main --match-id 1729376 1729390
 
-    3. Re-generate Parquet, per-match CSV, and combined CSV files offline from saved raw JSONs:
+    3. Re-generate per-match and combined CSV files offline from saved raw JSONs:
        python -m src.main --from-json data/raw/*_raw.json
 """
 
@@ -69,13 +69,11 @@ def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) 
             print(f"  - {ev_type!s:<22}: {count:>5}")
 
     print("\nExported Files:")
-    print(f"  [Raw JSON]       {exported.raw_json_path.resolve()}")
+    if exported.raw_json_path is not None:
+        print(f"  [Raw JSON]       {exported.raw_json_path.resolve()}")
     for table_name, csv_path in exported.csv_files.items():
         label = f"[{table_name} CSV]"
         print(f"  {label:<16} {csv_path.resolve()}")
-    if exported.parquet_files:
-        parquet_dir = next(iter(exported.parquet_files.values())).parent.resolve()
-        print(f"  [Parquet Dir]    {parquet_dir} ({len(exported.parquet_files)} tables)")
     print("=" * 72 + "\n")
 
 
@@ -96,9 +94,6 @@ def print_combined_summary(
     for table_name, csv_path in exported.csv_files.items():
         label = f"[{table_name} CSV]"
         print(f"  {label:<16} {csv_path.resolve()}")
-    if exported.parquet_files:
-        parquet_dir = next(iter(exported.parquet_files.values())).parent.resolve()
-        print(f"  [Parquet Dir]    {parquet_dir} ({len(exported.parquet_files)} tables)")
     print("=" * 72 + "\n")
 
 
@@ -125,7 +120,6 @@ def run_pipeline(
     match_ids: int | Sequence[int] | None = None,
     from_json_files: Sequence[str | Path] | None = None,
     output_dir: str | Path = "output",
-    processed_dir: str | Path = "data/processed",
     combined_dir: str | Path | None = None,
     export_combined: bool = True,
     headless: bool = False,
@@ -137,11 +131,7 @@ def run_pipeline(
     and exports joined multi-match tables to `output/combined/` when `export_combined=True`.
     """
     parser = MatchDataParser()
-    exporter = MatchDataExporter(
-        output_dir=output_dir,
-        processed_dir=processed_dir,
-        combined_dir=combined_dir,
-    )
+    exporter = MatchDataExporter(output_dir=output_dir, combined_dir=combined_dir)
     results: list[tuple[ParsedMatchDataset, ExportedFiles]] = []
     failed_items: list[tuple[str, str]] = []
 
@@ -226,7 +216,7 @@ def run_pipeline(
 
 def parse_cli_args() -> argparse.Namespace:
     cli = argparse.ArgumentParser(
-        description="Scrape WhoScored match data and export Parquet + CSV tables for analytics.",
+        description="Scrape WhoScored match data and export CSV tables for analytics.",
     )
     cli.add_argument(
         "--match-id",
@@ -256,13 +246,7 @@ def parse_cli_args() -> argparse.Namespace:
     cli.add_argument(
         "--no-combined",
         action="store_true",
-        help="Skip generating combined CSV/Parquet tables across all processed matches.",
-    )
-    cli.add_argument(
-        "--processed-dir",
-        "-p",
-        default="data/processed",
-        help="Directory where Parquet files will be saved (default: 'data/processed').",
+        help="Skip generating combined CSV tables across all processed matches.",
     )
     cli.add_argument(
         "--force-scrape",
@@ -295,7 +279,6 @@ if __name__ == "__main__":
         match_ids=target_match_ids,
         from_json_files=args.from_json,
         output_dir=args.output_dir,
-        processed_dir=args.processed_dir,
         combined_dir=args.combined_dir,
         export_combined=not args.no_combined,
         headless=args.headless,

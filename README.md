@@ -1,6 +1,6 @@
 # Football Match Analytics ⚽📊
 
-Projekt przeznaczony do pobierania, czyszczenia i analizy danych pomeczowych WhoScored (`matchCentreData` JSON) w tabelarycznych formatach **Parquet** oraz **CSV**.
+Projekt przeznaczony do pobierania, czyszczenia i analizy danych pomeczowych WhoScored (`matchCentreData` JSON) w tabelarycznym formacie **CSV**.
 
 ---
 
@@ -9,10 +9,8 @@ Projekt przeznaczony do pobierania, czyszczenia i analizy danych pomeczowych Who
 ```text
 football-match-analytics/
 ├── data/
-│   ├── raw/                  # Surowe pliki .json (np. match_1821123_..._raw.json)
-│   └── processed/            # Przetworzone tabele w formacie .parquet (szybka analiza wielu meczów)
-│       └── combined/         # Połączone tabele .parquet ze wszystkich przetworzonych meczów
-├── output/                   # Przetworzone tabele per-mecz w formacie .csv (podgląd w Excelu / Data Wranglerze)
+│   └── raw/                  # Surowe pliki .json (np. match_1821123_..._raw.json)
+├── output/                   # Przetworzone tabele per-mecz w formacie .csv (podgląd w Data Wranglerze / Rainbow CSV)
 │   └── combined/             # Połączone tabele .csv ze wszystkich przetworzonych meczów (combined_*.csv)
 ├── notebooks/
 │   ├── 01_eda_events.ipynb   # Notatnik Jupyter korzystający z modułu src.parser
@@ -32,11 +30,11 @@ football-match-analytics/
 │   │   ├── metadata.py       # Metadane meczu, mapowanie minut, słowniki ID i commonEvents
 │   │   ├── stats.py          # Statystyki zawodników, drużyn i stref strzałów minuta po minucie
 │   │   └── helpers.py        # Wspólne funkcje konwersji typów, słowników graczy i sortowania
-│   └── exporter.py           # Zapis surowego JSON-a oraz tabel Parquet i CSV
+│   └── exporter.py           # Zapis surowego JSON-a oraz tabel CSV
 ├── tests/
 │   ├── test_parser_coverage.py  # Testy pokrycia wszystkich ścieżek kluczy JSON i kwalifikatorów
 │   ├── test_parsers.py          # Testy jednostkowe parserów domenowych
-│   └── test_scraper_exporter.py # Testy ekstraktora HTML/JS oraz zapisu CSV/Parquet
+│   └── test_scraper_exporter.py # Testy ekstraktora HTML/JS oraz zapisu CSV
 ├── pyproject.toml            # Konfiguracja pytest
 └── requirements.txt          # Lista bibliotek Pythona
 ```
@@ -104,4 +102,4 @@ python -m src.main --from-json "data/raw/match_1821123_Southampton_vs_Aston_Vill
    * **Mapy podań (Pass Networks):** Filtrowanie celnych podań (`event_type == 'Pass'` oraz `outcome_type == 'Successful'`) z gotowymi kolumnami `player_name` -> `receiver_name`.
    * **Mapy strzałów (Shot Maps):** Filtrowanie zdarzeń z flagą `is_shot == True` z uwzględnieniem współrzędnych bramki (`goal_mouth_y`, `goal_mouth_z`) oraz flag `is_big_chance` i `is_penalty`.
 2. **Wpływ zmian i taktyki:** Analiza przedziałów w `formations_df` (np. przejście na inne ustawienie w `start_minute_expanded: 67`) oraz wpływu zmian na wydarzenia boiskowe.
-3. **Skalowalna analiza wielu meczów (DuckDB / Polars):** Dzięki zapisowi do `data/processed/*.parquet` można odpytywać setki meczów jednym zapytaniem SQL przez DuckDB lub Polars bez wczytywania plików CSV w pętli.
+3. **Analiza wielu meczów:** Połączone tabele `output/combined/combined_*.csv` zawierają wszystkie przetworzone mecze w jednym pliku (rozróżnione kolumną `match_id`), więc nie trzeba wczytywać plików per-mecz w pętli.

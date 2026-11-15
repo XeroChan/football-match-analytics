@@ -8,17 +8,12 @@ formations, pass-receiver inference, and `commonEvents` normalization).
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pandas as pd
 import pytest
 
-from src.parser import MatchDataParser
-from src.parsers import parse_common_events, parse_events, parse_formations
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-RAW_DIR = PROJECT_ROOT / "data" / "raw"
-RAW_FILES = sorted(RAW_DIR.glob("*_raw.json"))
+from src.parsers import parse_common_events, parse_events, parse_formations, parse_players
+from tests.conftest import RAW_DIR, RAW_FILES
 
 
 def test_incident_event_list_merge_preserves_all_qualifiers_and_satisfiers() -> None:
@@ -72,7 +67,7 @@ def test_incident_event_list_merge_preserves_all_qualifiers_and_satisfiers() -> 
         ],
     }
 
-    events_df = MatchDataParser().parse_events(payload)
+    events_df = parse_events(payload)
     assert len(events_df) == 1
     row = events_df.iloc[0]
     assert bool(row["is_incident"]) is True
@@ -195,7 +190,7 @@ def test_pass_receiver_inference() -> None:
             },
         ],
     }
-    df = parse_events(payload)
+    df = parse_events(payload, parse_players(payload))
     assert int(df.loc[0, "receiver_id"]) == 2
     assert df.loc[0, "receiver_name"] == "Bob"
     assert bool(df.loc[0, "receiver_is_first_eleven"]) is True

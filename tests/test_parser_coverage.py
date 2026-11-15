@@ -2,7 +2,7 @@
 test_parser_coverage.py
 =======================
 Checks that every key path in the raw `matchCentreData` JSON backups (`data/raw/*_raw.json`)
-is read by `MatchDataParser.parse_all()`, and verifies that qualifier values and merged
+is read by `parse_match()`, and verifies that qualifier values and merged
 `incidentEvents` fields are preserved without silent drops or conflicts.
 
 How it works:
@@ -28,12 +28,9 @@ from typing import Any
 
 import pytest
 
-from src.parser import MatchDataParser
+from src.parser import parse_match
 from src.parsers.qualifiers import extract_qualifiers_info
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-RAW_DIR = PROJECT_ROOT / "data" / "raw"
-RAW_FILES = sorted(RAW_DIR.glob("*_raw.json"))
+from tests.conftest import RAW_DIR, RAW_FILES
 
 # Exact paths (or path patterns) the parser is allowed to ignore. Matched with `re.fullmatch`.
 INTENTIONALLY_SKIPPED: dict[str, str] = {
@@ -120,9 +117,9 @@ def _is_skipped(path: str) -> bool:
 
 
 def find_unparsed_paths(raw: dict[str, Any]) -> list[str]:
-    """Returns every key path in `raw` that `MatchDataParser.parse_all()` never reads."""
+    """Returns every key path in `raw` that `parse_match()` never reads."""
     accessed: set[str] = set()
-    MatchDataParser().parse_all(_wrap(raw, "$", accessed))
+    parse_match(_wrap(raw, "$", accessed))
     all_paths = _all_paths(raw, "$", set())
     return sorted(p for p in all_paths - accessed if not _is_skipped(p))
 

@@ -29,40 +29,40 @@ from typing import Any
 from src.exporter import ExportedFiles, MatchDataExporter
 from src.match_ids import DEFAULT_MATCH_IDS
 from src.models import ParsedMatchDataset
-from src.parser import MatchDataParser
+from src.parser import parse_match
 from src.scraper import WhoScoredScraper, WhoScoredScraperError
 
 logger = logging.getLogger(__name__)
 
 
-def configure_logging(verbose: bool = False) -> None:
-    """Configures structured console logging."""
-    level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
-        datefmt="%H:%M:%S",
-    )
-
-
-def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) -> None:
-    """Prints a human-readable overview of the parsed match and exported files."""
-    meta: dict[Any, Any] = (
-        dataset.metadata_df.iloc[0].to_dict() if not dataset.metadata_df.empty else {}
-    )
-    home_team = meta.get("home_team_name", "Home")
-    away_team = meta.get("away_team_name", "Away")
-    score = meta.get("score", "N/A")
+def print_summary(
+    dataset: ParsedMatchDataset,
+    exported: ExportedFiles,
+    title: str | None = None,
+) -> None:
+    """Prints a human-readable overview of a parsed dataset and its exported files."""
+    if title is None:
+        meta: dict[Any, Any] = (
+            dataset.metadata_df.iloc[0].to_dict() if not dataset.metadata_df.empty else {}
+        )
+        home = meta.get("home_team_name", "Home")
+        away = meta.get("away_team_name", "Away")
+        title = f"Match Summary: {home} vs {away} (Score: {meta.get('score', 'N/A')})"
 
     print("\n" + "=" * 72)
-    print(f"Match Summary: {home_team} vs {away_team} (Score: {score})")
+    print(title)
     print("=" * 72)
-    print(f"  Match ID         : {dataset.match_id}")
+    if exported.raw_json_path is not None:
+        print(f"  Match ID         : {dataset.match_id}")
     for table_name, df in dataset.tables().items():
         if not df.empty:
             print(f"  {table_name:<16} : {len(df):,} rows ({len(df.columns)} cols)")
 
-    if not dataset.events_df.empty and "event_type" in dataset.events_df.columns:
+    if (
+        exported.raw_json_path is not None
+        and not dataset.events_df.empty
+        and "event_type" in dataset.events_df.columns
+    ):
         print("\nTop 10 Event Types Captured:")
         counts = dataset.events_df["event_type"].value_counts(dropna=False).head(10)
         for ev_type, count in counts.items():
@@ -75,45 +75,6 @@ def print_dataset_summary(dataset: ParsedMatchDataset, exported: ExportedFiles) 
         label = f"[{table_name} CSV]"
         print(f"  {label:<16} {csv_path.resolve()}")
     print("=" * 72 + "\n")
-
-
-def print_combined_summary(
-    match_count: int,
-    combined_dataset: ParsedMatchDataset,
-    exported: ExportedFiles,
-) -> None:
-    """Prints a summary of the combined multi-match dataset and exported combined files."""
-    print("\n" + "=" * 72)
-    print(f"Combined Dataset Summary ({match_count} matches joined)")
-    print("=" * 72)
-    for table_name, df in combined_dataset.tables().items():
-        if not df.empty:
-            print(f"  {table_name:<16} : {len(df):,} rows ({len(df.columns)} cols)")
-
-    print("\nExported Combined Files:")
-    for table_name, csv_path in exported.csv_files.items():
-        label = f"[{table_name} CSV]"
-        print(f"  {label:<16} {csv_path.resolve()}")
-    print("=" * 72 + "\n")
-
-
-def process_match_payload(
-    raw_data: dict[str, Any],
-    parser: MatchDataParser,
-    exporter: MatchDataExporter,
-    raw_json_path: Path | None = None,
-    overwrite_raw_json: bool = False,
-) -> tuple[ParsedMatchDataset, ExportedFiles]:
-    """Parses a raw `matchCentreData` dictionary and exports all configured formats."""
-    dataset = parser.parse_all(raw_data)
-    exported = exporter.export_all(
-        raw_data,
-        dataset,
-        raw_json_path=raw_json_path,
-        overwrite_raw_json=overwrite_raw_json,
-    )
-    print_dataset_summary(dataset, exported)
-    return dataset, exported
 
 
 def run_pipeline(
@@ -130,23 +91,11 @@ def run_pipeline(
     Automatically reuses cached `data/raw/match_<id>_*.json` files unless `force_scrape=True`,
     and exports joined multi-match tables to `output/combined/` when `export_combined=True`.
     """
-    parser = MatchDataParser()
     exporter = MatchDataExporter(output_dir=output_dir, combined_dir=combined_dir)
     results: list[tuple[ParsedMatchDataset, ExportedFiles]] = []
     failed_items: list[tuple[str, str]] = []
 
-    if from_json_files:
-        for json_file in from_json_files:
-            json_path = Path(json_file)
-            try:
-                raw_data = exporter.load_raw_json(json_path)
-                results.append(
-                    process_match_payload(raw_data, parser, exporter, raw_json_path=json_path),
-                )
-            except (OSError, ValueError, KeyError, TypeError) as exc:
-                logger.error("Skipping JSON file %s due to error: %s", json_path, exc)
-                failed_items.append((str(json_path), str(exc)))
-
+    json_paths: list[Path] = [Path(p) for p in (from_json_files or [])]
     normalized_ids: list[int] = (
         [match_ids]
         if isinstance(match_ids, int)
@@ -157,42 +106,39 @@ def run_pipeline(
         cached_json = None if force_scrape else exporter.find_cached_raw_json(match_id)
         if cached_json is not None:
             logger.info("Using cached raw JSON for matchId=%s: %s", match_id, cached_json)
-            try:
-                raw_data = exporter.load_raw_json(cached_json)
-                results.append(
-                    process_match_payload(raw_data, parser, exporter, raw_json_path=cached_json),
-                )
-            except (OSError, ValueError, KeyError, TypeError) as exc:
-                logger.error(
-                    "Skipping cached JSON %s (matchId=%s) due to error: %s",
-                    cached_json,
-                    match_id,
-                    exc,
-                )
-                failed_items.append((f"matchId={match_id}", str(exc)))
+            json_paths.append(cached_json)
         else:
             ids_to_scrape.append(match_id)
 
+    for json_path in json_paths:
+        try:
+            raw_data = exporter.load_raw_json(json_path)
+            dataset = parse_match(raw_data)
+            exported = exporter.export_all(raw_data, dataset, raw_json_path=json_path)
+            print_summary(dataset, exported)
+            results.append((dataset, exported))
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            logger.error("Skipping JSON file %s due to error: %s", json_path, exc)
+            failed_items.append((str(json_path), str(exc)))
+
     if ids_to_scrape:
-        total_to_scrape = len(ids_to_scrape)
+        total = len(ids_to_scrape)
         with WhoScoredScraper(headless=headless) as scraper:
             for idx, match_id in enumerate(ids_to_scrape, start=1):
-                logger.info("[%d/%d] Scraping matchId=%s", idx, total_to_scrape, match_id)
+                logger.info("[%d/%d] Scraping matchId=%s", idx, total, match_id)
                 try:
                     raw_data = scraper.scrape_match(match_id)
-                    results.append(
-                        process_match_payload(
-                            raw_data,
-                            parser,
-                            exporter,
-                            overwrite_raw_json=force_scrape,
-                        ),
+                    dataset = parse_match(raw_data)
+                    exported = exporter.export_all(
+                        raw_data, dataset, overwrite_raw_json=force_scrape,
                     )
+                    print_summary(dataset, exported)
+                    results.append((dataset, exported))
                 except (WhoScoredScraperError, OSError, ValueError, KeyError, TypeError) as exc:
                     logger.error(
                         "[%d/%d] Skipping matchId=%s (failed to scrape/process): %s",
                         idx,
-                        total_to_scrape,
+                        total,
                         match_id,
                         exc,
                     )
@@ -201,7 +147,11 @@ def run_pipeline(
     if export_combined and results:
         datasets = [ds for ds, _ in results]
         combined_ds, combined_exported = exporter.export_combined(datasets)
-        print_combined_summary(len(datasets), combined_ds, combined_exported)
+        print_summary(
+            combined_ds,
+            combined_exported,
+            title=f"Combined Dataset Summary ({len(datasets)} matches joined)",
+        )
 
     if failed_items:
         print("\n" + "!" * 72)
@@ -269,7 +219,11 @@ def parse_cli_args() -> argparse.Namespace:
 
 if __name__ == "__main__":
     args = parse_cli_args()
-    configure_logging(verbose=args.verbose)
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+        datefmt="%H:%M:%S",
+    )
 
     target_match_ids = args.match_id
     if not target_match_ids and not args.from_json:

@@ -14,12 +14,9 @@ import pandas as pd
 import pytest
 
 from src.exporter import MatchDataExporter
-from src.parser import MatchDataParser
+from src.parser import parse_match
 from src.scraper import WhoScoredScraper
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-RAW_DIR = PROJECT_ROOT / "data" / "raw"
-RAW_FILES = sorted(RAW_DIR.glob("*_raw.json"))
+from tests.conftest import RAW_DIR, RAW_FILES
 
 
 def test_scraper_html_fallback_preserves_lookup_tables() -> None:
@@ -86,7 +83,7 @@ def test_exporter_raw_json_overwrite_and_reuse(tmp_path: Path) -> None:
     exporter.save_raw_json(payload_v2, overwrite=True)
     assert exporter.load_raw_json(raw_path)["score"] == "2 : 1"
 
-    dataset = MatchDataParser().parse_all(payload_v2)
+    dataset = parse_match(payload_v2)
     existing_path = tmp_path / "custom_raw.json"
     exported = exporter.export_all(payload_v2, dataset, raw_json_path=existing_path)
     assert exported.raw_json_path == existing_path
@@ -100,7 +97,7 @@ def test_exporter_round_trip_csv(tmp_path: Path) -> None:
     and that reloading those files preserves row counts and column schemas.
     """
     raw = json.loads(RAW_FILES[0].read_text(encoding="utf-8"))
-    dataset = MatchDataParser().parse_all(raw)
+    dataset = parse_match(raw)
     exporter = MatchDataExporter(output_dir=tmp_path / "output", raw_dir=tmp_path / "raw")
     exported = exporter.export_all(raw, dataset)
 
@@ -119,11 +116,7 @@ def test_exporter_combined_catalog_and_tables(tmp_path: Path) -> None:
     Checks that `MatchDataExporter.export_combined` joins multiple `ParsedMatchDataset`
     instances and writes combined CSVs into a separate `output/combined/` catalog.
     """
-    parser = MatchDataParser()
-    datasets = [
-        parser.parse_all(json.loads(f.read_text(encoding="utf-8")))
-        for f in RAW_FILES[:2]
-    ]
+    datasets = [parse_match(json.loads(f.read_text(encoding="utf-8"))) for f in RAW_FILES[:2]]
     exporter = MatchDataExporter(output_dir=tmp_path / "output", raw_dir=tmp_path / "raw")
     combined_ds, exported = exporter.export_combined(datasets)
 

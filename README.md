@@ -21,7 +21,7 @@ football-match-analytics/
 │   ├── main.py               # Punkt wejścia CLI i orkiestrator potoku danych
 │   ├── models.py             # Kontenery danych (ParsedMatchDataset, ExportedFiles)
 │   ├── scraper.py            # Pobieranie danych matchCentreData przez Selenium
-│   ├── parser.py             # Fasada MatchDataParser
+│   ├── parser.py             # Funkcja parse_match() łącząca wszystkie parsery
 │   ├── parsers/              # Moduły parsowania poszczególnych domen
 │   │   ├── __init__.py
 │   │   ├── events.py         # Zdarzenia meczowe, incydenty i odbiorcy podań
@@ -77,7 +77,7 @@ python -m src.main --from-json "data/raw/match_1821123_Southampton_vs_Aston_Vill
 
 ## 🗄️ 3. Architektura danych (Schemat tabel)
 
-`MatchDataParser.parse_all()` zwraca obiekt `ParsedMatchDataset` zawierający 10 ustrukturyzowanych tabel:
+`parse_match()` zwraca obiekt `ParsedMatchDataset` zawierający 10 ustrukturyzowanych tabel:
 
 | Tabela (`DataFrame`) | Źródło w pliku JSON | Kluczowe informacje |
 | --- | --- | --- |

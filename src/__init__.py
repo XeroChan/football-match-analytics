@@ -4,21 +4,14 @@ from __future__ import annotations
 
 from src.exporter import ExportedFiles, MatchDataExporter
 from src.models import ParsedMatchDataset
-from src.parser import MatchDataParser
-from src.scraper import (
-    WhoScoredScraper,
-    WhoScoredScraperError,
-    scrape_whoscored_match_json,
-    scrape_whoscored_matches_json,
-)
+from src.parser import parse_match
+from src.scraper import WhoScoredScraper, WhoScoredScraperError
 
 __all__ = [
     "ExportedFiles",
     "MatchDataExporter",
-    "MatchDataParser",
     "ParsedMatchDataset",
     "WhoScoredScraper",
     "WhoScoredScraperError",
-    "scrape_whoscored_match_json",
-    "scrape_whoscored_matches_json",
+    "parse_match",
 ]

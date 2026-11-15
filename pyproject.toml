@@ -7,4 +7,15 @@ venvPath = "."
 venv = ".venv"
 extraPaths = ["."]
 
-
+[tool.ruff.lint]
+preview = true
+select = [
+    "correctness",
+    "suspicious",
+    "complexity",
+    "performance",
+    "style",
+    "security",
+    "formatting"
+    "pedantic"
+]

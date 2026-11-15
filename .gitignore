@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__
 .pytest_cache
 .ruff_cache
@@ -6,7 +6,6 @@ __pycache__
 
 # Ignored data
 data/raw/
-data/processed/
 output/
 *.json
 *.csv

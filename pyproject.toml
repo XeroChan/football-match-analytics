@@ -16,6 +16,6 @@ select = [
     "performance",
     "style",
     "security",
-    "formatting"
+    "formatting",
     "pedantic"
 ]

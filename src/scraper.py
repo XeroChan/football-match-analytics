@@ -16,13 +16,18 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
+import shutil
 import time
+from pathlib import Path
 from typing import Any, ClassVar, Self
 
 from selenium import webdriver
 from selenium.common.exceptions import JavascriptException, WebDriverException
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common import utils as selenium_utils
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
 
 logger = logging.getLogger(__name__)
 
@@ -31,19 +36,45 @@ class WhoScoredScraperError(Exception):
     """Custom exception raised when match data cannot be extracted from WhoScored."""
 
 
+class _FastFirefoxService(FirefoxService):
+    """Firefox Service bound to IPv4 loopback (127.0.0.1) with fast teardown on Windows."""
+
+    def __init__(
+        self,
+        executable_path: str | None = None,
+        port: int = 0,
+        service_args: list[str] | None = None,
+    ) -> None:
+        """Initialize GeckoDriver service forcing IPv4 host binding."""
+        args = list(service_args or [])
+        has_host = any(arg == "--host" or arg.startswith("--host=") for arg in args)
+        if not has_host:
+            args = ["--host", "127.0.0.1", *args]
+        super().__init__(executable_path=executable_path, port=port, service_args=args)
+
+    @property
+    def service_url(self) -> str:
+        """Returns the IPv4 loopback URL to avoid Windows `localhost` IPv6 lookup stalls."""
+        return f"http://127.0.0.1:{self.port}"
+
+    def is_connectable(self) -> bool:
+        """Checks GeckoDriver `/status` directly over IPv4 loopback."""
+        return selenium_utils.is_url_connectable(self.port, host="127.0.0.1")
+
+    def send_remote_shutdown_command(self) -> None:
+        """Skips the HTTP `/shutdown` poll loop; DELETE /session already closes Firefox."""
+        return
+
+
 class WhoScoredScraper:
     """
-    Selenium-based scraper for extracting embedded Opta/WhoScored `matchCentreData` JSON.
+    Selenium-based scraper for extracting embedded Opta/WhoScored `matchCentreData` JSON
+    using Firefox (GeckoDriver).
 
     Example usage:
         >>> with WhoScoredScraper(headless=False) as scraper:
         ...     raw_data = scraper.scrape_match(1729376)
     """
-
-    DEFAULT_USER_AGENT = (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
-    )
 
     # Keys of `require.config.params['args']` that are persisted into the raw JSON,
     # paired with their target key on the saved dictionary (`None` means root `matchCentreData`).
@@ -64,17 +95,18 @@ class WhoScoredScraper:
         Initialize scraper configuration.
 
         Args:
-            headless: Whether to run Chrome in headless mode. False is recommended
+            headless: Whether to run Firefox in headless mode. False is recommended
                 because Cloudflare frequently blocks headless browsers on WhoScored.
             timeout_seconds: Maximum time to wait for `matchCentreData` to load on the page.
             poll_interval: Seconds between checks when waiting for JS data to populate.
-            user_agent: Custom User-Agent header string.
+            user_agent: Optional custom User-Agent override. By default Firefox sends its
+                native User-Agent so HTTP headers match its TLS/JS fingerprint.
         """
         self.headless = headless
         self.timeout_seconds = timeout_seconds
         self.poll_interval = poll_interval
-        self.user_agent = user_agent or self.DEFAULT_USER_AGENT
-        self._driver: webdriver.Chrome | None = None
+        self.user_agent = user_agent
+        self._driver: webdriver.Firefox | None = None
 
     def __enter__(self) -> Self:
         self.start()
@@ -83,44 +115,76 @@ class WhoScoredScraper:
     def __exit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
         self.close()
 
-    def _build_chrome_options(self) -> Options:
-        """Configures Chrome options to minimize automation detection."""
-        options = Options()
-        if self.headless:
-            options.add_argument("--headless=new")
+    @staticmethod
+    def _find_cached_geckodriver() -> str | None:
+        """
+        Locates a cached or installed `geckodriver` binary so Selenium Manager does not
+        have to run on every startup. Returns `None` if none is found locally.
+        """
+        env_driver = os.environ.get("SE_GECKODRIVER")
+        if env_driver and Path(env_driver).is_file():
+            return env_driver
 
-        options.add_argument("--disable-blink-features=AutomationControlled")
-        options.add_argument(f"user-agent={self.user_agent}")
-        options.add_argument("--disable-infobars")
-        options.add_argument("--start-maximized")
-        options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        options.add_experimental_option("useAutomationExtension", False)
+        which_driver = shutil.which("geckodriver")
+        if which_driver and Path(which_driver).is_file():
+            return which_driver
+
+        cache_root = Path(
+            os.environ.get("SE_CACHE_PATH") or (Path.home() / ".cache" / "selenium"),
+        )
+        geckodriver_dir = cache_root / "geckodriver"
+        if not geckodriver_dir.is_dir():
+            return None
+
+        binary_name = "geckodriver.exe" if os.name == "nt" else "geckodriver"
+        candidates = [p for p in geckodriver_dir.rglob(binary_name) if p.is_file()]
+        if not candidates:
+            return None
+
+        newest = max(candidates, key=lambda p: p.stat().st_mtime)
+        return str(newest)
+
+    def _build_firefox_options(self) -> FirefoxOptions:
+        """Configures Firefox options for fast page loads and minimal background noise."""
+        options = FirefoxOptions()
+        options.page_load_strategy = "eager"
+        if self.headless:
+            options.add_argument("-headless")
+
+        preferences: dict[str, str | int | bool] = {
+            "dom.webdriver.enabled": False,
+            "useAutomationExtension": False,
+            "browser.startup.homepage_override.mstone": "ignore",
+            "datareporting.policy.dataSubmissionEnabled": False,
+            "toolkit.telemetry.enabled": False,
+            "app.update.auto": False,
+            "app.update.enabled": False,
+        }
+        if self.user_agent:
+            preferences["general.useragent.override"] = self.user_agent
+
+        for name, value in preferences.items():
+            options.set_preference(name, value)
         return options
 
     def start(self) -> None:
-        """Starts the underlying Chrome WebDriver instance if not already running."""
+        """Starts the underlying Firefox WebDriver instance if not already running."""
         if self._driver is None:
-            logger.info("Starting Chrome WebDriver (headless=%s)...", self.headless)
-            options = self._build_chrome_options()
-            self._driver = webdriver.Chrome(options=options)
-            # Mask navigator.webdriver property to reduce bot-detection friction
-            try:
-                self._driver.execute_cdp_cmd(
-                    "Page.addScriptToEvaluateOnNewDocument",
-                    {
-                        "source": (
-                            "Object.defineProperty(navigator, 'webdriver', "
-                            "{get: () => undefined})"
-                        ),
-                    },
-                )
-            except WebDriverException as exc:
-                logger.debug("Could not mask navigator.webdriver via CDP: %s", exc)
+            logger.info("Starting Firefox WebDriver (headless=%s)...", self.headless)
+            options = self._build_firefox_options()
+            driver_path = self._find_cached_geckodriver()
+            service = _FastFirefoxService(executable_path=driver_path)
+            self._driver = webdriver.Firefox(options=options, service=service)
+            if not self.headless:
+                try:
+                    self._driver.maximize_window()
+                except WebDriverException as exc:
+                    logger.debug("Could not maximize Firefox window: %s", exc)
 
     def close(self) -> None:
-        """Closes the Chrome WebDriver instance and releases system resources."""
+        """Closes the Firefox WebDriver instance and releases system resources."""
         if self._driver is not None:
-            logger.info("Closing Chrome WebDriver...")
+            logger.info("Closing Firefox WebDriver...")
             try:
                 self._driver.quit()
             except WebDriverException as exc:

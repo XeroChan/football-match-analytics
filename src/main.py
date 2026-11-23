@@ -179,7 +179,10 @@ def parse_cli_args() -> argparse.Namespace:
         "--from-json",
         "-j",
         nargs="+",
-        help="Parse one or more existing raw match JSON files offline instead of launching Chrome.",
+        help=(
+            "Parse one or more existing raw match JSON files offline "
+            "instead of launching Firefox."
+        ),
     )
     cli.add_argument(
         "--output-dir",
@@ -206,7 +209,7 @@ def parse_cli_args() -> argparse.Namespace:
     cli.add_argument(
         "--headless",
         action="store_true",
-        help="Run Chrome in headless mode (visible mode is recommended to avoid Cloudflare).",
+        help="Run Firefox in headless mode (visible mode is recommended to avoid Cloudflare).",
     )
     cli.add_argument(
         "--verbose",

@@ -31,7 +31,7 @@ CLI usage examples
 
     python -m src.predict_live --url "https://www.whoscored.com/matches/1821123/live"
 
-2. Live watch mode (keeps one Chrome window open and refreshes every 60 seconds)::
+2. Live watch mode (keeps one Firefox window open and refreshes every 60 seconds)::
 
     python -m src.predict_live --url "https://www.whoscored.com/matches/1821123/live" --watch
 
@@ -635,7 +635,7 @@ def parse_cli_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     source_group.add_argument(
         "--from-json",
         "-j",
-        help="Path to an offline raw match JSON file (skips launching Chrome).",
+        help="Path to an offline raw match JSON file (skips launching Firefox).",
     )
     cli.add_argument(
         "--model",
@@ -647,7 +647,7 @@ def parse_cli_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--watch",
         "-w",
         action="store_true",
-        help="Keep Chrome open and poll the live match repeatedly.",
+        help="Keep Firefox open and poll the live match repeatedly.",
     )
     cli.add_argument(
         "--interval",
@@ -668,7 +668,7 @@ def parse_cli_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     cli.add_argument(
         "--headless",
         action="store_true",
-        help="Run Chrome in headless mode (visible mode is recommended to avoid Cloudflare).",
+        help="Run Firefox in headless mode (visible mode is recommended to avoid Cloudflare).",
     )
     return cli.parse_args(argv)
 
@@ -693,7 +693,7 @@ def _run_live(
     predict_fn: Callable[[np.ndarray], np.ndarray],
     ckpt: dict[str, Any],
 ) -> None:
-    """Scrapes WhoScored via Chrome and prints either one snapshot, history, or watch loop."""
+    """Scrapes WhoScored via Firefox and prints either one snapshot, history, or watch loop."""
     match_id = extract_match_id_from_url(args.url)
     drop_incomplete = not args.include_current_minute
 

@@ -69,7 +69,7 @@ python -m src.main --url "https://www.whoscored.com/Matches/1821123/Live/England
 # 3. Wymuszenie ponownego pobrania przez przeglądarkę (pominięcie cache'u JSON)
 python -m src.main --url "https://www.whoscored.com/Matches/1821123/Live/England-Premier-League" --force-scrape
 
-# 4. Przetworzenie lokalnych plików JSON offline (bez uruchamiania Chrome)
+# 4. Przetworzenie lokalnych plików JSON offline (bez uruchamiania przeglądarki)
 python -m src.main --from-json "data/raw/match_1821123_Southampton_vs_Aston_Villa_raw.json"
 ```
 
